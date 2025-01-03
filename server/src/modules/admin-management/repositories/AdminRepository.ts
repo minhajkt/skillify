@@ -1,13 +1,8 @@
-import User, { IUser } from "../models/UserModel";
-import { IUserRepository } from "./IUserRepository";
+import User, { IUser } from "../../user-management/models/UserModel";
+import { IAdminRepository } from "./IAdminRepository";
 import bcrypt from 'bcryptjs'
 
-export class UserRepository implements IUserRepository {
-  async createUser(userData: Partial<IUser>): Promise<IUser> {
-    const user = new User(userData);
-    return await user.save();
-  }
-
+export class AdminRepository implements IAdminRepository {
   async getUserByEmail(email: String): Promise<IUser | null> {
     return await User.findOne({ email });
   }
@@ -16,11 +11,10 @@ export class UserRepository implements IUserRepository {
     id: String,
     userData: Partial<IUser>
   ): Promise<IUser | null> {
-    const updatedUser = await User.findByIdAndUpdate(id, userData, { new: true });
-    console.log('the udpated user is ', updatedUser);
-    
-    return updatedUser
+    return await User.findByIdAndUpdate(id, userData, { new: true });
   }
+
+  
 
   async getAllUsers(): Promise<IUser[]> {
     return await User.find();
@@ -31,11 +25,15 @@ export class UserRepository implements IUserRepository {
   }
 
   async findAllTutors(): Promise<IUser[]> {
-    return await User.find({ role: "tutor" });
+    return await User.find({ role: "tutor", isApproved:"approved" });
   }
 
   async getUserById(id: String): Promise<IUser | null> {
     return await User.findById(id);
+  }
+
+  async getTutorRequests(): Promise<IUser[]> {
+      return await User.find({role:"tutor",isApproved:'pending'})
   }
 
   async updatePassword(

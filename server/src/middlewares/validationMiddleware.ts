@@ -3,21 +3,75 @@ import { body, validationResult } from "express-validator";
 import { Request, Response } from "express";
 
 export const validateUserCreation = [
-    body('name')
-        .isLength({min:3}).withMessage('Name should be of minimum 3 charecters')
-        // .isAlpha().withMessage('Name should not contain numbers')
-        .trim(),
+  body("name")
+    .isLength({ min: 3 })
+    .withMessage("Name should be of minimum 3 charecters")
+    // .isAlpha().withMessage('Name should not contain numbers')
+    .trim(),
 
-    body('email')
-        .isEmail().withMessage('Please enter a valid email')
-        .normalizeEmail(),
-        
-    body('password') 
-        .isLength({min:3}).withMessage('Password should contain atleast 3 charecters')
-        .matches(/[0-9]/).withMessage('Password should contain atleast one number')
-        // .matches(/[a-zAZ]/).withMessage('Password must contain a letter')
-        .trim()  
-]
+  body("email")
+    .isEmail()
+    .withMessage("Please enter a valid email")
+    .normalizeEmail(),
+
+  body("password")
+    .isLength({ min: 3 })
+    .withMessage("Password should contain atleast 3 charecters")
+    .matches(/[0-9]/)
+    .withMessage("Password should contain atleast one number")
+    // .matches(/[a-zAZ]/).withMessage('Password must contain a letter')
+    .trim(),
+
+  body("confirmPassword")
+    .isLength({ min: 3 })
+    .withMessage("Password should contain atleast 3 charecters")
+    .matches(/[0-9]/)
+    .withMessage("Password should contain atleast one number")
+    // .matches(/[a-zAZ]/).withMessage('Password must contain a letter')
+    .trim(),
+
+  // body("bio")
+  // .isLength({ min: 3 })
+  // .withMessage("Please provide a short description")
+  // // .matches(/[a-zAZ]/).withMessage('Password must contain a letter')
+  // .trim(),
+];
+
+export const validateTutorCreation = [
+  body("name")
+    .isLength({ min: 3 })
+    .withMessage("Name should be of minimum 3 charecters")
+    // .isAlpha().withMessage('Name should not contain numbers')
+    .trim(),
+
+  body("email")
+    .isEmail()
+    .withMessage("Please enter a valid email")
+    .normalizeEmail(),
+
+  body("password")
+    .isLength({ min: 3 })
+    .withMessage("Password should contain atleast 3 charecters")
+    .matches(/[0-9]/)
+    .withMessage("Password should contain atleast one number")
+    // .matches(/[a-zAZ]/).withMessage('Password must contain a letter')
+    .trim(),
+
+  body("confirmPassword")
+    .isLength({ min: 3 })
+    .withMessage("Password should contain atleast 3 charecters")
+    .matches(/[0-9]/)
+    .withMessage("Password should contain atleast one number")
+    // .matches(/[a-zAZ]/).withMessage('Password must contain a letter')
+    .trim(),
+
+  body("bio")
+  .isLength({ min: 3 })
+  .withMessage("Please provide a short description")
+  // .matches(/[a-zAZ]/).withMessage('Password must contain a letter')
+  .trim(),
+];
+
 
 export const validateUserLogin = [
   body("email")
@@ -32,6 +86,12 @@ export const validateUserLogin = [
     .withMessage("Password should contain atleast one number")
     // .matches(/[a-zAZ]/).withMessage('Password must contain a letter')
     .trim(),
+
+   body("bio") 
+    .isLength({ min: 3 })
+    .withMessage("Please provide a short description")
+    // .matches(/[a-zAZ]/).withMessage('Password must contain a letter')
+    .trim(),    
 ];
 
 export const validateUserUpdation = [
@@ -64,6 +124,8 @@ export const handleValidationErrors = async(req: Request, res: Response, next: N
     const errors = validationResult(req)
     if(!errors.isEmpty()) {
          res.status(400).json({errors: errors.array()})
+         console.log(errors.array());
+         
     return;
         }
     next()  

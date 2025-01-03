@@ -9,7 +9,7 @@ if(!JWT_SECRET_KEY) {
 }
 
 export const generateToken = (payload : object) : string => {
-    return jwt.sign({payload}, JWT_SECRET_KEY, {expiresIn: '1h'})
+    return jwt.sign(payload, JWT_SECRET_KEY, {expiresIn: '1h'})
 }
 
 export const verifyToken = (token:string) => {

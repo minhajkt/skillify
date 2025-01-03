@@ -47,13 +47,12 @@ export const sendEmail = async(email: string, resetToken: string) => {
     await transporter.sendMail(mailOptions);
 }
 
-// generatign otp random
 
 const generateOtp = (): string => {
   const otp = Math.floor(100000 + Math.random() * 900000);
   return otp.toString();
 };
-//
+
 let otpStore: Record<string, { otp: string; expiresAt: number }> = {};
 
 export const validateOtp = async (
