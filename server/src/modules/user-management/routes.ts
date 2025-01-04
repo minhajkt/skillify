@@ -54,7 +54,10 @@ router.post("/auth/google", UserController.googleSignIn);
 // );
 router.post("/users/logout", UserController.logoutUser);
 
+
 // routes for tutors
+
+
 router.post(
   "/tutors/signup",
   upload.array("certificates", 10),

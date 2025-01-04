@@ -31,7 +31,7 @@ export const authenticateJWT = async(req: Request, res: Response, next: NextFunc
           res.status(403).json({ message: "Your account is blocked" });
           return;
         }
-
+        
         req.user = user; 
         next()
     } catch (error) {

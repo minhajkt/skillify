@@ -124,4 +124,50 @@ export class AdminController {
       return;
     }
   };
+
+  static getAllCourse = async(req: Request, res: Response) => {
+    try {
+      const courses = await adminService.getAllCourse()
+      if(!courses) {
+         res.status(404).json({message: "No courses are found"})
+        return;
+      }
+       res.status(200).json(courses)
+       return;
+    } catch (error) {
+      res.status(500).json({message: 'An unexpected error occured', error: (error as Error).message})
+      return; 
+    }
+  }
+
+  static getCourseRequests = async(req: Request, res: Response) => {
+    try {
+      const courseRequest = await adminService.getCourseRequests()
+      if(!courseRequest) {
+        res.status(404).json({message: "No requests pending"})
+        return
+      }
+      res.status(201).json({message: "Course requests fetched successfully", courseRequest})
+      return
+    } catch (error) {
+      res.status(500).json({message: "An unexpected error occured", error: (error as Error).message})
+      return; 
+    }
+  }
+
+  static updateCourseApproval = async(req: Request, res: Response): Promise<void> => {
+    const {id} = req.params
+    const {status} = req.body
+
+    try {
+      const udpatedCourse = await adminService.updateCourseApproval(id, status)
+      if(!udpatedCourse) {
+        res.status(404).json({message: "Course not found or request failed"})
+        return
+      }
+      res.status(200).json({message:"Course approved successfully", udpatedCourse})
+    } catch (error) {
+      res.status(500).json({message:"An unexpected error occured", error: (error as Error).message})
+    }
+  }
 }

@@ -6,7 +6,6 @@ export interface IUser extends Document {
     password: string,
     role: string,
     profilePhoto: string,
-    createdAt : Date,
     verified: boolean,
     isActive : boolean,
     bio?:string,
@@ -20,12 +19,13 @@ const UserSchema: Schema = new Schema({
   password: { type: String, required: true },
   role: { type: String, enum: ["user", "tutor", "admin"], default: "user" },
   profilePhoto: { type: String, required: false },
-  createdAt: { type: Date, default: Date.now() },
   verified: { type: Boolean, default: false },
   isActive: { type: Boolean, default: true },
   bio: { type: String, default: null },
   isApproved: { type: String, enum:['pending', 'approved', 'rejected'], default: 'pending' },
-  certificates: { type: [String], default: [] },
-});
+  certificates: { type: [String], default: [] }, 
+  },
+    {timestamps: true}
+  );
 
 export default mongoose.model<IUser>('User', UserSchema);

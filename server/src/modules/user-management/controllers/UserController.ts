@@ -345,6 +345,13 @@ static googleSignIn = async (req: Request, res: Response): Promise<void> => {
 
     let user = await userService.getUserByEmail(email);
 
+    if(user && user.isActive === false) {
+      res.status(403).json({error:"You are blocked"})
+      console.log('blocked');
+      return
+      
+    }
+
     if (!user) {
       const userData = {
         name,

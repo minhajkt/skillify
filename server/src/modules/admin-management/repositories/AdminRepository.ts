@@ -1,6 +1,8 @@
+import { ICourse } from "../../courses/models/courseModel";
 import User, { IUser } from "../../user-management/models/UserModel";
 import { IAdminRepository } from "./IAdminRepository";
 import bcrypt from 'bcryptjs'
+import Course from '../../courses/models/courseModel'
 
 export class AdminRepository implements IAdminRepository {
   async getUserByEmail(email: String): Promise<IUser | null> {
@@ -14,8 +16,6 @@ export class AdminRepository implements IAdminRepository {
     return await User.findByIdAndUpdate(id, userData, { new: true });
   }
 
-  
-
   async getAllUsers(): Promise<IUser[]> {
     return await User.find();
   }
@@ -25,7 +25,7 @@ export class AdminRepository implements IAdminRepository {
   }
 
   async findAllTutors(): Promise<IUser[]> {
-    return await User.find({ role: "tutor", isApproved:"approved" });
+    return await User.find({ role: "tutor", isApproved: "approved" });
   }
 
   async getUserById(id: String): Promise<IUser | null> {
@@ -33,7 +33,7 @@ export class AdminRepository implements IAdminRepository {
   }
 
   async getTutorRequests(): Promise<IUser[]> {
-      return await User.find({role:"tutor",isApproved:'pending'})
+    return await User.find({ role: "tutor", isApproved: "pending" });
   }
 
   async updatePassword(
@@ -46,5 +46,17 @@ export class AdminRepository implements IAdminRepository {
       { password: hashedPassword },
       { new: true }
     );
+  }
+
+  async getAllCourse(): Promise<ICourse[]> {
+    return await Course.find({isApproved: 'approved'})
+  }
+
+  async getCourseRequests(): Promise<ICourse[]> {
+    return await Course.find({ isApproved: "pending" });
+  }
+
+  async updateCourseApproval(id: string, status:string): Promise<ICourse | null> {
+    return await Course.findByIdAndUpdate(id, {isApproved:status}, {new:true})
   }
 }

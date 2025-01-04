@@ -21,7 +21,11 @@ adminRouter.post(
 );
 adminRouter.post("/admin/logout", UserController.logoutUser);
 
-adminRouter.get("/admin/students", AdminController.getStudents);
+adminRouter.get(
+  "/admin/students",
+  authenticateJWT,
+  AdminController.getStudents
+);
 adminRouter.patch(
   "/admin/students/:id/status",
   authenticateJWT,
@@ -29,7 +33,7 @@ adminRouter.patch(
   AdminController.updateStudentStatus
 );
 
-adminRouter.get("/admin/tutors", AdminController.getTutors);
+adminRouter.get("/admin/tutors", authenticateJWT, AdminController.getTutors);
 adminRouter.patch(
   "/admin/tutors/:id/status",
   authenticateJWT,
@@ -43,4 +47,9 @@ adminRouter.patch(
   checkRole(["admin"]),
   AdminController.updateTutorApproval
 );
+
+adminRouter.get('/admin/courses', AdminController.getAllCourse)
+adminRouter.get('/admin/course-requests', AdminController.getCourseRequests)
+adminRouter.patch('/admin/course-request/:id/approval', AdminController.updateCourseApproval)
+
 export default adminRouter;

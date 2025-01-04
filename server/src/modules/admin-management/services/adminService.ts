@@ -1,5 +1,6 @@
 import { IAdminRepository } from "../repositories/IAdminRepository";
 import { IUser } from "../../user-management/models/UserModel";
+import { ICourse } from "../../courses/models/courseModel";
 
 
 export class AdminService {
@@ -35,4 +36,17 @@ export class AdminService {
   ): Promise<IUser | null> {
     return this.adminRepository.updateUser(id, userData);
   }
+
+  async getAllCourse(): Promise<ICourse[]> {
+    return await this.adminRepository.getAllCourse()
+  }
+
+  async getCourseRequests(): Promise<ICourse[]> {
+    return await this.adminRepository.getCourseRequests()
+  }
+
+  async updateCourseApproval(id: string, status: string): Promise<ICourse | null> {
+    return await this.adminRepository.updateCourseApproval(id, status)
+  }
+
 }
