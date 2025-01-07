@@ -6,6 +6,8 @@ import cookieParser from 'cookie-parser'
 import adminRoutes from './modules/admin-management/admin-routes'
 import courseRouter from './modules/courses/course-routes'
 import lectureRouter from './modules/lectures/lecture-routes'
+import tutorRouter from './modules/tutor/tutor-routes'
+import multer from 'multer'
 
 const app = express()
 
@@ -26,6 +28,7 @@ app.use('/api', userRoutes)
 app.use("/api", adminRoutes);
 app.use('/api', courseRouter)
 app.use('/api', lectureRouter)
+app.use("/api", tutorRouter);
 // app.use('/api/tutors', userRoutes)
 
 app.get('/', (req, res) => {

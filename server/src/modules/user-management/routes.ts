@@ -82,6 +82,7 @@ router.post(
   handleValidationErrors,
   UserController.resetPassword
 );
+
 router.post("/tutors/logout", UserController.logoutUser);
 
 

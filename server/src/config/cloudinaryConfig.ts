@@ -20,6 +20,14 @@ const storage = new CloudinaryStorage({
   }),
 });
 
+const videoStorage = new CloudinaryStorage({
+  cloudinary: cloudinary.v2,
+  params: async (req, file) => ({
+    folder: "user_uploads/videos",
+    resource_type: "video", 
+    format: file.mimetype.split("/")[1] || "mp4",
+  }),
+});
 const upload = multer({
   storage,
   limits: {
@@ -34,5 +42,17 @@ const upload = multer({
   },
 });
 
-export { cloudinary, upload };
+const uploadVideo = multer({
+  storage: videoStorage,
+  limits: { fileSize: 50 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith("video/")) {
+      cb(new Error("Only video files are allowed"));
+      return;
+    }
+    cb(null, true);
+  },
+});
+
+export { cloudinary, upload, uploadVideo };
 

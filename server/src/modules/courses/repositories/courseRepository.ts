@@ -20,4 +20,8 @@ export class CourseRepository {
        console.log(`Updated Course: `, updatedCourse);
      }
   }
+
+  async getAllCourses(): Promise<ICourse[]> {
+    return await Course.find();
+  }
 }

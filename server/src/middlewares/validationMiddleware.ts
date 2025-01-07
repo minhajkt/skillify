@@ -120,11 +120,34 @@ export const validateForgotPassword = [
     .trim(),
 ];
 
+
+
+export const validateCourseCreation = [
+  body("title")
+    .isLength({ min: 3 })
+    .withMessage("Title should contain atleast 3 charecters"),
+
+  body("description")
+    .isLength({ min: 3 })
+    .withMessage("Title should contain atleast 3 charecters")
+    .trim(),
+
+  body("category")
+    .isLength({ min: 3 })
+    .withMessage("Select a category")
+    .trim(),
+
+    body("price")
+      .isFloat({ gt: 0 }) 
+    .withMessage("Enter a valid price")
+    .trim()
+];
+
 export const handleValidationErrors = async(req: Request, res: Response, next: NextFunction): Promise<void> => {
     const errors = validationResult(req)
     if(!errors.isEmpty()) {
          res.status(400).json({errors: errors.array()})
-         console.log(errors.array());
+         console.log('is',errors.array());
          
     return;
         }

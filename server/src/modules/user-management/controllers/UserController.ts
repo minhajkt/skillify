@@ -226,7 +226,6 @@ export class UserController {
     try {
       const userId = req.params.id;
       const userData = req.body;
-
       if (req.file) {
         // console.log("image file is", req.file.path);
 
