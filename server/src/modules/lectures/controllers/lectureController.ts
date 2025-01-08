@@ -48,6 +48,7 @@ export class LectureController {
       }
 
       const createdLectures = [];
+      const courseId = lecturesData[0].courseId;
 
       for (let i = 0; i < lecturesData.length; i++) {
         const lectureData = {
@@ -59,7 +60,7 @@ export class LectureController {
           videoUrl: videos[i].path,
         };
 
-        const newLecture = await lectureService.createLecture(lectureData);
+        const newLecture = await lectureService.createLecture(lectureData, courseId);
         if (!newLecture) {
           res
             .status(400)

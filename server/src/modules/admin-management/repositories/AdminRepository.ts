@@ -36,6 +36,10 @@ export class AdminRepository implements IAdminRepository {
     return await User.find({ role: "tutor", isApproved: "pending" });
   }
 
+  async getCourseRequests(): Promise<ICourse[]> {
+    return await Course.find({isApproved: "pending" });
+  }
+
   async updatePassword(
     userId: string,
     newPassword: string
@@ -49,14 +53,17 @@ export class AdminRepository implements IAdminRepository {
   }
 
   async getAllCourse(): Promise<ICourse[]> {
-    return await Course.find({isApproved: 'approved'})
+    return await Course.find({ isApproved: "approved" });
   }
 
-  async getCourseRequests(): Promise<ICourse[]> {
-    return await Course.find({ isApproved: "pending" });
-  }
-
-  async updateCourseApproval(id: string, status:string): Promise<ICourse | null> {
-    return await Course.findByIdAndUpdate(id, {isApproved:status}, {new:true})
+  async updateCourseApproval(
+    id: string,
+    status: string
+  ): Promise<ICourse | null> {
+    return await Course.findByIdAndUpdate(
+      id,
+      { isApproved: status },
+      { new: true }
+    );
   }
 }

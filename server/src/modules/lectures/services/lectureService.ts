@@ -1,5 +1,7 @@
 import { ILectureRepository } from "../repositories/ILectureRepository";
 import { ILecture } from "../models/lectureModel";
+import Course from '../../courses/models/courseModel'
+import mongoose from "mongoose";
 
 export class LectureService {
   private lectureRepo: ILectureRepository;
@@ -8,8 +10,18 @@ export class LectureService {
     this.lectureRepo = lectureRepo;
   }
 
-  async createLecture(lectureData: Partial<ILecture>): Promise<ILecture | null> {
+  async createLecture(lectureData: Partial<ILecture>, courseId: mongoose.Types.ObjectId): Promise<ILecture | null> {
     try {
+      if(lectureData) {
+        const updatedCourse = await Course.findByIdAndUpdate(
+          courseId,
+          {isApproved: "pending"},
+          {new: true}
+        )
+        if(!updatedCourse) {
+          throw new Error("Course not found")
+        }
+      }
       return await this.lectureRepo.createLecture(lectureData);
     } catch (error) {
       throw new Error(`Error creating new Lecture ${(error as Error).message}`);

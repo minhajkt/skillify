@@ -18,10 +18,17 @@ export class AdminService {
     return this.adminRepository.findAllTutors();
   }
 
+  async getTutorById(id:string) {
+    return this.adminRepository.getUserById(id)
+  }
+
   async getTutorRequests() {
     return this.adminRepository.getTutorRequests();
   }
 
+  async getCourseRequests() {
+    return this.adminRepository.getCourseRequests();
+  }
 
   async updateUser(
     id: string,
@@ -29,7 +36,7 @@ export class AdminService {
   ): Promise<IUser | null> {
     return this.adminRepository.updateUser(id, userData);
   }
-  
+
   async updatetutorRequest(
     id: string,
     userData: Partial<IUser>
@@ -38,15 +45,13 @@ export class AdminService {
   }
 
   async getAllCourse(): Promise<ICourse[]> {
-    return await this.adminRepository.getAllCourse()
+    return await this.adminRepository.getAllCourse();
   }
 
-  async getCourseRequests(): Promise<ICourse[]> {
-    return await this.adminRepository.getCourseRequests()
+  async updateCourseApproval(
+    id: string,
+    status: string
+  ): Promise<ICourse | null> {
+    return await this.adminRepository.updateCourseApproval(id, status);
   }
-
-  async updateCourseApproval(id: string, status: string): Promise<ICourse | null> {
-    return await this.adminRepository.updateCourseApproval(id, status)
-  }
-
 }

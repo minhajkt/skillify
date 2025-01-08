@@ -7,14 +7,14 @@ export interface IAdminRepository {
   getUserById(id: String): Promise<IUser | null>;
   getAllUsers(): Promise<IUser[]>;
   findAllStudents(): Promise<IUser[]>;
-  
+
   findAllTutors(): Promise<IUser[]>;
   getTutorRequests(): Promise<IUser[]>;
-  
-  getAllCourse(): Promise<ICourse[]>
   getCourseRequests(): Promise<ICourse[]>;
-  updateCourseApproval(id: string, status: string):Promise<ICourse | null>;
 
+  getAllCourse(): Promise<ICourse[]>;
+  getCourseRequests(): Promise<ICourse[]>;
+  updateCourseApproval(id: string, status: string): Promise<ICourse | null>;
 
   updatePassword(userId: string, newPassword: string): Promise<IUser | null>;
 }

@@ -95,4 +95,14 @@ router.post("/tutors/logout", UserController.logoutUser);
 // });
 
 
+router.get("/validate-session", authenticateJWT, (req, res) => {
+  if (req.user && req.user.isActive) {
+    console.log('blocked//////////////////////////////////////////////////');
+    
+    res.status(200).json({ message: "Session is valid" });
+  } else {
+    res.status(403).json({ message: "Your account is blocked" });
+  }
+});
+
 export default router;

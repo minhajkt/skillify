@@ -40,6 +40,8 @@ adminRouter.patch(
   AdminController.updateTutorStatus
 );
 
+adminRouter.get("/admin/tutor/:id", AdminController.getTutorById)
+
 adminRouter.get("/admin/tutor-requests", AdminController.getTutorRequests)
 adminRouter.patch(
   "/admin/tutor-request/:id/approval",
@@ -48,8 +50,17 @@ adminRouter.patch(
   AdminController.updateTutorApproval
 );
 
+adminRouter.get("/admin/course-requests", AdminController.getCourseRequests);
+
+
 adminRouter.get('/admin/courses', AdminController.getAllCourse)
-adminRouter.get('/admin/course-requests', AdminController.getCourseRequests)
+// adminRouter.get('/admin/course-requests', AdminController.getCourseRequests)
 adminRouter.patch('/admin/course-request/:id/approval', AdminController.updateCourseApproval)
+adminRouter.patch(
+  "/admin/tutor-course/:id/approval",
+  authenticateJWT,
+  checkRole(["admin"]),
+  AdminController.updateCourseApproval
+);
 
 export default adminRouter;
