@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { signupUser } from "../api/authApi";
+import { signupUser } from "../../api/authApi";
 import { Box, Grid, Typography, TextField, Button } from "@mui/material";
-import SignupOTPModal from "./SignupOTPModal";
+import SignupOTPModal from "../shared/SignupOTPModal";
 
 const Signup = () => {
   const [name, setName] = useState("");
@@ -30,7 +30,7 @@ const Signup = () => {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-        setStatus('loading')
+      setStatus("loading");
       const userData = await signupUser(name, email, password, confirmPassword);
       if (userData) {
         setEmailForOtp(email);
@@ -38,13 +38,13 @@ const Signup = () => {
       }
       console.log("userData is ", userData);
       setErrorMessage("");
-      setStatus('idle')
+      setStatus("idle");
     } catch (error) {
       if (error instanceof Error) {
         setErrorMessage(error.message);
       }
       console.error("Error in logging in", error);
-      setStatus('idle')
+      setStatus("idle");
     }
   };
 
@@ -129,7 +129,6 @@ const Signup = () => {
               Skillify
             </span>{" "}
           </Typography>
-          {/* {errorMessage && <Alert severity="error">{errorMessage}</Alert>} */}
 
           <Box sx={{ minHeight: "20px" }}>
             <Typography variant="caption" color="red">

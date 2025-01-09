@@ -1,34 +1,47 @@
 import { Box, Button, Grid, Typography } from "@mui/material"
 import { useEffect, useState } from "react";
+import { fetchAllCourses, fetchTutorById } from "../../api/adminApi";
+import { useNavigate } from "react-router-dom";
+import { fetchCourseDetails } from "../../api/courseApi";
+import { handleAxiosError } from "../../utils/errorHandler";
 
 
 const OurCourses = () => {
-    const ourCourses = [
-      { name: "100 Days of Code: The Complete Python Program", icon: "/images/py.jpg", tutor:"", rating:4.0, price:2500 },
-      { name: "The Complete 2025 Web Development Bootcamp", icon: "/images/mern thumb.png", tutor:"", rating:5.0, price:1800 },
-      { name: "Basics of Accounting and Taxation", icon: "/images/accc.jpeg", tutor:"", rating:3.8, price:1900 },
-      { name: "Learn to Become a Trader in 2025", icon: "/images/stock thumnb.jpg", tutor:"", rating:4.5, price:3000 },
-      { name: "100 Days of Code: The Complete Python Program", icon: "/images/py.jpg", tutor:"", rating:4.0, price:2500 },
-      { name: "The Complete 2025 Web Development Bootcamp", icon: "/images/mern thumb.png", tutor:"", rating:5.0, price:1800 },
-      { name: "Basics of Accounting and Taxation", icon: "/images/accc.jpeg", tutor:"", rating:3.8, price:1900 },
-      { name: "Learn to Become a Trader in 2025", icon: "/images/stock thumnb.jpg", tutor:"", rating:4.5, price:3000 },
-      { name: "100 Days of Code: The Complete Python Program", icon: "/images/py.jpg", tutor:"", rating:4.0, price:2500 },
-      { name: "The Complete 2025 Web Development Bootcamp", icon: "/images/mern thumb.png", tutor:"", rating:5.0, price:1800 },
-      { name: "Basics of Accounting and Taxation", icon: "/images/accc.jpeg", tutor:"", rating:3.8, price:1900},
-      { name: "Learn to Become a Trader in 2025", icon: "/images/stock thumnb.jpg", tutor:"", rating:4.5, price:3000 },
-    
-    ];
-    const [courses, setCourses] = useState<{name:string,tutor:string, rating:number, price:number ,icon:string}[]>([]);
-    // useEffect(() => {
-    //   fetch("/api/courses") 
-    //     .then((response) => response.json())
-    //     .then((data) => setCourses(data))
-    //     .catch((error) => console.error("Error fetching courses:", error));
-    // }, []);
+
+    const [courses, setCourses] = useState([])
+    const navigate = useNavigate()
     useEffect(() => {
-      setCourses(ourCourses)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      const getCourses = async() => {
+        try {
+          const response = await fetchAllCourses()
+          console.log('res is ', response);
+          
+          const tutorIds = response.map((course) => course.createdBy);
+          console.log("tut id is ", tutorIds);
+
+          const tutors = await Promise.all(
+            tutorIds.map((tutorId) => fetchTutorById(tutorId))
+          );
+          console.log("tut detaisl is ", tutors);
+
+        const coursesWithTutors = response.map((course, index) => ({
+          ...course,
+          name: course.title,
+          tutor: tutors[index]?.name || "Unknown",
+        }));          
+          console.log("tut with coursees is ", coursesWithTutors);
+
+          setCourses(coursesWithTutors);
+          // console.log(coursesWithTutors);
+        } catch (error) {
+          console.log("error occured", error);
+          
+        }
+        
+      }
+      getCourses()
     }, []);
+
 
     const [visibleCourses, setVisibleCourses] = useState(4)
     const handleShowMoreCourses = () => {
@@ -37,7 +50,7 @@ const OurCourses = () => {
     return (
       <Box
         sx={{
-          bgcolor: "palevioletred",
+          // bgcolor: "#F7F9FA",
           width: "100%",
           paddingLeft: { xs: "0rem", sm: "4rem" },
           boxSizing: "border-box",
@@ -69,6 +82,7 @@ const OurCourses = () => {
                     alignItems: { xs: "start", sm: "center" },
                     justifyContent: "center",
                     ml: { xs: 4, sm: 0 },
+                    mb:2,
                     borderRadius: "8px",
                     height: "auto",
                     width: { xs: "90%", sm: "80%" },
@@ -82,7 +96,7 @@ const OurCourses = () => {
                     },
                     cursor: "pointer",
                   }}
-                  onClick={() => console.log("clicked")}
+                  onClick={() => navigate(`/users/course-details/${course._id}`)}
                 >
                   <Box
                     sx={{
@@ -94,7 +108,7 @@ const OurCourses = () => {
                   >
                     <Box
                       component="img"
-                      src={course.icon}
+                      src={course.thumbnail}
                       alt={course.name}
                       sx={{
                         width: { xs: "100%", sm: "100%" },
@@ -108,7 +122,7 @@ const OurCourses = () => {
                   </Box>
                   <Box
                     sx={{
-                      bgcolor: "yellow",
+                      // bgcolor: "yellow",
                       height: { xs: "5rem", sm: "10rem" },
                       width: "100%",
                       borderRadius: "8px",
@@ -123,7 +137,7 @@ const OurCourses = () => {
                       }}
                       // fontWeight="medium"
                     >
-                      {course?.name || "name"}
+                      {course?.title || "name"}
                     </Typography>
                     <Typography
                       variant="body2"
@@ -165,7 +179,7 @@ const OurCourses = () => {
           </Grid>
         </Box>
 
-        {visibleCourses < ourCourses.length && (
+        {visibleCourses < courses.length && (
           <Box sx={{ marginTop: 1, paddingLeft: 2 }}>
             <Button
               variant="outlined"

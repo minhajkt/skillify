@@ -1,43 +1,42 @@
 import { useEffect, useState } from "react";
-import { loginUser } from "../api/authApi";
-import { Link, useNavigate } from "react-router-dom";
-import { Box, Grid, Typography, TextField, Button } from "@mui/material";
-import ForgotPasswordModal from "./ForgotPasswordModal";
+import { useNavigate } from "react-router-dom";
+import { loginAdmin } from "../../api/authApi";
+import { Box, Button, Grid, TextField, Typography } from "@mui/material";
+import ForgotPasswordModal from "../shared/ForgotPasswordModal";
 
-const Login = () => {
+const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleOpenModal = () => setIsModalOpen(true)
+  const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    if(email !== '' || password !== '') {
-        setErrorMessage(null)
+    if (email !== "" || password !== "") {
+      setErrorMessage(null);
     }
-  }, [email, password])
+  }, [email, password]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMessage(null)
+    setErrorMessage(null);
     try {
-      const userData = await loginUser(email, password);
+      const userData = await loginAdmin(email, password);
       if (userData) {
-        navigate("/home");
+        navigate("/admin");
       }
       console.log("userData is ", userData);
-
     } catch (error: unknown) {
-        if(error instanceof Error) {
-            console.error("Error in logging in", error);
-            setErrorMessage(error.message)
-        }else {
-            setErrorMessage('An unexpected error occured')
-        }
+      if (error instanceof Error) {
+        console.error("Error in logging in", error);
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage("An unexpected error occured");
+      }
     }
   };
   return (
@@ -60,14 +59,18 @@ const Login = () => {
         <Typography
           variant="h3"
           fontWeight="bold"
-          align="center"
+          alignItems="center"
           textAlign="start"
           gutterBottom
+          sx={{ paddingTop: 25 }}
         >
-          Welcome to our community
+          Skillify Admin Login
         </Typography>
-        <Typography variant="h6" textAlign="start" sx={{ marginBottom: 4 }}>
-          <span style={{ color: "#999999", fontWeight: "bold" }}>Skillify</span>{" "}
+        <Typography
+          variant="h6"
+          textAlign="start"
+          sx={{ marginBottom: 4, color: "#2563EB" }}
+        >
           provides you with an exceptional option to learn and upskill without
           any problems. You can learn at your own pace from your comfort zone.
         </Typography>
@@ -92,15 +95,19 @@ const Login = () => {
           justifyContent: "center",
           alignItems: "center",
           padding: 4,
-          marginLeft:{xs:7, sm:0}
+          marginLeft: { xs: 7, sm: 0 },
         }}
       >
         <Typography
           variant="h3"
-          sx={{ textAlign: "start", display: "block", fontSize:{xs:"1.6rem", sm:"2rem"} }}
+          sx={{
+            textAlign: "start",
+            display: "block",
+            fontSize: { xs: "1.6rem", sm: "2rem" },
+          }}
           gutterBottom
         >
-          Skillify Login
+          Skillify Admin Login
         </Typography>
         <Box
           sx={{
@@ -111,7 +118,7 @@ const Login = () => {
           }}
         >
           <Typography variant="body1" sx={{ marginTop: 1 }}>
-            Log in to continue your learning process <br /> with{" "}
+            Log in to continue to dashboard <br /> of{" "}
             <span style={{ color: "#999999", fontWeight: "bold" }}>
               Skillify
             </span>
@@ -168,47 +175,10 @@ const Login = () => {
               Log In
             </Button>
           </Box>
-
-          <Typography variant="body2" textAlign="center" marginTop={2}>
-            Don't have an account?{" "}
-            <Link
-              to="/signup"
-              style={{ textDecoration: "none", color: "#1e90ff" }}
-            >
-              Create free account
-            </Link>
-          </Typography>
         </Box>
-        <Typography variant="subtitle2" marginTop={2}>
-          <span style={{ color: "grey" }}>--------- </span>Or{" "}
-          <span style={{ color: "grey" }}>--------- </span>
-        </Typography>
-        <Button
-          variant="outlined"
-          startIcon={
-            <img
-              src="/images/search.png"
-              alt="Google logo"
-              style={{ height: "20px", width: "20px", paddingLeft:"10px"}}
-            />
-          }
-          sx={{
-            maxWidth: 400,
-            width: {xs:"10%",sm:"40%"},
-            height: "8%",
-            marginTop: 1,
-            borderRadius: "24px",
-            borderColor: "grey",
-            bgcolor: "#f0f0f0",
-          }}
-        >
-            <Typography variant="body2" sx={{display:{xs:"none", sm:'block'}}}>
-          Sign in with Google
-            </Typography>
-        </Button>
       </Grid>
     </Grid>
   );
 };
 
-export default Login;
+export default AdminLogin;

@@ -1,0 +1,237 @@
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography,
+  Box,
+  TableSortLabel,
+  TextField,
+  TablePagination,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  SelectChangeEvent,
+  Button,
+} from "@mui/material";
+import { useEffect, useState } from "react";
+import { fetchAllCourses, fetchTutorById } from "../../api/adminApi";
+import { fetchCategories } from "../../api/courseApi";
+import { useNavigate } from "react-router-dom";
+
+
+
+const AdminCourse = () => {
+  const [coursesData, setCoursesData] = useState<any[]>([]);
+  const [filteredCourses, setFilteredCourses] = useState<any[]>([]);
+  const [error, setError] = useState("");
+  const [sortConfig, setSortConfig] = useState({
+    key: "createdAt",
+    direction: "desc",
+  });
+  const navigate = useNavigate()
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [categories, setCategories] = useState<string[]>([]);
+  
+  useEffect(() => {
+    const showCourses = async () => {
+      try {
+        const courses = await fetchAllCourses();
+
+        const categories = await fetchCategories()
+        setCategories(categories);
+
+        const tutorIds = courses.map((course) => course.createdBy);
+        const tutors = await Promise.all(
+          tutorIds.map((tutorId) => fetchTutorById(tutorId))
+        );
+
+        const coursesWithTutors = courses.map((course, index) => ({
+          ...course,
+          name: course.title,
+          tutor: tutors[index]?.name || "Unknown",
+        }));
+
+        setCoursesData(coursesWithTutors);
+        setFilteredCourses(coursesWithTutors);
+      } catch (error) {
+        setError("Failed to fetch the courses");
+        console.log(error);
+      }
+    };
+    showCourses();
+  }, []);
+
+    const handleOpenModal = (course: Course) => {
+      navigate(`/admin/course-details/${course._id}`);
+    };
+
+  useEffect(() => {
+    let updatedCourses = [...coursesData];
+
+    if (searchQuery) {
+      updatedCourses = updatedCourses.filter(
+        (course) =>
+          course.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          course.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          course.tutor?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    if (categoryFilter) {
+      updatedCourses = updatedCourses.filter(
+        (course) => course.category === categoryFilter
+      );
+    }
+
+    updatedCourses.sort((a, b) => {
+      const isAsc = sortConfig.direction === "asc";
+      if (a[sortConfig.key] < b[sortConfig.key]) return isAsc ? -1 : 1;
+      if (a[sortConfig.key] > b[sortConfig.key]) return isAsc ? 1 : -1;
+      return 0;
+    });
+
+    setFilteredCourses(updatedCourses);
+  }, [coursesData, searchQuery, categoryFilter, sortConfig]);
+
+  const handleSort = (key: string) => {
+    const isAsc = sortConfig.key === key && sortConfig.direction === "asc";
+    setSortConfig({ key, direction: isAsc ? "desc" : "asc" });
+  };
+
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const handleCategoryFilterChange = (event: SelectChangeEvent<string>) => {
+    setCategoryFilter(event.target.value);
+  };
+
+  const handleChangePage = (_event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  return (
+    <Box sx={{ padding: 2, width: "70vw" }}>
+      <Typography variant="h5" fontWeight="bold" sx={{ mb: 3 }}>
+        Courses
+      </Typography>
+
+      <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
+        <TextField
+          fullWidth
+          placeholder="Search by course name, category, or tutor..."
+          variant="outlined"
+          value={searchQuery}
+          onChange={handleSearch}
+        />
+
+        <FormControl fullWidth>
+          <InputLabel>Filter by Category</InputLabel>
+          <Select
+            value={categoryFilter}
+            label="Filter by Category"
+            onChange={handleCategoryFilterChange}
+          >
+            <MenuItem value="">All</MenuItem>
+            {categories.map((category, index) => (
+              <MenuItem key={index} value={category}>
+                {category}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
+
+      <TableContainer component={Paper} sx={{ bgcolor: "#FAFAFA" }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>
+                <TableSortLabel
+                  active={sortConfig.key === "name"}
+                  direction={
+                    sortConfig.key === "name" ? sortConfig.direction : "asc"
+                  }
+                  onClick={() => handleSort("name")}
+                >
+                  Course Name
+                </TableSortLabel>
+              </TableCell>
+              <TableCell>
+                <TableSortLabel
+                  active={sortConfig.key === "category"}
+                  direction={
+                    sortConfig.key === "category" ? sortConfig.direction : "asc"
+                  }
+                  onClick={() => handleSort("category")}
+                >
+                  Category
+                </TableSortLabel>
+              </TableCell>
+              <TableCell>
+                <TableSortLabel
+                  active={sortConfig.key === "tutor"}
+                  direction={
+                    sortConfig.key === "tutor" ? sortConfig.direction : "asc"
+                  }
+                  onClick={() => handleSort("tutor")}
+                >
+                  Tutor
+                </TableSortLabel>
+              </TableCell>
+              <TableCell>
+                  
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredCourses
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((course, index) => (
+                <TableRow key={index}>
+                  <TableCell>{course.title}</TableCell>
+                  <TableCell>{course.category}</TableCell>
+                  <TableCell>{course.tutor}</TableCell>
+                  <TableCell>
+                    <Button
+                      variant="outlined"
+                      onClick={() => handleOpenModal(course)}
+                    >
+                      View
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <TablePagination
+        component="div"
+        count={filteredCourses.length}
+        page={page}
+        onPageChange={handleChangePage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        rowsPerPageOptions={[5, 10, 20]}
+      />
+    </Box>
+  );
+};
+
+export default AdminCourse;

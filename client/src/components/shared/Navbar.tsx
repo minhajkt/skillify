@@ -1,43 +1,74 @@
-
-import { AppBar, Avatar, Box, Button, IconButton, InputAdornment, Menu, MenuItem, TextField, Toolbar, Typography } from "@mui/material";
+import {
+  AppBar,
+  Avatar,
+  Box,
+  Button,
+  IconButton,
+  InputAdornment,
+  Menu,
+  MenuItem,
+  Snackbar,
+  TextField,
+  Toolbar,
+  Typography,
+} from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState, store } from "../store/store";
+import { RootState, store } from "../../store/store";
 import { useEffect, useState } from "react";
-// import { logoutUser } from "../api/authApi";
-import { logout } from "../store/authSlice";
+import { Link } from "react-router-dom";
+import { logout } from "../../store/authSlice";
+import ProfileModal from "./ProfileModal";
 const Navbar = () => {
-  const navigate = useNavigate()
-  const token = useSelector((state: RootState) => state.auth.token)
-  const user = useSelector((state: RootState) => state.auth.user)
-  console.log('tokn ies', token);
-  console.log('user is ', user);
+  const navigate = useNavigate();
 
-  const dispatch = useDispatch()
-  const [anchorE1, setAnchorE1] = useState<null | HTMLElement>(null)
+  const token = useSelector((state: RootState) => state.auth.token);
+  const user = useSelector((state: RootState) => state.auth.user);
+  console.log("tokn ies", token);
+  console.log("user issss ", user);
+
+  const dispatch = useDispatch();
+  const [anchorE1, setAnchorE1] = useState<null | HTMLElement>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorE1(event.currentTarget)
-  }
+    setAnchorE1(event.currentTarget);
+  };
 
   const handleCloseMenu = () => {
-    setAnchorE1(null)
-  }
+    setAnchorE1(null);
+  };
+
+  const handleOpenModal = () => {
+    setModalOpen(true);
+    handleCloseMenu();
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+  };
   useEffect(() => {
     console.log("Current Redux state:", store.getState());
   }, []);
-    const handleLogout = async() => {
-        try {
-            // await logoutUser();
-            dispatch(logout())
-            console.log('logged out');
-            navigate('/login')
-            
-        } catch (error) {
-            console.log(error);
-        }
+
+  const handleLogout = async () => {
+    try {
+      // await logoutUser();
+      dispatch(logout());
+      console.log("logged out");
+      localStorage.setItem("logoutSuccess", "true");
+      if(user.role === 'tutor') {
+        navigate("/tutors/login");
+      }else if (user.role === 'admin') {
+        navigate("/admin/login");
+      }else {
+        navigate('/login')
+      }
+    } catch (error) {
+      console.log(error);
     }
+  };
 
   return (
     <AppBar
@@ -58,8 +89,7 @@ const Navbar = () => {
           component={"img"}
           src="/images/skillify-high-resolution-logo__1_-removebg-preview - Copy.png"
           alt="Skillify Logo"
-          onClick={() =>navigate("/home")}
-          
+          onClick={() => navigate("/home")}
           style={
             {
               // height: "26px",
@@ -72,9 +102,10 @@ const Navbar = () => {
             height: { xs: "20px", md: "26px" },
             width: { xs: "100px", md: "120px" },
             paddingLeft: { xs: "0rem", md: "3rem" },
-            cursor:"pointer"
+            cursor: "pointer",
           }}
         ></Box>
+        {user?.role !== 'admin' || user?.role !== 'tutor'? (
 
         <TextField
           variant="outlined"
@@ -99,6 +130,7 @@ const Navbar = () => {
             ),
           }}
         />
+        ): (<Box></Box>)}
 
         <Box display="flex" alignItems="center" gap={2}>
           <Typography
@@ -109,6 +141,8 @@ const Navbar = () => {
               fontWeight: 500,
               display: { xs: "none", md: "block" },
             }}
+            component={Link}
+            to="/tutors/home"
           >
             Teach on Skillify
           </Typography>
@@ -147,7 +181,7 @@ const Navbar = () => {
                 onClose={handleCloseMenu}
                 sx={{
                   "& .MuiPaper-root": {
-                    borderRadius: "12px",
+                    borderRadius: "5px",
                   },
                 }}
               >
@@ -191,7 +225,7 @@ const Navbar = () => {
                 <hr style={{ border: "1px solid #ECF2F0," }} />
 
                 <MenuItem
-                  onClick={() => navigate("/profile")}
+                  onClick={handleOpenModal}
                   sx={{ fontSize: { xs: "small", md: "medium" } }}
                 >
                   Profile
@@ -222,7 +256,7 @@ const Navbar = () => {
             <Box display={"flex"} justifyContent="center" alignItems="center">
               <Button
                 variant="outlined"
-                sx={{ color: "black", margin: 0, borderColor: "black",  }}
+                sx={{ color: "black", margin: 0, borderColor: "black" }}
                 onClick={() => navigate("/login")}
               >
                 Log in
@@ -232,7 +266,7 @@ const Navbar = () => {
                 color="primary"
                 sx={{
                   backgroundColor: "black",
-                  display:{xs:"none", sm:'block'}, 
+                  display: { xs: "none", sm: "block" },
                   "&:hover": { backgroundColor: "#333" },
                 }}
                 onClick={() => navigate("/signup")}
@@ -243,8 +277,9 @@ const Navbar = () => {
           )}
         </Box>
       </Toolbar>
+      {modalOpen && <ProfileModal user={user} onClose={handleCloseModal} />}
     </AppBar>
   );
-}
+};
 
-export default Navbar
+export default Navbar;

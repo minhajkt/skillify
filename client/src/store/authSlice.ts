@@ -31,9 +31,15 @@ const authSlice = createSlice({
             state.token = null
             state.user = null
             Cookies.remove('authToken')
+        },
+        updateUser: (state, action: PayloadAction<{user: User}>) => {
+            state.user = action.payload.user
+            if(state.token) {
+                Cookies.set('authToken', state.token, {expires: 7})
+            }
         } 
     }
 })
 
-export const {loginSuccess, logout} = authSlice.actions;
+export const {loginSuccess, logout, updateUser} = authSlice.actions;
 export default authSlice.reducer;

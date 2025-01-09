@@ -43,7 +43,7 @@ const HiringPartners = () => {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          bgcolor: "grey",
+          bgcolor: "#F7F9FA",
           position: "relative",
         }}
       >
@@ -87,35 +87,26 @@ const HiringPartners = () => {
                   key={index}
                   sx={{
                     position: "absolute",
-                    top: partner.position.top, 
-                    left: partner.position.left, 
+                    top: partner.position.top,
+                    left: partner.position.left,
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
                     backgroundColor: "white",
-                    width: {xs:"40px",sm:'80px',md:"120px"}, 
-                    height: {xs:"20px",sm:"40px",md:"50px"},
+                    width: { xs: "40px", sm: "80px", md: "120px" },
+                    height: { xs: "20px", sm: "40px", md: "50px" },
                     boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                    padding: {xs:"6px 8px",sm:"8px 12px"},
+                    padding: { xs: "6px 8px", sm: "8px 12px" },
                   }}
                 >
-                    <Box component={"img"}
+                  <Box
+                    component={"img"}
                     src={partner.logo}
                     sx={{
-                        width:{xs:"3rem",sm:"6rem",md:"9rem"},
-                        height:"auto"
-                    }}
-                    />
-                    
-                    {/* </Box>
-                  <img
-                    src={partner.logo}
-                    alt={partner.name}
-                    style={{
-                      width: "9rem",
+                      width: { xs: "3rem", sm: "6rem", md: "9rem" },
                       height: "auto",
                     }}
-                  /> */}
+                  />
                 </Box>
               ))}
             </Box>
