@@ -4,6 +4,7 @@ import { sendEmail, validateOtp } from "../../../utils/otpUtil";
 import { comparePassword, hashPassword } from "../../../utils/passwordHashing";
 import { IUser } from "../models/UserModel";
 import { IUserRepository } from "../repositories/IUserRepository";
+import { ICourse } from "../../courses/models/courseModel";
 
 export class UserService {
   private userRepository: IUserRepository;
@@ -17,13 +18,13 @@ export class UserService {
       userData.email as string
     );
     if (existingUser) {
-      if(existingUser.verified) {
-          throw new Error("Email already exists");
+      if (existingUser.verified) {
+        throw new Error("Email already exists");
       }
-        const hashedPassword = await hashPassword(userData.password as string);
-        userData.password = hashedPassword;
-      await this.userRepository.updateUser(existingUser.id, userData)
-      return existingUser
+      const hashedPassword = await hashPassword(userData.password as string);
+      userData.password = hashedPassword;
+      await this.userRepository.updateUser(existingUser.id, userData);
+      return existingUser;
     }
 
     const hashedPassword = await hashPassword(userData.password as string);
@@ -80,4 +81,12 @@ export class UserService {
   ): Promise<IUser | null> {
     return this.userRepository.updatePassword(userId, newPassword);
   }
+  
+  async getCourseById(id: string): Promise<IUser | null> {
+    return this.userRepository.getCourseById(id);
+  }
+
+  // async getAllCourseForUser(): Promise<ICourse[]> {
+  //   return await this.userRepository.getAllCourseForUser();
+  // }
 }

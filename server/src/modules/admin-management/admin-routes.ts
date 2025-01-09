@@ -54,6 +54,7 @@ adminRouter.get("/admin/course-requests", AdminController.getCourseRequests);
 
 
 adminRouter.get('/admin/courses', AdminController.getAllCourse)
+// adminRouter.get("/admin/coursesforfrontend", AdminController.getAllCourseForFrontend);
 // adminRouter.get('/admin/course-requests', AdminController.getCourseRequests)
 adminRouter.patch('/admin/course-request/:id/approval', AdminController.updateCourseApproval)
 adminRouter.patch(

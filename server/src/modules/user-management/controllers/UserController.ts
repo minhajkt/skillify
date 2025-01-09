@@ -8,10 +8,12 @@ import { cloudinary } from "../../../config/cloudinaryConfig";
 import {upload } from '../../../config/cloudinaryConfig'
 import { OAuth2Client } from "google-auth-library";
 import { generateToken } from "../../../utils/jwtUtil";
+import Stripe from 'stripe'
 
 const userRepository = new UserRepository();
 const userService = new UserService(userRepository);
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {apiVersion:"2024-12-18.acacia"});
 
 interface AuthRequest extends Request {
   user?: {
@@ -370,5 +372,34 @@ static googleSignIn = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ error: (error as Error).message });
   }
 };
+
+  static getCourseById = async(req: Request, res: Response) => {
+    try {
+      const {id} = req.params
+      const course = await userService.getCourseById(id)
+      if(!course) {
+        return res.status(404).json({message: "Course not found"})
+      }
+      return res.status(200).json(course)
+    } catch (error) {
+      return res.status(500).json({message: "An unexpected error occured", error})
+    }
+  }
+
+
+  // static getAllCourseForUser = async (req: Request, res: Response) => {
+  //   try {
+  //     const courses = await userService.getAllCourseForUser();
+  //     if (!courses) {
+  //       return res.status(404).json({ message: "No courses are found" });
+  //     }
+  //     return res.status(200).json(courses);
+  //   } catch (error) {
+  //     return res.status(500).json({
+  //       message: "An unexpected error occured",
+  //       error: (error as Error).message,
+  //     });
+  //   }
+  // };
 
 }

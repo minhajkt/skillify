@@ -1,4 +1,5 @@
 import { IUser } from "../models/UserModel";
+import {ICourse} from '../../courses/models/courseModel'
 
 export interface IUserRepository {
   createUser(userData: Partial<IUser>): Promise<IUser>;
@@ -8,6 +9,8 @@ export interface IUserRepository {
   getAllUsers(): Promise<IUser[]>;
   findAllStudents(): Promise<IUser[]>;
   findAllTutors(isApproved: boolean): Promise<IUser[]>;
+  getCourseById(id: string): Promise<IUser | null>;
+  // getAllCourseForUser(): Promise<ICourse[]>;
 
   updatePassword(userId: string, newPassword: string): Promise<IUser | null>;
 }

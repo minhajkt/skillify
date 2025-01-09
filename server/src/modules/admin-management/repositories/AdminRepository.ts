@@ -53,7 +53,8 @@ export class AdminRepository implements IAdminRepository {
   }
 
   async getAllCourse(): Promise<ICourse[]> {
-    return await Course.find({ isApproved: "approved" });
+    return await Course.find({ isApproved: "approved" })
+    // .populate("createdBy", "name").exec();
   }
 
   async updateCourseApproval(

@@ -8,6 +8,7 @@ import courseRouter from './modules/courses/course-routes'
 import lectureRouter from './modules/lectures/lecture-routes'
 import tutorRouter from './modules/tutor/tutor-routes'
 import multer from 'multer'
+import Stripe from 'stripe'
 
 const app = express()
 
@@ -21,8 +22,13 @@ app.use(
 );
 app.use(express.json())
 
+
 const port = process.env.PORT || 5000;
 app.use(cookieParser());
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion:"2024-12-18.acacia"
+});
 
 app.use('/api', userRoutes)
 app.use("/api", adminRoutes);

@@ -1,4 +1,5 @@
 import User, { IUser } from "../models/UserModel";
+import Course, {ICourse} from '../../courses/models/courseModel'
 import { IUserRepository } from "./IUserRepository";
 import bcrypt from 'bcryptjs'
 
@@ -16,10 +17,12 @@ export class UserRepository implements IUserRepository {
     id: String,
     userData: Partial<IUser>
   ): Promise<IUser | null> {
-    const updatedUser = await User.findByIdAndUpdate(id, userData, { new: true });
-    console.log('the udpated user is ', updatedUser);
-    
-    return updatedUser
+    const updatedUser = await User.findByIdAndUpdate(id, userData, {
+      new: true,
+    });
+    console.log("the udpated user is ", updatedUser);
+
+    return updatedUser;
   }
 
   async getAllUsers(): Promise<IUser[]> {
@@ -49,4 +52,13 @@ export class UserRepository implements IUserRepository {
       { new: true }
     );
   }
+  
+  async getCourseById(id: String): Promise<IUser | null> {
+    return await Course.findById(id);
+  }
+  // async getAllCourseForUser(): Promise<ICourse[]> {
+  //   return await Course.find({ isApproved: "approved" })
+  //     .populate("createdBy", "name")
+  //     .exec();
+  // }
 }

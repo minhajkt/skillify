@@ -18,8 +18,8 @@ export class AdminService {
     return this.adminRepository.findAllTutors();
   }
 
-  async getTutorById(id:string) {
-    return this.adminRepository.getUserById(id)
+  async getTutorById(id: string) {
+    return this.adminRepository.getUserById(id);
   }
 
   async getTutorRequests() {
@@ -47,6 +47,10 @@ export class AdminService {
   async getAllCourse(): Promise<ICourse[]> {
     return await this.adminRepository.getAllCourse();
   }
+
+  // async getAllCourseForFrontend(): Promise<ICourse[]> {
+  //   return await this.adminRepository.getAllCourseForFrontend();
+  // }
 
   async updateCourseApproval(
     id: string,

@@ -25,7 +25,7 @@ router.post("/users/verify-otp", UserController.verifyOtp);
 router.post("/users/login", validateUserLogin, UserController.loginUser);
 router.get(
   "/users/user/:id",
-  authenticateJWT,
+  // authenticateJWT,
   UserController.getUserById
 );
 router.put(
@@ -44,8 +44,10 @@ router.post(
   handleValidationErrors,
   UserController.resetPassword
 );
+// router.get("/users/user/:id", authenticateJWT, UserController.getUserById);
 router.post("/auth/google", UserController.googleSignIn);
 
+// router.get('/user/courses', UserController.getAllCourseForUser)
 
 // router.post(
 //   "/users/update-profile-photo", authenticateJWT,
@@ -68,6 +70,7 @@ router.post(
 router.post("/tutors/verify-otp", UserController.verifyOtp);
 router.post("/tutors/login", validateUserLogin, UserController.loginTutor);
 router.get("/tutors/user/:id", authenticateJWT, UserController.getUserById);
+
 router.put(
   "/tutors/update-user/:id",
   authenticateJWT,
@@ -104,5 +107,10 @@ router.get("/validate-session", authenticateJWT, (req, res) => {
     res.status(403).json({ message: "Your account is blocked" });
   }
 });
+
+router.get('/courses/:id', UserController.getCourseById)
+
+// stripe payment route
+router.post('/create-checkout-session', UserController.stripePayment)
 
 export default router;

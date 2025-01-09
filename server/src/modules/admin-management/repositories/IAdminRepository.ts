@@ -13,6 +13,7 @@ export interface IAdminRepository {
   getCourseRequests(): Promise<ICourse[]>;
 
   getAllCourse(): Promise<ICourse[]>;
+  // getAllCourseForFrontend(): Promise<ICourse[]>;
   getCourseRequests(): Promise<ICourse[]>;
   updateCourseApproval(id: string, status: string): Promise<ICourse | null>;
 

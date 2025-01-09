@@ -57,19 +57,19 @@ export class AdminController {
     }
   };
 
-  static getTutorById = async(req: Request, res:Response) => {
-    const {id } = req.params;
+  static getTutorById = async (req: Request, res: Response) => {
+    const { id } = req.params;
     try {
-      const tutor = await adminService.getTutorById(id)
+      const tutor = await adminService.getTutorById(id);
       if (!tutor) {
         return res.status(404).json({ message: "Tutor not found" });
       }
       res.json(tutor);
     } catch (error) {
-      console.log('error', error);
-      res.json(500).json({message:"an error occured"})
+      console.log("error", error);
+      res.json(500).json({ message: "an error occured" });
     }
-  }
+  };
 
   static updateTutorStatus = async (
     req: Request,
@@ -139,14 +139,18 @@ export class AdminController {
     try {
       const updatedTutor = await adminService.updateUser(id, {
         isApproved,
-        verified: isApproved === 'approved'
+        verified: isApproved === "approved",
       });
 
       if (!updatedTutor) {
         res.status(404).json({ message: "Tutor not found" });
         return;
       }
-      await sendApprovalEmail(updatedTutor.email,updatedTutor.name, isApproved)
+      await sendApprovalEmail(
+        updatedTutor.email,
+        updatedTutor.name,
+        isApproved
+      );
 
       res.status(200).json(updatedTutor);
       return;
@@ -156,63 +160,96 @@ export class AdminController {
     }
   };
 
-  static updateCourseApproval = async(req: Request, res: Response) => {
-    const {id} = req.params
-    const {isApproved} = req.body
+  static updateCourseApproval = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { isApproved } = req.body;
     try {
       // const updatedCourse = await adminRepository.updateCourseApproval(id, isApproved)
-      const updatedCourse = await Course.findByIdAndUpdate(id, {isApproved: isApproved}, {new:true})
-      console.log('updated course is , ', updatedCourse);
-      
-      if(!updatedCourse) {
-        res.status(404).json({message: "Course not found"})
-        return; 
+      const updatedCourse = await Course.findByIdAndUpdate(
+        id,
+        { isApproved: isApproved },
+        { new: true }
+      );
+      console.log("updated course is , ", updatedCourse);
+
+      if (!updatedCourse) {
+        res.status(404).json({ message: "Course not found" });
+        return;
       }
 
-      // const tutor = await User.findById(updatedCourse.createdBy); 
+      // const tutor = await User.findById(updatedCourse.createdBy);
       // console.log('tutor name from updatecourseapproval of the admin', tutor);
-      
+
       // if (!tutor) {
       //   return res.status(404).json({ message: "Tutor not found." });
       // }
 
       // await sendCourseApprovalEmail(tutor.email, tutor.name, isApproved)
-      res.status(200).json({message: "Course approval updated",updatedCourse})
+      res
+        .status(200)
+        .json({ message: "Course approval updated", updatedCourse });
     } catch (error) {
-      console.log('error in course update');
-      
+      console.log("error in course update");
     }
-  }
+  };
 
-  static getAllCourse = async(req: Request, res: Response) => {
+  static getAllCourse = async (req: Request, res: Response) => {
     try {
-      const courses = await adminService.getAllCourse()
-      if(!courses) {
-         res.status(404).json({message: "No courses are found"})
+      const courses = await adminService.getAllCourse();
+      if (!courses) {
+        return res.status(404).json({ message: "No courses are found" });
+      }
+      return res.status(200).json(courses);
+    } catch (error) {
+      return res.status(500).json({
+        message: "An unexpected error occured",
+        error: (error as Error).message,
+      });
+    }
+  };
+
+  // static getAllCourseForFrontend = async (req: Request, res: Response) => {
+  //   try {
+  //     const courses = await adminService.getAllCourseForFrontend();
+  //     if (!courses) {
+  //       res.status(404).json({ message: "No courses are found" });
+  //       return;
+  //     }
+  //     res.status(200).json(courses);
+  //     return;
+  //   } catch (error) {
+  //     res
+  //       .status(500)
+  //       .json({
+  //         message: "An unexpected error occured",
+  //         error: (error as Error).message,
+  //       });
+  //     return;
+  //   }
+  // };
+
+  static getCourseRequests = async (req: Request, res: Response) => {
+    try {
+      const courseRequest = await adminService.getCourseRequests();
+      if (!courseRequest) {
+        res.status(404).json({ message: "No requests pending" });
         return;
       }
-       res.status(200).json(courses)
-       return;
+      res
+        .status(201)
+        .json({
+          message: "Course requests fetched successfully",
+          courseRequest,
+        });
+      return;
     } catch (error) {
-      res.status(500).json({message: 'An unexpected error occured', error: (error as Error).message})
-      return; 
+      res
+        .status(500)
+        .json({
+          message: "An unexpected error occured",
+          error: (error as Error).message,
+        });
+      return;
     }
-  }
-
-
-
-  static getCourseRequests = async(req: Request, res: Response) => {
-    try {
-      const courseRequest = await adminService.getCourseRequests()
-      if(!courseRequest) {
-        res.status(404).json({message: "No requests pending"})
-        return
-      }
-      res.status(201).json({message: "Course requests fetched successfully", courseRequest})
-      return
-    } catch (error) {
-      res.status(500).json({message: "An unexpected error occured", error: (error as Error).message})
-      return; 
-    }
-  }
+  };
 }
