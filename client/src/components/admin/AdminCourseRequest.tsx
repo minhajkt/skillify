@@ -55,6 +55,8 @@ const AdminCourseRequest = () => {
       setLoading(true);
       try {
         const fetchedCourse = await fetchCourseRequests();
+        console.log('fffffffffffffffffffffffffffffff', fetchedCourse);
+        
         setCourses(fetchedCourse);
 
         const fetchedTutors = await fetchTutors();
@@ -144,7 +146,14 @@ const AdminCourseRequest = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {courses
+            {courses.length === 0 ? (
+    <TableRow>
+      <TableCell colSpan={7} align="center">
+        No course requests Pending
+      </TableCell>
+    </TableRow>
+  ) :
+            (courses
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((course) => (
                 <TableRow key={course._id}>
@@ -175,18 +184,7 @@ const AdminCourseRequest = () => {
                     </span>
                   </TableCell>
                   <TableCell sx={{pl:8}}>{course.lectures.length}</TableCell>
-                  {/* <TableCell>
-                    {course.isApproved === "pending" && (
-                      <>
-                        <IconButton color="success">
-                          <CheckCircleIcon />
-                        </IconButton>
-                        <IconButton color="error">
-                          <CancelIcon />
-                        </IconButton>
-                      </>
-                    )}
-                  </TableCell> */}
+
                   <TableCell>
                     <Button
                       variant="outlined"
@@ -196,7 +194,8 @@ const AdminCourseRequest = () => {
                     </Button>
                   </TableCell>
                 </TableRow>
-              ))}
+              ))
+            )}
           </TableBody>
         </Table>
       </TableContainer>

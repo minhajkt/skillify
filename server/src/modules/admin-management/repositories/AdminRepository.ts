@@ -5,8 +5,8 @@ import bcrypt from 'bcryptjs'
 import Course from '../../courses/models/courseModel'
 
 export class AdminRepository implements IAdminRepository {
-  async getUserByEmail(email: String): Promise<IUser | null> {
-    return await User.findOne({ email });
+  async findAllStudents(): Promise<IUser[]> {
+    return await User.find({ role: "user" });
   }
 
   async updateUser(
@@ -14,14 +14,6 @@ export class AdminRepository implements IAdminRepository {
     userData: Partial<IUser>
   ): Promise<IUser | null> {
     return await User.findByIdAndUpdate(id, userData, { new: true });
-  }
-
-  async getAllUsers(): Promise<IUser[]> {
-    return await User.find();
-  }
-
-  async findAllStudents(): Promise<IUser[]> {
-    return await User.find({ role: "user" });
   }
 
   async findAllTutors(): Promise<IUser[]> {
@@ -37,7 +29,31 @@ export class AdminRepository implements IAdminRepository {
   }
 
   async getCourseRequests(): Promise<ICourse[]> {
-    return await Course.find({isApproved: "pending" });
+    return await Course.find({ isApproved: "pending" });
+  }
+
+  async updateCourseApproval(
+    id: string,
+    status: string
+  ): Promise<ICourse | null> {
+    return await Course.findByIdAndUpdate(
+      id,
+      { isApproved: status },
+      { new: true }
+    );
+  }
+
+  async getAllCourse(): Promise<ICourse[]> {
+    return await Course.find({ isApproved: "approved" });
+    // .populate("createdBy", "name").exec();
+  }
+  
+  async getAllUsers(): Promise<IUser[]> {
+    return await User.find();
+  }
+
+  async getUserByEmail(email: String): Promise<IUser | null> {
+    return await User.findOne({ email });
   }
 
   async updatePassword(
@@ -48,22 +64,6 @@ export class AdminRepository implements IAdminRepository {
     return await User.findByIdAndUpdate(
       userId,
       { password: hashedPassword },
-      { new: true }
-    );
-  }
-
-  async getAllCourse(): Promise<ICourse[]> {
-    return await Course.find({ isApproved: "approved" })
-    // .populate("createdBy", "name").exec();
-  }
-
-  async updateCourseApproval(
-    id: string,
-    status: string
-  ): Promise<ICourse | null> {
-    return await Course.findByIdAndUpdate(
-      id,
-      { isApproved: status },
       { new: true }
     );
   }

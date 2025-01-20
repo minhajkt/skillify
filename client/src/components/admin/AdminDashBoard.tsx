@@ -4,6 +4,8 @@ import { Box, Card, CardContent, IconButton, List, ListItem, ListItemText, Typog
 import {
   FileDownload as ExportIcon,
 } from "@mui/icons-material";
+import { useEffect, useState } from "react";
+import { enrolledStudents } from "../../api/enrollmentApi";
 
 // const salesData = [
 //   { month: "Jan", value: 4000 },
@@ -27,7 +29,20 @@ const courseStrength = [
   { name: "Accounts", value: 2 },
 ];
 
+
+
 const AdminDashBoard = () => {
+  const [studentStrength, setStudentStregnth] = useState('')
+  useEffect(() => {
+    const fetchTotalStrength = async() => {
+      const response = await enrolledStudents();
+      setStudentStregnth(response)
+      // console.log('sterngthhhh', response);
+      
+    }
+    fetchTotalStrength()
+  }, [])
+
   return (
     <Box
       sx={{
@@ -39,10 +54,10 @@ const AdminDashBoard = () => {
     >
       <Box sx={{ flex: 1, p: 3, bgcolor: "" }}>
         <Box sx={{ display: "flex", gap: 2, mb: 3, bgcolor: "" }}>
-          <StatsCard title="Total Number of Enrolled Students" value="10" />
-          <StatsCard title="Total Number of Courses available" value="5" />
+          {/* <StatsCard title="Total Number of Enrollments" value={studentStrength} /> */}
+          {/* <StatsCard title="Total Number of Courses available" value="5" />
           <StatsCard title="Total Number of Instructors joined" value="5" />
-          <StatsCard title="Total Revenue Generated in sales" value="₹25000" />
+          <StatsCard title="Total Revenue Generated in sales" value="₹25000" /> */}
         </Box>
         <Card sx={{ flex: 2, p: 2, bgcolor: "#FAFAFA" }}>
           <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
@@ -64,7 +79,7 @@ const AdminDashBoard = () => {
             {/* <Line type="monotone" dataKey="value" stroke="#8884d8" /> */}
           {/* </LineChart> */}
         </Card>
-        <Card sx={{ flex: 1, p: 2, bgcolor: "#FAFAFA", mt: 3 }}>
+        {/* <Card sx={{ flex: 1, p: 2, bgcolor: "#FAFAFA", mt: 3 }}>
           <Typography variant="h6" fontWeight={"bold"} sx={{ mb: 2 }}>
             Course Strength
           </Typography>
@@ -99,7 +114,7 @@ const AdminDashBoard = () => {
               </ListItem>
             ))}
           </List>
-        </Card>
+        </Card> */}
       </Box>
     </Box>
   );

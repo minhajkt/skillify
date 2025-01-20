@@ -8,9 +8,9 @@ interface DecodedToken extends JwtPayload {
   id: string; 
 }
 
-export const authenticateJWT = async(req: Request, res: Response, next: NextFunction):Promise<void> => {
+export const authenticateJWT = async(req: RequestWithUser, res: Response, next: NextFunction):Promise<void> => {
     const token = req.cookies.authToken
-
+    // console.log("Cookies: ", req.cookies);  
     if(!token) {
          res.status(401).json({message: 'No token found'})
          return;
@@ -32,10 +32,12 @@ export const authenticateJWT = async(req: Request, res: Response, next: NextFunc
           return;
         }
         
+        // req.user = user;
         req.user = user; 
+
         next()
     } catch (error) {
-        res.status(403).json({message: 'Invalid Token'})        
+        res.status(403).json({message: 'Invalid Token'})
         return; 
     }
 }

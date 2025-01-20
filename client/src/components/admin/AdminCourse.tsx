@@ -52,7 +52,7 @@ const AdminCourse = () => {
         const tutors = await Promise.all(
           tutorIds.map((tutorId) => fetchTutorById(tutorId))
         );
-
+        
         const coursesWithTutors = courses.map((course, index) => ({
           ...course,
           name: course.title,

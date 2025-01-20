@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Snackbar, TextField, Typography } from "@mui/material";
+import { Box, Button, IconButton, Paper, Snackbar, TextField, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { addLecture } from "../../api/lectureApi";
 import { useNavigate, useParams } from "react-router-dom";
@@ -154,14 +154,20 @@ const AddLecture = () => {
   };
 
   return (
-    <Box>
+    <Box sx={{ minHeight: "100vh", bgcolor: "#f8fafc", p: { xs: 4, sm: 6 },mx:45 }}>
+      
       <Snackbar
         open={openSnackbar}
         message="Your Course Request is under Review. We will get back to you within 24 hours"
         autoHideDuration={600000}
         onClose={() => setOpenSnackbar(false)}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        sx={{ width: "500px", position: "absolute", top: "50%" }}
+        sx={{
+          width: "500px",
+          position: "absolute",
+          top: "10%",
+          zIndex: 9999,
+        }}
         action={
           <IconButton
             size="small"
@@ -171,50 +177,63 @@ const AddLecture = () => {
               navigate(`/tutors/courses`);
             }}
             sx={{
+              color: "white",
               position: "relative",
               right: "-6px",
-              top: "-60px",
+              top: "-4px",
               zIndex: 1000,
-              color: "white",
             }}
           >
             <CloseIcon />
           </IconButton>
         }
       />
+
       <Typography
         variant="h3"
         sx={{
-          textAlign: "start",
-          display: "block",
-          fontSize: { xs: "1.6rem", sm: "2rem" },
-          marginTop: { xs: 5, sm: 0, md: 7 },
+          fontWeight: "bold",
+          fontSize: { xs: "1.8rem", sm: "2rem" },
+          mb: 2,
+          color: "#1e293b",
         }}
-        gutterBottom
       >
         Add Lectures
       </Typography>
 
-      <Typography variant="body1" sx={{ marginTop: 0 }}>
-        Please fill all the fields to add a lecture
+      <Typography variant="body1" sx={{ color: "#6b7280", mb: 3 }}>
+        Please fill all the fields to add a lecture to your course.
       </Typography>
-
-      {/* <Box sx={{ minHeight: "20px" }}>
-        <Typography variant="caption" color="red">
-          {errorMessage || "\u00A0"}
-        </Typography>
-      </Box> */}
 
       <Box
         component="form"
-        sx={{ width: "100%", maxWidth: 400 }}
+        sx={{
+          width: "100%",
+          maxWidth: 600,
+          mx: "auto",
+          backgroundColor: "#ffffff",
+          borderRadius: 2,
+          boxShadow: 3,
+          padding: 4,
+        }}
         onSubmit={handleAddLectures}
       >
-        <Box sx={{ minHeight: "20px" }}>
-          <Typography variant="caption" color="red">
-            {errorMessage || "\u00A0"}
-          </Typography>
-        </Box>
+        {errorMessage && (
+          // <Paper
+          //   sx={{
+          //     padding: 2,
+          //     backgroundColor: "#FFF5F5",
+          //     border: "1px solid #FED7D7",
+          //     borderRadius: 1,
+          //     marginBottom: 2,
+          //   }}
+          // >
+          <Box sx={{ minHeight: "20px" }}>
+            <Typography variant="caption" color="error">{errorMessage}</Typography>
+          </Box>
+          // </Paper>
+        )}
+
         {lectures.map((lecture, index) => (
           <Box key={index} sx={{ marginBottom: 2 }}>
             {expandedLectureIndex !== index ? (
@@ -224,26 +243,22 @@ const AddLecture = () => {
                   cursor: "pointer",
                   padding: 2,
                   border: "1px solid #ddd",
-                  borderRadius: "4px",
+                  borderRadius: 1,
                   marginBottom: 2,
+                  backgroundColor: "#f8fafc",
+                  "&:hover": {
+                    backgroundColor: "#e2e8f0",
+                  },
                 }}
               >
-                <Typography variant="h6">Lecture {index + 1}</Typography>
-                <Typography variant="body1">
+                <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                  Lecture {index + 1}
+                </Typography>
+                <Typography variant="body2" sx={{ color: "#6b7280" }}>
                   Title: {lecture.title || "Not Provided"}
                 </Typography>
-                {/* <Typography variant="body1">
-                  Description: {lecture.description || "Not Provided"}
-                </Typography>
-                <Typography variant="body1">
-                  Duration: {lecture.duration || "Not Provided"}
-                </Typography>
-                <Typography variant="body1">
-                  Order: {lecture.order || "Not Provided"}
-                </Typography> */}
               </Box>
             ) : (
-              // Expanded View
               <Box>
                 <TextField
                   label="Title"
@@ -297,12 +312,18 @@ const AddLecture = () => {
                       e.target.files?.[0] || null
                     )
                   }
+                  style={{ marginTop: "8px", width: "100%" }}
                 />
                 <Button
                   variant="outlined"
                   color="secondary"
                   onClick={() => handleRemoveLectureField(index)}
-                  sx={{ marginTop: 1 }}
+                  sx={{
+                    marginTop: 1,
+                    width: "100%",
+                    borderRadius: 1,
+                    fontWeight: "bold",
+                  }}
                 >
                   Remove Lecture
                 </Button>
@@ -315,24 +336,214 @@ const AddLecture = () => {
           variant="contained"
           color="primary"
           onClick={handleAddLectureField}
-          sx={{ marginTop: 2 }}
+          sx={{
+            marginTop: 2,
+            width: "100%",
+            borderRadius: 2,
+            padding: "12px 24px",
+            fontWeight: "bold",
+          }}
         >
           Add Lecture
         </Button>
 
-        <Box display={"flex"} justifyContent={"center"}>
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
           <Button
             variant="contained"
             color="primary"
-            sx={{ marginTop: 1, width: "30%" }}
+            sx={{
+              width: "30%",
+              borderRadius: 2,
+              padding: "12px 24px",
+              fontWeight: "bold",
+            }}
             onClick={handleAddLectures}
             disabled={status === "loading"}
           >
-            {status === "loading" ? "Loading" : "Submit"}
+            {status === "loading" ? "Loading..." : "Submit"}
           </Button>
         </Box>
       </Box>
     </Box>
+    // <Box>
+    //   <Snackbar
+    //     open={openSnackbar}
+    //     message="Your Course Request is under Review. We will get back to you within 24 hours"
+    //     autoHideDuration={600000}
+    //     onClose={() => setOpenSnackbar(false)}
+    //     anchorOrigin={{ vertical: "top", horizontal: "center" }}
+    //     sx={{ width: "500px", position: "absolute", top: "50%" }}
+    //     action={
+    //       <IconButton
+    //         size="small"
+    //         color="inherit"
+    //         onClick={() => {
+    //           setOpenSnackbar(false);
+    //           navigate(`/tutors/courses`);
+    //         }}
+    //         sx={{
+    //           position: "relative",
+    //           right: "-6px",
+    //           top: "-60px",
+    //           zIndex: 1000,
+    //           color: "white",
+    //         }}
+    //       >
+    //         <CloseIcon />
+    //       </IconButton>
+    //     }
+    //   />
+    //   <Typography
+    //     variant="h3"
+    //     sx={{
+    //       textAlign: "start",
+    //       display: "block",
+    //       fontSize: { xs: "1.6rem", sm: "2rem" },
+    //       marginTop: { xs: 5, sm: 0, md: 7 },
+    //     }}
+    //     gutterBottom
+    //   >
+    //     Add Lectures
+    //   </Typography>
+
+    //   <Typography variant="body1" sx={{ marginTop: 0 }}>
+    //     Please fill all the fields to add a lecture
+    //   </Typography>
+
+    //   {/* <Box sx={{ minHeight: "20px" }}>
+    //     <Typography variant="caption" color="red">
+    //       {errorMessage || "\u00A0"}
+    //     </Typography>
+    //   </Box> */}
+
+    //   <Box
+    //     component="form"
+    //     sx={{ width: "100%", maxWidth: 400 }}
+    //     onSubmit={handleAddLectures}
+    //   >
+    //     <Box sx={{ minHeight: "20px" }}>
+    //       <Typography variant="caption" color="red">
+    //         {errorMessage || "\u00A0"}
+    //       </Typography>
+    //     </Box>
+    //     {lectures.map((lecture, index) => (
+    //       <Box key={index} sx={{ marginBottom: 2 }}>
+    //         {expandedLectureIndex !== index ? (
+    //           <Box
+    //             onClick={() => toggleLectureExpansion(index)}
+    //             sx={{
+    //               cursor: "pointer",
+    //               padding: 2,
+    //               border: "1px solid #ddd",
+    //               borderRadius: "4px",
+    //               marginBottom: 2,
+    //             }}
+    //           >
+    //             <Typography variant="h6">Lecture {index + 1}</Typography>
+    //             <Typography variant="body1">
+    //               Title: {lecture.title || "Not Provided"}
+    //             </Typography>
+    //             {/* <Typography variant="body1">
+    //               Description: {lecture.description || "Not Provided"}
+    //             </Typography>
+    //             <Typography variant="body1">
+    //               Duration: {lecture.duration || "Not Provided"}
+    //             </Typography>
+    //             <Typography variant="body1">
+    //               Order: {lecture.order || "Not Provided"}
+    //             </Typography> */}
+    //           </Box>
+    //         ) : (
+    //           // Expanded View
+    //           <Box>
+    //             <TextField
+    //               label="Title"
+    //               variant="outlined"
+    //               fullWidth
+    //               sx={{ marginTop: 1 }}
+    //               value={lecture.title}
+    //               onChange={(e) =>
+    //                 handleInputChange(index, "title", e.target.value)
+    //               }
+    //             />
+    //             <TextField
+    //               label="Description"
+    //               variant="outlined"
+    //               fullWidth
+    //               multiline
+    //               rows={4}
+    //               sx={{ marginTop: 1 }}
+    //               value={lecture.description}
+    //               onChange={(e) =>
+    //                 handleInputChange(index, "description", e.target.value)
+    //               }
+    //             />
+    //             <TextField
+    //               label="Duration"
+    //               variant="outlined"
+    //               fullWidth
+    //               sx={{ marginTop: 1 }}
+    //               value={lecture.duration}
+    //               onChange={(e) =>
+    //                 handleInputChange(index, "duration", e.target.value)
+    //               }
+    //             />
+    //             <TextField
+    //               label="Order"
+    //               variant="outlined"
+    //               fullWidth
+    //               sx={{ marginTop: 1 }}
+    //               value={lecture.order}
+    //               onChange={(e) =>
+    //                 handleInputChange(index, "order", e.target.value)
+    //               }
+    //             />
+    //             <input
+    //               type="file"
+    //               accept="video/*"
+    //               onChange={(e) =>
+    //                 handleInputChange(
+    //                   index,
+    //                   "videoFile",
+    //                   e.target.files?.[0] || null
+    //                 )
+    //               }
+    //             />
+    //             <Button
+    //               variant="outlined"
+    //               color="secondary"
+    //               onClick={() => handleRemoveLectureField(index)}
+    //               sx={{ marginTop: 1 }}
+    //             >
+    //               Remove Lecture
+    //             </Button>
+    //           </Box>
+    //         )}
+    //       </Box>
+    //     ))}
+
+    //     <Button
+    //       variant="contained"
+    //       color="primary"
+    //       onClick={handleAddLectureField}
+    //       sx={{ marginTop: 2 }}
+    //     >
+    //       Add Lecture
+    //     </Button>
+
+    //     <Box display={"flex"} justifyContent={"center"}>
+    //       <Button
+    //         variant="contained"
+    //         color="primary"
+    //         sx={{ marginTop: 1, width: "30%" }}
+    //         onClick={handleAddLectures}
+    //         disabled={status === "loading"}
+    //       >
+    //         {status === "loading" ? "Loading" : "Submit"}
+    //       </Button>
+    //     </Box>
+    //   </Box>
+    // </Box>
   );
 };
 

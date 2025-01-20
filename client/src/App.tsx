@@ -3,7 +3,7 @@ import {
   Routes,
   Route,
   Navigate,
-  useLocation,
+  // useLocation,
 } from "react-router-dom";
 import "./App.css";
 import LoginPage from "./pages/user/LoginPage";
@@ -28,7 +28,15 @@ import CourseDetailsPage from "./pages/tutor/CourseDetailsPage";
 import AdminCourseRequest from "./components/admin/AdminCourseRequest";
 import AdminCourseDetailsPage from "./components/admin/AdminCourseDetailsPage";
 import UserCourseDetailsPage from "./pages/user/UserCourseDetailsPage";
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
+import MyCourses from "./pages/user/MyCourses";
+import UserCourseSection from "./pages/user/UserCourseSection";
+import Wishlist from "./components/user/Wishlist";
 
+const stripePromise = loadStripe(
+  "pk_test_51QfLoJF574cRRlb7gt4W52ZaKOrTVvdRuxGB5nDgXRQhugeedtvDfqKPFTVryX1uBAnthR40zUGYMeyE7baknYkD00Ar4wRwmH"
+);
 
 
 function App() {
@@ -48,7 +56,18 @@ function App() {
             <Route path="/tutors/login" element={<TutorLoginPage />} />
             <Route path="/tutors/home" element={<TutorHome />} />
             <Route path="/admin/login" element={<AdminLoginPage />} />
-            <Route path="/users/course-details/:courseId" element={<UserCourseDetailsPage />} />
+            {/* <Route path="/users/course-details/:courseId" element={<UserCourseDetailsPage />} /> */}
+            <Route
+              path="/users/course-details/:courseId"
+              element={
+                <Elements stripe={stripePromise}>
+                  <UserCourseDetailsPage />
+                </Elements>
+              }
+            />
+            <Route path="/users/my-courses" element={<MyCourses />} />
+            <Route path="/users/course-section/:courseId" element={<UserCourseSection />} />
+            <Route path="/wishlist" element={<Wishlist />} />
 
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<Navigate to={"dashboard"} />} />

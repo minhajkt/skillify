@@ -1,53 +1,68 @@
 import { Request, Response } from "express";
-import { CourseRepository } from "../repositories/courseRepository";
-import { CourseService } from "../services/courseService";
-import { cloudinary } from "../../../config/cloudinaryConfig";
-import {Schema} from 'mongoose'
-import Course from '../models/courseModel'
+import mongoose, { Schema } from "mongoose";
+import Course from "../models/courseModel";
+import { ICourseService } from "../services/ICourseService";
+import { ICourseController } from "./ICourseController";
 
-const courseService = new CourseService(new CourseRepository())
 
-export class courseController {
-    static createCourse = async(req: Request, res: Response) => {
-        try {
-            const courseData = req.body;
-            console.log('course data req.nody', courseData);
-            
-            if(req.file) {
-                const result = await cloudinary.v2.uploader.upload(req.file.path, {
-                    folder:"course_thumbnails",
-                    resource_type:"auto"
-                    // transformation: [{ width: 500, height: 500, crop: "limit" }],
-                })
-                console.log('req.file', req.file);
-                
-                courseData.thumbnail = result.secure_url
-            }
-            const newCourse = await courseService.createCourse(courseData);
-            res.status(201).json({newCourse, message:"New Course created successfully"})
-        } catch (error) {
-            res.status(400).json({error: (error as Error).message})
-        }
+export class CourseController implements ICourseController {
+  private courseService: ICourseService;
+  constructor(courseService: ICourseService) {
+    this.courseService = courseService;
+  }
+
+  async createCourse(req: Request, res: Response): Promise<void> {
+    try {
+      const courseData = req.body;
+      console.log("course data req.nody", courseData);
+      if (req.file) {
+        courseData.thumbnail = req.file.path;
+      }
+
+      const newCourse = await this.courseService.createCourse(courseData,req.file);
+      res.status(201).json({ newCourse, message: "New Course created successfully" });
+    } catch (error) {
+      res.status(400).json({ error: (error as Error).message });
     }
+  }
 
-    static getAllCourses = async(req: Request, res: Response) => {
-        try {
-            const courses =await courseService.getAllCourses()
-            if(!courses) {
-                return res.status(404).json({message: "No courses found"})
-            }
-            return res.status(200).json(courses)
-        } catch (error) {
-            return res.status(500).json({message: "An unexpected error occured.",error:(error as Error).message})
-        }
-    }
+  async getAllCourses(req: Request, res: Response): Promise<void> {
+    try {
+      const courses = await this.courseService.getAllCourses();
 
-    static getCategories = async(req: Request, res:Response) => {
-        try {
-            const categories = (Course.schema.path('category') as Schema.Types.String).enumValues
-            return res.status(200).json(categories)
-        } catch (error) {
-            return res.status(500).json({message:"An unexpected error occured", error:(error as Error).message})
-        }
+       res.status(200).json(courses);
+    } catch (error) {
+       res.status(500).json({
+        message: "An unexpected error occured.",
+        error: (error as Error).message,
+      });
     }
+  };
+
+  async getCategories(req: Request, res: Response): Promise<void> {
+    try {
+    const categories = await this.courseService.getCategories()
+       res.status(200).json(categories);
+    } catch (error) {
+       res.status(500).json({message: "An unexpected error occured",error: (error as Error).message,});
+    }
+  };
+
+  // for user course viewing
+
+  async getUserCourse(req: Request, res: Response): Promise<void> {
+    try {
+      const { courseId } = req.params;
+
+      if (!mongoose.Types.ObjectId.isValid(courseId)) {
+         res.status(400).json({ message: "Invalid course ID" });
+      }
+
+      const userCourse = await this.courseService.getUserCourse(courseId);
+
+       res.status(200).json(userCourse);
+    } catch (error) {console.log("Error occured when trying to view user course video part",error);
+         res.status(500).json({message: "An unexpected error occured",error: (error as Error).message,});
+    }
+  };
 }

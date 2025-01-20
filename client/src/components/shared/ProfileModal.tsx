@@ -6,6 +6,7 @@ import {
   CircularProgress,
   Box,
   Typography,
+  Snackbar,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
@@ -24,6 +25,7 @@ interface ProfileModalProps {
 }
 
 const ProfileModal = ({ user, onClose }: ProfileModalProps) => {
+  
   const token = useSelector((state: RootState) => state.auth.token);
   console.log("userdataaaaaa is", token);
 
@@ -33,6 +35,7 @@ const ProfileModal = ({ user, onClose }: ProfileModalProps) => {
   const [photo, setPhoto] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [successSnackbar, setSuccessSnackbar] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -63,7 +66,11 @@ const ProfileModal = ({ user, onClose }: ProfileModalProps) => {
 
       dispatch(updateUser(response.data));
       console.log("Profile updated:", response.data);
-      onClose();
+      setSuccessSnackbar(true);
+      console.log("Snackbar should open:", successSnackbar);
+      setTimeout(() => {
+        onClose();
+      }, 3000);
     } catch (err) {
       setError("Failed to update profile");
       console.error("Error updating profile", err);
@@ -181,6 +188,14 @@ const ProfileModal = ({ user, onClose }: ProfileModalProps) => {
         >
           Cancel
         </Button>
+        <Snackbar
+          open={successSnackbar}
+          onClose={() => setSuccessSnackbar(false)}
+          autoHideDuration={3000}
+          message="Profile updated successfully!"
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          sx={{zIndex:3000}}
+        />
       </Box>
     </Box>
 

@@ -18,6 +18,7 @@ import {
   InputLabel,
   FormControl,
   SelectChangeEvent,
+  Snackbar,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import BlockIcon from "@mui/icons-material/Block";
@@ -50,6 +51,8 @@ const AdminStudent = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+    const [snackbar, setSnackbar] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState("");
 
   useEffect(() => {
     const getStudents = async () => {
@@ -135,6 +138,8 @@ const handleStatusToggle = async (studentIndex: number) => {
     await updateStudentStatus(student._id, !originalStatus);
     student.isActive = !originalStatus;
     setFilteredStudents(updatedStudents);
+    setSnackbarMessage(originalStatus ? "Student blocked!" : "Student unblocked!");
+    setSnackbar(true);
     
   } catch (error: unknown) {
     console.error("Failed to update student", error);
@@ -237,6 +242,13 @@ const handleStatusToggle = async (studentIndex: number) => {
           </TableBody>
         </Table>
       </TableContainer>
+      <Snackbar
+        open={snackbar}
+        onClose={() => setSnackbar(false)}
+        autoHideDuration={3000}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        message={snackbarMessage}
+      />
 
       <TablePagination
         component="div"

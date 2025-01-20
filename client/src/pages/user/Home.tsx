@@ -15,6 +15,12 @@ const Home = () => {
   const token = useSelector((state: RootState) => state.auth.token);
   const [openSnackbar, setOpenSnackbar] = useState(false);
 
+    const [searchQuery, setSearchQuery] = useState("");
+
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchQuery(e.target.value);
+    };
+
   useEffect(() => {
     if (localStorage.getItem("loginSuccess") === "true") {
       setOpenSnackbar(true);
@@ -33,7 +39,10 @@ const Home = () => {
             minHeight: "100vh",
           }}
         >
-          <Navbar />
+          <Navbar
+            searchQuery={searchQuery}
+            onSearchChange={handleSearchChange}
+          />
 
           <MainBanner
             sx={{
@@ -41,9 +50,9 @@ const Home = () => {
             }}
           />
           <Category />
-          <OurCourses />
+          <OurCourses searchQuery={searchQuery} />
           <HiringPartners />
-          <StudentsReview />
+          {/* <StudentsReview /> */}
           <Footer />
         </Box>
       ) : (
@@ -55,7 +64,10 @@ const Home = () => {
             minHeight: "100vh",
           }}
         >
-          <Navbar />
+          <Navbar
+            searchQuery={searchQuery}
+            onSearchChange={handleSearchChange}
+          />
           <Snackbar
             open={openSnackbar}
             message="Login successful!"
@@ -70,7 +82,7 @@ const Home = () => {
             }}
           />
           <Category />
-          <OurCourses />
+          <OurCourses searchQuery={searchQuery} />
           <Footer />
         </Box>
       )}

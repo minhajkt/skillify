@@ -11,19 +11,30 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  Divider,
+  Avatar,
+  Alert,
+  Snackbar,
 } from "@mui/material";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import LanguageOutlinedIcon from "@mui/icons-material/LanguageOutlined";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
+import Person2OutlinedIcon from "@mui/icons-material/Person2Outlined";
 
 
 import { useEffect, useState } from "react";
 import { fetchCourseDetails } from "../../api/courseApi";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { getTutorById } from "../../api/userApi";
 import Navbar from "../../components/shared/Navbar";
 import { getLecturesByCourseId } from "../../api/lectureApi";
-import { AccessTime, ExpandMore, PlayCircleOutline } from "@mui/icons-material";
+import { AccessTime, CalendarToday, ExpandMore, PlayCircleOutline, ThumbUp } from "@mui/icons-material";
+import CheckoutButton from "../../components/user/CheckoutButton";
+import { getReviews } from "../../api/reviewApi";
+import ReviewComponent from "../../components/user/ReviewComponent";
+import { fetchUserEnrolledCourses } from "../../api/enrollmentApi";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store/store";
 
 const UserCourseDetailsPage = () => {
   const [course, setCourse] = useState("");
@@ -31,6 +42,22 @@ const UserCourseDetailsPage = () => {
   const [tutor, setTutor] = useState('')
   const [lectures, setLectures] = useState([])
   const [totalHours, setTotalHours] = useState('')
+  const [reviews, setReviews] = useState([])
+  const [averageRating, setAverageRating] = useState(0);
+  const [totalReviews, setTotalReviews] = useState(0);
+  const [isEnrolled, setIsEnrolled] = useState(false);
+      const location = useLocation();
+      const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false);
+
+
+          useEffect(() => {
+            if (
+              new URLSearchParams(location.search).get("cancelled") === "true"
+            ) {
+              setShowSuccessSnackbar(true);
+              console.log("snacbar set to true", showSuccessSnackbar);
+            }
+          }, [location.search]);
 
   useEffect(() => {
     const getCourseDetails = async () => {
@@ -55,7 +82,23 @@ const UserCourseDetailsPage = () => {
         );
         setTotalHours((totalDuration / 60).toFixed(1))
         // console.log("Total Duration:", totalHours);
-        
+        const enrolledCourses = await fetchUserEnrolledCourses();
+        console.log("Enrolled Courses:", enrolledCourses);
+    if (Array.isArray(enrolledCourses)) {
+      const courseEnrolled = enrolledCourses.some(
+        (enrolledCourse) =>
+          enrolledCourse.courseId && enrolledCourse.courseId._id === courseId
+      );
+      setIsEnrolled(courseEnrolled);
+
+    } else {
+      console.error(
+        "Unexpected response format for enrolled courses:",
+        enrolledCourses
+      );
+      setIsEnrolled(false);
+    }   
+    console.log("Is enrolled:", isEnrolled);
       } catch (error) {
         console.error("Error fetching course details:", error);
       }
@@ -79,7 +122,6 @@ const UserCourseDetailsPage = () => {
       }}
     >
       <Navbar />
-      {/* Hero Section */}
 
       <Box
         sx={{
@@ -104,8 +146,8 @@ const UserCourseDetailsPage = () => {
               {course.description}
             </Typography>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, my: 2 }}>
-              {/* <Rating value={4} readOnly precision={0.5} />
-              <Typography variant="body2">(1,691 ratings)</Typography> */}
+              <Rating value={averageRating} readOnly precision={0.5} />
+              <Typography variant="body2">({totalReviews} ratings)</Typography>
             </Box>
             <Typography variant="body2">
               Course Created by: {tutor.name}
@@ -118,9 +160,7 @@ const UserCourseDetailsPage = () => {
         </Grid>
       </Box>
 
-      {/* Main Content */}
       <Grid container spacing={4} maxWidth="lg" mx="auto">
-        {/* Left Column - Course Details */}
         <Grid item xs={12} md={8}>
           <Card sx={{ mb: 4 }}>
             <CardContent>
@@ -141,11 +181,11 @@ const UserCourseDetailsPage = () => {
               <Typography variant="body2" color="text.secondary" mb={2}>
                 {lectures.length} lectures
               </Typography>
-              <Box sx={{display:"flex", alignItems:"center", gap:1.5}}>
-                <AccessTimeOutlinedIcon fontSize="small" sx={{mb:2}}/>
-              <Typography variant="body2" color="text.secondary" mb={2}>
-                {totalHours} Hours
-              </Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                <AccessTimeOutlinedIcon fontSize="small" sx={{ mb: 2 }} />
+                <Typography variant="body2" color="text.secondary" mb={2}>
+                  {totalHours} Hours
+                </Typography>
               </Box>
               {lectures?.map((lecture, index) => (
                 <Typography key={lecture._id}>
@@ -159,58 +199,11 @@ const UserCourseDetailsPage = () => {
                     {lecture.title}
                   </Box>
                 </Typography>
-                // <Accordion key={lecture._id}>
-                //   <AccordionSummary expandIcon={<ExpandMore />}>
-                //     <Stack
-                //       direction="row"
-                //       spacing={2}
-                //       alignItems="center"
-                //       width="100%"
-                //     >
-                //       <Typography variant="subtitle1">
-                //         {index + 1}. {lecture.title}
-                //       </Typography>
-                //       <Typography
-                //         variant="body2"
-                //         color="text.secondary"
-                //         sx={{ ml: "auto" }}
-                //       >
-                //         <AccessTime
-                //           sx={{
-                //             fontSize: 16,
-                //             verticalAlign: "middle",
-                //             mr: 0.5,
-                //           }}
-                //         />
-                //         {lecture.duration} min
-                //       </Typography>
-                //     </Stack>
-                //   </AccordionSummary>
-                //   <AccordionDetails>
-                //     <Typography
-                //       variant="body2"
-                //       color="text.secondary"
-                //       paragraph
-                //     >
-                //       {lecture.description}
-                //     </Typography>
-                //     {lecture.videoUrl && (
-                //       <Button
-                //         startIcon={<PlayCircleOutline />}
-                //         variant="outlined"
-                //         size="small"
-                //       >
-                //         Watch Preview
-                //       </Button>
-                //     )}
-                //   </AccordionDetails>
-                // </Accordion>
               ))}
             </CardContent>
           </Card>
         </Grid>
 
-        {/* Right Column - Course Card */}
         <Grid item xs={12} md={4}>
           <Card sx={{ position: "sticky", top: 24 }}>
             <CardContent>
@@ -240,7 +233,11 @@ const UserCourseDetailsPage = () => {
                   {course.rating}
                   {5}
                 </Typography>
-                <Chip label={course.category} variant="outlined" sx={{fontSize:"12px"}}/>
+                <Chip
+                  label={course.category}
+                  variant="outlined"
+                  sx={{ fontSize: "12px" }}
+                />
               </Box>
               <Box
                 sx={{
@@ -255,7 +252,7 @@ const UserCourseDetailsPage = () => {
                 <Chip
                   label={`${course.lectures?.length || 0} lectures`}
                   variant="outlined"
-                  sx={{fontSize:"12px"}}
+                  sx={{ fontSize: "12px" }}
                 />
               </Box>
               <Box
@@ -263,7 +260,7 @@ const UserCourseDetailsPage = () => {
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  mb:1
+                  mb: 1,
                 }}
               >
                 <Typography sx={{ fontSize: "14px", lineHeight: 2 }}>
@@ -273,34 +270,36 @@ const UserCourseDetailsPage = () => {
                     {tutor.name}
                   </span>
                 </Typography>
-                <Chip label="English" variant="outlined" sx={{fontSize:"12px"}}/>
-              </Box>
-              <Button
-                variant="contained"
-                fullWidth
-                sx={{
-                  bgcolor: "#1a1a1a",
-                  "&:hover": { bgcolor: "#333" },
-                  py: 1.5,
-                  mb: 0,
-                }}
-              >
-                ENROLL NOW
-              </Button>
-              {/* <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                <Chip label={course.category} variant="outlined" />
                 <Chip
-                  label={`${course.lectures?.length || 0} lectures`}
+                  label="English"
                   variant="outlined"
+                  sx={{ fontSize: "12px" }}
                 />
-                <Chip label="English" variant="outlined" />
-              </Stack> */}
+              </Box>
+              <CheckoutButton disabled={isEnrolled} />
             </CardContent>
           </Card>
         </Grid>
       </Grid>
+              <Snackbar
+                open={showSuccessSnackbar}
+                onClose={() => setShowSuccessSnackbar(false)}
+                autoHideDuration={3000}
+                anchorOrigin={{ vertical: "top", horizontal: "center" }}
+              >
+                <Alert severity="warning">
+                  Your Payment was cancelled
+                </Alert>
+              </Snackbar>
+      <ReviewComponent
+        courseId={courseId}
+        setAverageRating={setAverageRating}
+        setTotalReviews={setTotalReviews}
+      />
     </Box>
   );
 };
 
 export default UserCourseDetailsPage;
+
+

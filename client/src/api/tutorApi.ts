@@ -3,7 +3,9 @@ import { axiosInstance } from "./axiosInstance";
 
 export const fetchTutorCourses = async () => {
   try {
-    const response = await axiosInstance.get("/tutor/courses");
+    const response = await axiosInstance.get("/tutor/courses", {
+      withCredentials: true
+    });
     return response.data;
   } catch (error) {
     handleAxiosError(error);

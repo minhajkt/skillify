@@ -11,3 +11,18 @@ export const getTutorById = async(courseId: string) => {
         throw handleAxiosError(error)
     }
 }
+
+export const getUserCourseDetails = async(courseId: string) => {
+    try {
+        if (!courseId) {
+          throw new Error("Course ID is required to fetch course details.");
+        }
+        
+        const response = await axiosInstance.get(`/users/course-section/${courseId}`, {
+            withCredentials: true
+        })
+        return response.data
+    } catch (error) {
+        throw handleAxiosError(error)
+    }
+}

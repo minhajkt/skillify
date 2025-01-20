@@ -1,61 +1,105 @@
 import { IAdminRepository } from "../repositories/IAdminRepository";
 import { IUser } from "../../user-management/models/UserModel";
 import { ICourse } from "../../courses/models/courseModel";
+import { IAdminService } from "./IAdminService";
+import { IUserRepository } from "../../user-management/repositories/IUserRepository";
+import { sendCourseApprovalEmail } from "../../../utils/approveEmail";
 
 
-export class AdminService {
+export class AdminService implements IAdminService {
   private adminRepository: IAdminRepository;
 
   constructor(adminRepository: IAdminRepository) {
     this.adminRepository = adminRepository;
   }
 
-  async getAllStudents() {
+  async getAllStudents(): Promise<IUser[]> {
     return this.adminRepository.findAllStudents();
   }
 
-  async getAllTutor() {
+  async updateUser(id: string, userData: Partial<IUser>): Promise<IUser | null> {
+    if(!id) {
+      throw new Error("User ID is required")
+    }
+
+    const updatedUser =  this.adminRepository.updateUser(id, userData);
+    if(!updatedUser) {
+      throw new Error('User not found')
+    }
+    return updatedUser
+  }
+
+  async getAllTutor():Promise<IUser[]> {
     return this.adminRepository.findAllTutors();
   }
 
-  async getTutorById(id: string) {
-    return this.adminRepository.getUserById(id);
+  async getTutorById(id: string):Promise<IUser | null> {
+    if(!id) {
+      throw new Error("ID is not found")
+    }
+
+    const tutor = this.adminRepository.getUserById(id);
+    if(!tutor) {
+      throw new Error("Tutor not found")
+    }
+    return tutor
+  }
+  
+  async getTutorRequests():Promise<IUser[]> {
+
+    const tutorRequests =  this.adminRepository.getTutorRequests();
+    if(!tutorRequests) {
+      throw new Error("No requests pending");
+    }
+    return tutorRequests
   }
 
-  async getTutorRequests() {
-    return this.adminRepository.getTutorRequests();
+  async updatetutorRequest(id: string,userData: Partial<IUser>): Promise<IUser | null> {
+    const updatedTutor = this.adminRepository.updateUser(id, userData);
+    if(!updatedTutor) {
+      throw new Error("Tutor not found")
+    }
+    return updatedTutor
   }
 
-  async getCourseRequests() {
-    return this.adminRepository.getCourseRequests();
+  async getCourseRequests(): Promise<ICourse[]> {
+    
+    const courseRequests =  this.adminRepository.getCourseRequests();
+    if(!courseRequests) {
+      throw new Error("No course requests found")
+    }
+    return courseRequests
+  }
+  
+  async updateCourseApproval(id: string,status: string): Promise<ICourse | null> {
+    const updatedCourse = await this.adminRepository.updateCourseApproval(
+      id,
+      status
+    );
+    if (!updatedCourse) {
+      throw new Error("No updated course found");
+    }
+    const tutor = await this.adminRepository.getUserById(updatedCourse.createdBy.toString())
+    if(!tutor) {
+      throw new Error('Tutor not found')
+    }
+    console.log('tutor name from updatecourseapproval of the admin', tutor);
+
+    await sendCourseApprovalEmail(tutor.email, tutor.name, status)
+    return updatedCourse;
   }
 
-  async updateUser(
-    id: string,
-    userData: Partial<IUser>
-  ): Promise<IUser | null> {
-    return this.adminRepository.updateUser(id, userData);
-  }
-
-  async updatetutorRequest(
-    id: string,
-    userData: Partial<IUser>
-  ): Promise<IUser | null> {
-    return this.adminRepository.updateUser(id, userData);
-  }
 
   async getAllCourse(): Promise<ICourse[]> {
-    return await this.adminRepository.getAllCourse();
+    const allCourses =  await this.adminRepository.getAllCourse();
+    if(!allCourses) {
+      throw new Error('No courses found')
+    }
+    return allCourses
   }
 
   // async getAllCourseForFrontend(): Promise<ICourse[]> {
   //   return await this.adminRepository.getAllCourseForFrontend();
   // }
 
-  async updateCourseApproval(
-    id: string,
-    status: string
-  ): Promise<ICourse | null> {
-    return await this.adminRepository.updateCourseApproval(id, status);
-  }
 }

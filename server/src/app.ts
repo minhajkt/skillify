@@ -9,17 +9,23 @@ import lectureRouter from './modules/lectures/lecture-routes'
 import tutorRouter from './modules/tutor/tutor-routes'
 import multer from 'multer'
 import Stripe from 'stripe'
-
+import webhookRouter from './modules/webhooks/webhook-route'
+import enrollmentRouter from './modules/enrollment/enrollment-route';
+import reviewRouter from './modules/review/review-routes'
+import wishlistRouter from './modules/wishlist/wishlist-route'
 const app = express()
 
 connectDB()
 
 app.use(
   cors({
-    origin: 'http://localhost:5173',
+    origin: process.env.CORS_ORIGIN,
     credentials: true,
   })
 );
+// app.use(express.raw({ type: "application/json" }));
+app.use("/webhook", express.raw({ type: "application/json" }), webhookRouter);
+
 app.use(express.json())
 
 
@@ -35,7 +41,9 @@ app.use("/api", adminRoutes);
 app.use('/api', courseRouter)
 app.use('/api', lectureRouter)
 app.use("/api", tutorRouter);
-// app.use('/api/tutors', userRoutes)
+app.use('/api', enrollmentRouter)
+app.use('/api', reviewRouter)
+app.use("/api", wishlistRouter);
 
 app.get('/', (req, res) => {
     res.send("hello world")

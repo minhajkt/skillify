@@ -5,7 +5,7 @@ import { Request, Response } from "express";
 export const validateUserCreation = [
   body("name")
     .isLength({ min: 3 })
-    .withMessage("Name should be of minimum 3 charecters")
+    .withMessage("Name should be of minimum 3 charecters for user")
     // .isAlpha().withMessage('Name should not contain numbers')
     .trim(),
 
@@ -40,7 +40,7 @@ export const validateUserCreation = [
 export const validateTutorCreation = [
   body("name")
     .isLength({ min: 3 })
-    .withMessage("Name should be of minimum 3 charecters")
+    .withMessage("Name should be of minimum 3 charecters for tutor")
     // .isAlpha().withMessage('Name should not contain numbers')
     .trim(),
 
@@ -97,7 +97,7 @@ export const validateUserLogin = [
 export const validateUserUpdation = [
   body("name")
     .isLength({ min: 3 })
-    .withMessage("Name should be of minimum 3 charecters")
+    .withMessage("Name should be of minimum 3 charecters for updattion")
     // .isAlpha().withMessage('Name should not contain numbers')
     .trim(),
 
@@ -129,7 +129,7 @@ export const validateCourseCreation = [
 
   body("description")
     .isLength({ min: 3 })
-    .withMessage("Title should contain atleast 3 charecters")
+    .withMessage("Desciption should contain atleast 3 charecters")
     .trim(),
 
   body("category")
@@ -140,7 +140,7 @@ export const validateCourseCreation = [
     body("price")
       .isFloat({ gt: 0 }) 
     .withMessage("Enter a valid price")
-    .trim()
+    .trim(),
 ];
 
 export const handleValidationErrors = async(req: Request, res: Response, next: NextFunction): Promise<void> => {

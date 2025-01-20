@@ -13,6 +13,7 @@ import {
   TableRow,
   Paper,
   Tooltip,
+  Snackbar,
 } from "@mui/material";
 import { axiosInstance } from "../../api/axiosInstance";
 import { updateCourseApproval } from "../../api/adminApi";
@@ -38,6 +39,10 @@ const AdminCourseDetailsPage = () => {
   const [lectures, setLectures] = useState<{ [key: string]: Lectures }>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+  });
 
   const fetchCourseDetails = async () => {
     try {
@@ -86,7 +91,10 @@ const handleApprove = async (courseId: string) => {
   try {
     const updatedCourse = await updateCourseApproval(courseId, "approved");
     console.log('updatde is ', updatedCourse);
-    
+    setSnackbar({
+      open: true,
+      message: "Course approved successfully!",
+    });
     setCourse((prev) => {
         console.log("Previous course state:", prev);  
       if (prev && prev._id === courseId) {
@@ -103,6 +111,10 @@ const handleApprove = async (courseId: string) => {
     const handleReject = async (courseId: string) => {
       try {
         const updatedCourse = await updateCourseApproval(courseId, "rejected");
+        setSnackbar({
+          open: true,
+          message: "Course rejected successfully!",
+        });
     setCourse((prev) => {
         // console.log("Previous course state:", prev);  
       if (prev && prev._id === courseId) {
@@ -267,6 +279,13 @@ const handleApprove = async (courseId: string) => {
               </>
             )}
           </Box>
+          <Snackbar
+            open={snackbar.open}
+            onClose={() => setSnackbar({ ...snackbar, open: false })}
+            autoHideDuration={3000}
+            message={snackbar.message}
+            anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          />
         </>
       ) : (
         <Typography>No course data available.</Typography>

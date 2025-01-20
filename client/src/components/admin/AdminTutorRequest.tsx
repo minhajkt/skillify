@@ -11,6 +11,7 @@ import {
   TablePagination,
   IconButton,
   Button,
+  Snackbar,
 
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -35,6 +36,10 @@ const AdminTutorRequest = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [modalOpen, setModalOpen] = useState(false)
+    const [snackbar, setSnackbar] = useState({
+      open: false,
+      message: "",
+    });
 
   useEffect(() => {
     const getTutorRequests = async () => {
@@ -72,6 +77,10 @@ const handleApprove = async (tutorId: string) => {
         tutor._id === tutorId ? { ...tutor, isApproved: "approved" } : tutor
       )
     );
+    setSnackbar({
+      open: true,
+      message: "Tutor approved successfully!",
+    });
   } catch (error) {
     console.error("Failed to approve tutor request.", error);
   }
@@ -86,6 +95,10 @@ const handleReject = async (tutorId: string) => {
         tutor._id === tutorId ? { ...tutor, isApproved: "rejected" } : tutor
       )
     );
+          setSnackbar({
+            open: true,
+            message: "Tutor rejected successfully!",
+          });
   } catch (error) {
     console.error("Failed to reject tutor request.", error);
   }
@@ -122,62 +135,76 @@ const handleReject = async (tutorId: string) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {tutors
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((tutor) => (
-                <TableRow key={tutor._id}>
-                  <TableCell>{tutor.name}</TableCell>
-                  <TableCell>{tutor.email}</TableCell>
-                  <TableCell>
-                    <span
-                      style={{
-                        color:
-                          tutor.isApproved === "approved"
-                            ? "green"
-                            : tutor.isApproved === "rejected"
-                            ? "red"
-                            : "orange",
-                      }}
-                    >
-                      {tutor.isApproved === "approved"
-                        ? "Approved"
-                        : tutor.isApproved === "rejected"
-                        ? "Rejected"
-                        : "Pending"}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    {tutor.isApproved === "pending" && (
-                      <>
-                        <IconButton
-                          color="success"
-                          onClick={() => handleApprove(tutor._id)}
-                        >
-                          <CheckCircleIcon />
-                        </IconButton>
-                        <IconButton
-                          color="error"
-                          onClick={() => handleReject(tutor._id)}
-                        >
-                          <CancelIcon />
-                        </IconButton>
-                      </>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="outlined"
-                      onClick={() => handleOpenModal(tutor)}
-                    >
-                      View
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+            {tutors.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} align="center">
+                  No tutor requests pending
+                </TableCell>
+              </TableRow>
+            ) : (
+              tutors
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((tutor) => (
+                  <TableRow key={tutor._id}>
+                    <TableCell>{tutor.name}</TableCell>
+                    <TableCell>{tutor.email}</TableCell>
+                    <TableCell>
+                      <span
+                        style={{
+                          color:
+                            tutor.isApproved === "approved"
+                              ? "green"
+                              : tutor.isApproved === "rejected"
+                              ? "red"
+                              : "orange",
+                        }}
+                      >
+                        {tutor.isApproved === "approved"
+                          ? "Approved"
+                          : tutor.isApproved === "rejected"
+                          ? "Rejected"
+                          : "Pending"}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      {tutor.isApproved === "pending" && (
+                        <>
+                          <IconButton
+                            color="success"
+                            onClick={() => handleApprove(tutor._id)}
+                          >
+                            <CheckCircleIcon />
+                          </IconButton>
+                          <IconButton
+                            color="error"
+                            onClick={() => handleReject(tutor._id)}
+                          >
+                            <CancelIcon />
+                          </IconButton>
+                        </>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outlined"
+                        onClick={() => handleOpenModal(tutor)}
+                      >
+                        View
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+            )}
           </TableBody>
         </Table>
       </TableContainer>
-
+      <Snackbar
+        open={snackbar.open}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        autoHideDuration={3000}
+        message={snackbar.message}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      />
       <TablePagination
         component="div"
         count={tutors.length}

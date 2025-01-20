@@ -18,6 +18,7 @@ import {
   InputLabel,
   FormControl,
   SelectChangeEvent,
+  Snackbar,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import BlockIcon from "@mui/icons-material/Block";
@@ -50,6 +51,8 @@ const AdminTutor = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [snackbar, setSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
     useEffect(() => {
       const getTutors = async () => {
@@ -131,6 +134,9 @@ const AdminTutor = () => {
     
     try {
         await updateTutorsStatus(tutor._id, newStatus)
+        setSnackbarMessage(newStatus ? "Tutor Unblocked!" : "Tutor Blocked!");
+        setSnackbar(true);
+
     } catch (error) {
         console.error('Failed to update student', error);
         tutor.isActive = !newStatus; 
@@ -215,11 +221,7 @@ const AdminTutor = () => {
                       color={tutor.isActive ? "error" : "success"}
                       onClick={() => handleStatusToggle(index)}
                     >
-                      {tutor.isActive ? (
-                        <BlockIcon />
-                      ) : (
-                        <CheckCircleIcon />
-                      )}
+                      {tutor.isActive ? <BlockIcon /> : <CheckCircleIcon />}
                     </IconButton>
                   </TableCell>
                 </TableRow>
@@ -227,7 +229,13 @@ const AdminTutor = () => {
           </TableBody>
         </Table>
       </TableContainer>
-
+      <Snackbar
+        open={snackbar}
+        onClose={() => setSnackbar(false)}
+        autoHideDuration={3000}
+        message={snackbarMessage}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      />
       <TablePagination
         component="div"
         count={filteredTutors.length}

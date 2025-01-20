@@ -2,13 +2,16 @@ import { ILectureRepository } from "../repositories/ILectureRepository";
 import { ILecture } from "../models/lectureModel";
 import Course from '../../courses/models/courseModel'
 import mongoose from "mongoose";
+import { ICourseService } from "../../courses/services/ICourseService";
+import { ILectureService } from "./ILectureService";
 
-export class LectureService {
+export class LectureService implements ILectureService{
   private lectureRepo: ILectureRepository;
 
   constructor(lectureRepo: ILectureRepository) {
     this.lectureRepo = lectureRepo;
   }
+
 
   async createLecture(lectureData: Partial<ILecture>, courseId: mongoose.Types.ObjectId): Promise<ILecture | null> {
     try {
@@ -27,6 +30,10 @@ export class LectureService {
       throw new Error(`Error creating new Lecture ${(error as Error).message}`);
     }
   }
+
+    async addLectureToCourse(courseId: mongoose.Types.ObjectId,lectureId: mongoose.Types.ObjectId): Promise<void> {
+      await this.lectureRepo.addLecture(courseId, lectureId);
+    }
 
   async getLecturesByCourse(courseId: string): Promise<ILecture[]> {
     try {

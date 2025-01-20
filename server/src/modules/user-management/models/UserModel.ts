@@ -1,20 +1,21 @@
 import mongoose, {Schema, Document} from "mongoose";
 
 export interface IUser extends Document {
-    name: string,
-    email: string,
-    password: string,
-    role: string,
-    profilePhoto: string,
-    verified: boolean,
-    isActive : boolean,
-    bio?:string,
-    isApproved?: string,
-    certificatess?:string
+  name: string;
+  email: string;
+  password: string;
+  role: string;
+  profilePhoto: string;
+  verified: boolean;
+  isActive: boolean;
+  bio?: string;
+  isApproved?: string;
+  // certificatess?: string;
+  certificates?: string[];
 }
 
 const UserSchema: Schema = new Schema({
-  name: { type: String, required: true },
+  name: { type: String, required: true }, 
   email: { type: String, required: true },
   password: { type: String, required: true },
   role: { type: String, enum: ["user", "tutor", "admin"], default: "user" },
