@@ -54,11 +54,7 @@ const UserCourseSection = () => {
   if (!course) return <p>Loading...</p>;
 
   return (
-    // <div>
-    //   <h1>{course.title}</h1>
-    //   <p>{course.description}</p>
-    //   {/* Render other course details */}
-    // </div>
+
     <Box>
       <Navbar />
       <Box sx={{ px: 10, py: 5, mt: { xs: "64px", md: "80px" } }}>
@@ -115,19 +111,7 @@ const UserCourseSection = () => {
           <Box sx={{ width: "300px", p: 2 }}>
             {course.lectures && course.lectures.length > 0 ? (
               course.lectures.map((lecture) => (
-                // <Button key={lecture._id}>
-                //   <Button
-                //     sx={{
-                //       textAlign: "left",
-                //       color: "black",
-                //       borderBottom: "1px solid #AFAFAF",
-                //       width:"280px"
-                //     }}
-                //     onClick={() => handleLectureSelect(lecture)}
-                //   >
-                //     {lecture.title}
-                //   </Button>
-                // </Button>
+
                 <Button key={lecture._id}>
                   <Typography
                     sx={{

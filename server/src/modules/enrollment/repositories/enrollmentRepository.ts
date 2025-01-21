@@ -3,11 +3,6 @@ import { IEnrollmentRepository } from "./IEnrollmentRepository";
 
 
 export class EnrollmentRepository implements IEnrollmentRepository{
-  // async createEnrollment(enrollmentData: Partial<IEnrollment>): Promise<IEnrollment> {
-  //     const enrollment = new Enrollment(enrollmentData)
-  //     return await enrollment.save()
-  // }
-
   
   async getAllEnrolledCoursesByStudent(
     id: string

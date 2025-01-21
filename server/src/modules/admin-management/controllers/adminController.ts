@@ -9,11 +9,7 @@ import Course from '../../courses/models/courseModel'
 import { IAdminService } from "../services/IAdminService";
 import { IAdminController } from "./IAdminController";
 
-// const userRepository = new UserRepository();
-// const userService = new UserService(userRepository);
 
-// const adminRepository = new AdminRepository();
-// const adminService = new AdminService(adminRepository)
 
 export class AdminController implements IAdminController {
   private adminService: IAdminService;
@@ -61,9 +57,7 @@ export class AdminController implements IAdminController {
     const { id } = req.params;
     try {
       const tutor = await this.adminService.getTutorById(id);
-      // if (!tutor) {
-      //   return res.status(404).json({ message: "Tutor not found" });
-      // }
+
       res.status(200).json(tutor);
     } catch (error) {
       console.log("error", error);
@@ -102,20 +96,7 @@ export class AdminController implements IAdminController {
     }
   };
 
-  // static getCourseRequest = async(req: Request, res: Response) => {
-  //   try {
-  //     const courseRequest = await adminRepository.getCourseRequests()
-  //     if(!courseRequest) {
-  //       res.status(404).json({message: "No requests pending"})
-  //       return
-  //     }
-  //     res.status(200).json({message: "Course request fetched successfully ", courseRequest})
-  //     return
-  //   } catch (error) {
-  //     res.status(500).json({message: "An unexpected error occured", error: (error as Error).message})
-  //     return
-  //   }
-  // }
+
 
   async updateTutorApproval(req: Request,res: Response): Promise<void> {
     const { id } = req.params;
@@ -149,10 +130,7 @@ export class AdminController implements IAdminController {
   async getCourseRequests(req: Request, res: Response): Promise<void> {
     try {
       const courseRequest = await this.adminService.getCourseRequests();
-      // if (!courseRequest) {
-      //   res.status(404).json({ message: "No requests pending" });
-      //   return;
-      // }
+
       res.status(201).json({
         message: "Course requests fetched successfully",
         courseRequest,
@@ -190,24 +168,5 @@ export class AdminController implements IAdminController {
     }
   };
 
-  // static getAllCourseForFrontend = async (req: Request, res: Response) => {
-  //   try {
-  //     const courses = await adminService.getAllCourseForFrontend();
-  //     if (!courses) {
-  //       res.status(404).json({ message: "No courses are found" });
-  //       return;
-  //     }
-  //     res.status(200).json(courses);
-  //     return;
-  //   } catch (error) {
-  //     res
-  //       .status(500)
-  //       .json({
-  //         message: "An unexpected error occured",
-  //         error: (error as Error).message,
-  //       });
-  //     return;
-  //   }
-  // };
 
 }

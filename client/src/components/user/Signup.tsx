@@ -1,50 +1,67 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { signupUser } from "../../api/authApi";
-import { Box, Grid, Typography, TextField, Button } from "@mui/material";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { googleSignIn, signupUser } from "../../api/authApi";
+import { Box, Grid, Typography, TextField, Button, } from "@mui/material";
 import SignupOTPModal from "../shared/SignupOTPModal";
+import { Formik, Form, Field } from "formik";
+import * as Yup from "yup";
+import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
+import { AxiosError } from "axios";
+
+const SignupSchema = Yup.object().shape({
+  name: Yup.string().required("Full Name is required"),
+  email: Yup.string()
+    .email("Invalid email address")
+    .required("Email is required"),
+  password: Yup.string()
+    .min(3, "Password should be of minimum 3 charecters for user")
+    .required("Password is required"),
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref("password"), undefined], "Passwords must match")
+    .required("Confirm password is required"),
+});
 
 const Signup = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+  const navigate = useNavigate()
   const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
   const [emailForOtp, setEmailForOtp] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [errorMessage, setErrorMessage] = useState('')
   const [status, setStatus] = useState<
     "idle" | "loading" | "success" | "error"
   >("idle");
 
-  useEffect(() => {
-    if (
-      name !== "" ||
-      email !== "" ||
-      password !== "" ||
-      confirmPassword !== ""
-    ) {
-      setErrorMessage("");
-    }
-  }, [name, email, password, confirmPassword]);
-
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
+    const handleGoogleSuccess = async (
+      credentialResponse: CredentialResponse
+    ) => {
+      try {
+        if (credentialResponse.credential) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const userData = await googleSignIn(credentialResponse.credential);
+          navigate("/home");
+        }
+      } catch (error) {
+        setErrorMessage("Your account is temporarily suspended");
+        console.log("Google sign in error", error);
+      }
+    };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleSignup = async (values: any) => {
     try {
+      const { name, email, password, confirmPassword } = values;
       setStatus("loading");
       const userData = await signupUser(name, email, password, confirmPassword);
       if (userData) {
         setEmailForOtp(email);
         setIsOtpModalOpen(true);
       }
-      console.log("userData is ", userData);
-      setErrorMessage("");
       setStatus("idle");
     } catch (error) {
-      if (error instanceof Error) {
-        setErrorMessage(error.message);
+      console.error("Error in signing up:", error);
+      setStatus("error");
+      if(error instanceof Error) {
+        setErrorMessage(error.message)
       }
-      console.error("Error in logging in", error);
-      setStatus("idle");
     }
   };
 
@@ -87,14 +104,6 @@ const Signup = () => {
             provides you with an exceptional option to learn and upskill without
             any problems. You can learn at your own pace from your comfort zone.
           </Typography>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              textAlign: "left",
-              flexDirection: "column",
-            }}
-          ></Box>
         </Grid>
 
         <Grid
@@ -117,6 +126,7 @@ const Signup = () => {
               textAlign: "start",
               display: "block",
               fontSize: { xs: "1.6rem", sm: "2rem" },
+              pt: 4,
             }}
             gutterBottom
           >
@@ -129,101 +139,133 @@ const Signup = () => {
               Skillify
             </span>{" "}
           </Typography>
-
           <Box sx={{ minHeight: "20px" }}>
             <Typography variant="caption" color="red">
               {errorMessage || "\u00A0"}
             </Typography>
           </Box>
+          <Formik
+            initialValues={{
+              name: "",
+              email: "",
+              password: "",
+              confirmPassword: "",
+            }}
+            validationSchema={SignupSchema}
+            onSubmit={handleSignup}
+          >
+            {({ isSubmitting, touched, errors }) => (
+              <Form>
+                <Box component="div" sx={{ width: "100%", maxWidth: 400 }}>
+                  <Field
+                    name="name"
+                    as={TextField}
+                    label="Full Name"
+                    variant="outlined"
+                    fullWidth
+                    sx={{
+                      marginTop: 0,
+                      marginBottom: 0,
+                    }}
+                    error={touched.name && Boolean(errors.name)}
+                    helperText={touched.name && errors.name ? errors.name : " "}
+                  />
 
-          <Box component="form" sx={{ width: "100%", maxWidth: 400 }}>
-            <TextField
-              label="Full Name"
-              variant="outlined"
-              fullWidth
-              sx={{ marginTop: 1 }}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-            <TextField
-              label="Email address"
-              variant="outlined"
-              fullWidth
-              sx={{ marginTop: 1 }}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <TextField
-              label="Password"
-              type="password"
-              variant="outlined"
-              fullWidth
-              sx={{ marginTop: 1 }}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <TextField
-              label="Confirm Password"
-              variant="outlined"
-              type="password"
-              fullWidth
-              sx={{ marginTop: 1 }}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
+                  <Field
+                    name="email"
+                    as={TextField}
+                    label="Email address"
+                    variant="outlined"
+                    fullWidth
+                    sx={{
+                      marginTop: 0,
+                      marginBottom: 0,
+                    }}
+                    error={touched.email && Boolean(errors.email)}
+                    helperText={
+                      touched.email && errors.email ? errors.email : " "
+                    }
+                  />
 
-            <Box display={"flex"} justifyContent={"center"}>
-              <Button
-                variant="contained"
-                color="primary"
-                sx={{ marginTop: 1, width: "30%" }}
-                onClick={handleSignup}
-                disabled={status === "loading"}
-              >
-                {status === "loading" ? "Signing up" : "Sign up"}
-              </Button>
-            </Box>
+                  <Field
+                    name="password"
+                    as={TextField}
+                    type="password"
+                    label="Password"
+                    variant="outlined"
+                    fullWidth
+                    sx={{
+                      marginTop: 0,
+                      marginBottom: 0,
+                    }}
+                    error={touched.password && Boolean(errors.password)}
+                    helperText={
+                      touched.password && errors.password
+                        ? errors.password
+                        : " "
+                    }
+                  />
 
-            <Typography variant="body2" textAlign="center" marginTop={1}>
-              Already have an account?{" "}
-              <Link
-                to="/login"
-                style={{ textDecoration: "none", color: "#1e90ff" }}
-              >
-                Login
-              </Link>
-            </Typography>
-          </Box>
+                  <Field
+                    name="confirmPassword"
+                    as={TextField}
+                    type="password"
+                    label="Confirm Password"
+                    variant="outlined"
+                    fullWidth
+                    sx={{
+                      marginTop: 0,
+                      marginBottom: 0,
+                    }}
+                    error={
+                      touched.confirmPassword && Boolean(errors.confirmPassword)
+                    }
+                    helperText={
+                      touched.confirmPassword && errors.confirmPassword
+                        ? errors.confirmPassword
+                        : " "
+                    }
+                  />
+
+                  <Box display={"flex"} justifyContent={"center"}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      sx={{ marginTop: 1, width: "30%" }}
+                      type="submit"
+                      disabled={isSubmitting || status === "loading"}
+                    >
+                      {isSubmitting || status === "loading"
+                        ? "Signing up..."
+                        : "Sign up"}
+                    </Button>
+                  </Box>
+
+                  <Typography variant="body2" textAlign="center" marginTop={1}>
+                    Already have an account?{" "}
+                    <Link
+                      to="/login"
+                      style={{ textDecoration: "none", color: "#1e90ff" }}
+                    >
+                      Login
+                    </Link>
+                  </Typography>
+                </Box>
+              </Form>
+            )}
+          </Formik>
+
           <Typography variant="subtitle2" marginTop={1}>
             <span style={{ color: "grey" }}>--------- </span>Or{" "}
             <span style={{ color: "grey" }}>--------- </span>
           </Typography>
-          <Button
-            variant="outlined"
-            startIcon={
-              <img
-                src="/images/search.png"
-                alt="Google logo"
-                style={{ height: "20px", width: "20px", paddingLeft: "10px" }}
-              />
-            }
-            sx={{
-              maxWidth: 400,
-              width: { xs: "10%", sm: "40%" },
-              height: "8%",
-              marginTop: 1,
-              borderRadius: "24px",
-              borderColor: "grey",
-              bgcolor: "#f0f0f0",
-            }}
-          >
-            <Typography
-              variant="body2"
-              sx={{ display: { xs: "none", sm: "block" } }}
-            >
-              Sign in with Google
-            </Typography>
-          </Button>
+
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            theme="outline"
+            shape="pill"
+            size="large"
+          />
         </Grid>
       </Grid>
     </Box>

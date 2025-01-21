@@ -57,7 +57,7 @@ const MyCourses = () => {
         console.log('resposne for enrolledcourssssssssssssssssssse', response);
         
       } catch (error) {
-        setError("You have no courses enrolled");
+        // setError("You have no courses enrolled");
       } finally {
         setLoading(false);
       }
@@ -111,10 +111,10 @@ useEffect(() => {
 
     const handleSubmitReview = async() => {
       if (rating && reviewText.trim()) {
-        console.log("Review data being sentttttttttttttttttttttt:", {
-          reviewText,
-          rating,
-        });
+        // console.log("Review data being sentttttttttttttttttttttt:", {
+        //   reviewText,
+        //   rating,
+        // });
 
 
         const reviewData = {
@@ -260,7 +260,56 @@ useEffect(() => {
                 </Card>
               ))
             ) : (
-              <Typography>No Enrolled Courses</Typography>
+              // <Typography>No Enrolled Courses</Typography>
+              
+                <Box
+                  sx={{
+                    textAlign: "center",
+                    bgcolor: "#f9f9f9",
+                    p: 4,
+                    borderRadius: "12px",
+                    boxShadow: 2,
+                    
+                    // maxWidth: 500,
+                    mx: "auto",
+                  }}
+                >
+                  <img
+                    src="/images/00.png" 
+                    alt="No courses illustration"
+                    style={{
+                      maxWidth: "20%",
+                      height: "auto",
+                      marginBottom: "16px",
+                    }}
+                  />
+                  <Typography variant="h5" sx={{ fontWeight: "bold", mb: 2 }}>
+                    No Enrolled Courses Yet!
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{ color: "text.secondary", mb: 3 }}
+                  >
+                    It looks like you haven't enrolled in any courses. Start
+                    exploring our courses to begin your learning
+                    journey.
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    size="large"
+                    onClick={() => navigate("/home")}
+                    sx={{
+                      // background: "linear-gradient(45deg, #6a11cb, #2575fc)",
+                      color: "#fff",
+                      fontWeight: "bold",
+                      textTransform: "none",
+                      px: 4,
+                      py: 1.5,
+                    }}
+                  >
+                    Browse Courses
+                  </Button>
+                </Box>
             )}
           </Stack>
         </Box>

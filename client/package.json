@@ -20,6 +20,7 @@
     "@stripe/react-stripe-js": "^3.1.1",
     "@stripe/stripe-js": "^5.5.0",
     "axios": "^1.7.9",
+    "formik": "^2.4.6",
     "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
     "react": "^18.3.1",
@@ -27,7 +28,8 @@
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.0.2",
     "recharts": "^2.15.0",
-    "redux-persist": "^6.0.0"
+    "redux-persist": "^6.0.0",
+    "yup": "^1.6.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",

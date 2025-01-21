@@ -1,35 +1,38 @@
-import { Box, Button, Grid, TextField, Typography } from "@mui/material"
+import { Box, Button, Grid, Snackbar, TextField, Typography } from "@mui/material"
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { loginTutor } from "../../api/authApi";
 import ForgotPasswordModal from "../shared/ForgotPasswordModal";
+// import * as Yup from "yup";
+import { Formik, Form, Field } from "formik";
+import { LoginSchema } from "../user/Login";
+
+
 
 const TutorLogin = () => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-
+    const [openSnackbar, setOpenSnackbar] = useState(false);
     const handleOpenModal = () => setIsModalOpen(true);
     const handleCloseModal = () => setIsModalOpen(false);
 
     const navigate = useNavigate();
+  useEffect(() => {
+    if (localStorage.getItem("logoutSuccess") === "true") {
+      setOpenSnackbar(true);
+      localStorage.removeItem("logoutSuccess");
+    }
+  }, []);
 
-    useEffect(() => {
-      if (email !== "" || password !== "") {
-        setErrorMessage(null);
-      }
-    }, [email, password]);
-
-    const handleLogin = async (e: React.FormEvent) => {
-      e.preventDefault();
-      setErrorMessage(null);
+    const handleLogin = async (values: { email: string; password: string }) => {
       try {
+        const {email, password} = values
         const userData = await loginTutor(email, password);
         if (userData) {
           navigate("/tutors/home");
         }
-        console.log("userData is ", userData);
+        // console.log("userData is ", userData);
       } catch (error: unknown) {
         if (error instanceof Error) {
           console.error("Error in logging in", error);
@@ -41,6 +44,14 @@ const TutorLogin = () => {
     };
   return (
     <Grid container sx={{ height: "100vh", width: "100%" }}>
+      <Snackbar
+        open={openSnackbar}
+        message="Logout successful!"
+        autoHideDuration={2000}
+        onClose={() => setOpenSnackbar(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        sx={{ zIndex: 2000 }}
+      />
       <Grid
         item
         xs={12}
@@ -122,69 +133,91 @@ const TutorLogin = () => {
           </Typography>
         </Box>
 
-
         <Box sx={{ minHeight: "20px" }}>
           <Typography variant="caption" color="red">
             {errorMessage || "\u00A0"}
           </Typography>
         </Box>
 
-        <Box component="form" sx={{ width: "100%", maxWidth: 400 }}>
-          <TextField
-            label="Email address"
-            variant="outlined"
-            fullWidth
-            sx={{ marginTop: 0 }}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <TextField
-            label="Password"
-            type="password"
-            variant="outlined"
-            fullWidth
-            sx={{ marginTop: 2, marginBottom: 1 }}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+        <Formik
+          initialValues={{
+            email: "",
+            password: "",
+          }}
+          validationSchema={LoginSchema}
+          onSubmit={handleLogin}
+        >
+          {({ errors, touched, isSubmitting }) => (
+            <Form>
+              <Box sx={{ width: "100%", maxWidth: 400 }}>
+                <Field
+                  name="email"
+                  as={TextField}
+                  label="Email address"
+                  variant="outlined"
+                  fullWidth
+                  sx={{ marginTop: 0, marginBottom: 0 }}
+                  error={touched.email && Boolean(errors.email)}
+                  helperText={touched.email && errors.email ? errors.email : " "}
+                />
+                <Field
+                  name="password"
+                  as={TextField}
+                  type="password"
+                  label="Password"
+                  variant="outlined"
+                  fullWidth
+                  sx={{
+                    marginTop: 0,
+                    marginBottom: 0,
+                  }}
+                  error={touched.password && Boolean(errors.password)}
+                  helperText={touched.password && errors.password? errors.password : " "}
+                />
 
-          <Typography
-            variant="body2"
-            textAlign="end"
-            sx={{ marginBottom: 1, color: "#1e90ff", cursor: "pointer" }}
-            onClick={handleOpenModal}
+                <Typography
+                  variant="body2"
+                  textAlign="end"
+                  sx={{ marginBottom: 1, color: "#1e90ff", cursor: "pointer" }}
+                  onClick={handleOpenModal}
+                >
+                  Forgot password?
+                </Typography>
+
+                <ForgotPasswordModal
+                  open={isModalOpen}
+                  handleClose={handleCloseModal}
+                />
+                <Box display={"flex"} justifyContent={"center"}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    sx={{ marginTop: 1, width: "30%" }}
+                    type="submit"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "..." : "Log In"}
+                  </Button>
+                </Box>
+              </Box>
+            </Form>
+          )}
+        </Formik>
+
+        <Typography variant="body2" textAlign="center" marginTop={2}>
+          Don't have an account?{" "}
+          <Link
+            to="/tutors/signup"
+            style={{ textDecoration: "none", color: "#1e90ff" }}
           >
-            Forgot password?
-          </Typography>
-
-          <ForgotPasswordModal
-            open={isModalOpen}
-            handleClose={handleCloseModal}
-          />
-          <Box display={"flex"} justifyContent={"center"}>
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{ marginTop: 1, width: "30%" }}
-              onClick={handleLogin}
-            >
-              Log In
-            </Button>
-          </Box>
-
-          <Typography variant="body2" textAlign="center" marginTop={2}>
-            Don't have an account?{" "}
-            <Link
-              to="/tutors/signup"
-              style={{ textDecoration: "none", color: "#1e90ff" }}
-            >
-              Create free account
-            </Link>
-          </Typography>
-        </Box>
+            Create free account
+          </Link>
+        </Typography>
+        {/* </Box> */}
       </Grid>
     </Grid>
   );
 }
 
 export default TutorLogin
+

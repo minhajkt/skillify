@@ -153,7 +153,7 @@ const handleRemoveFromWishlistHandler = async (courseId: string) => {
 };
 
 useEffect(() => {
-  console.log("Wishlist updateddddddddddddddddddddddddd:", wishlist);
+  // console.log("Wishlist updateddddddddddddddddddddddddd:", wishlist);
 }, [wishlist]);
 
   return (

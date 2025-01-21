@@ -98,8 +98,6 @@ export class AdminService implements IAdminService {
     return allCourses
   }
 
-  // async getAllCourseForFrontend(): Promise<ICourse[]> {
-  //   return await this.adminRepository.getAllCourseForFrontend();
-  // }
+
 
 }

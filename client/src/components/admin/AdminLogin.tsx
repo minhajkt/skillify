@@ -1,12 +1,22 @@
-import { useEffect, useState } from "react";
+import {  useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginAdmin } from "../../api/authApi";
 import { Box, Button, Grid, TextField, Typography } from "@mui/material";
 import ForgotPasswordModal from "../shared/ForgotPasswordModal";
+import * as Yup from "yup";
+import { Formik, Form, Field } from "formik";
+
+const LoginSchema = Yup.object().shape({
+  email: Yup.string()
+    .email("Invalid email address")
+    .required("Email is required"),
+  password: Yup.string()
+    .min(3, "Password must be at least 3 characters long")
+    .required("Password is required"),
+});
 
 const AdminLogin = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -15,21 +25,16 @@ const AdminLogin = () => {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (email !== "" || password !== "") {
-      setErrorMessage(null);
-    }
-  }, [email, password]);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleLogin = async (values: { email: string; password: string }) => {
     setErrorMessage(null);
     try {
+      const { email, password } = values;
       const userData = await loginAdmin(email, password);
       if (userData) {
         navigate("/admin");
       }
-      console.log("userData is ", userData);
+      // console.log("userData is ", userData);
     } catch (error: unknown) {
       if (error instanceof Error) {
         console.error("Error in logging in", error);
@@ -125,33 +130,44 @@ const AdminLogin = () => {
           </Typography>
         </Box>
 
-        {/* {errorMessage && <Alert severity="error">{errorMessage}</Alert>} */}
-
         <Box sx={{ minHeight: "20px" }}>
           <Typography variant="caption" color="red">
             {errorMessage || "\u00A0"}
           </Typography>
         </Box>
 
-        <Box component="form" sx={{ width: "100%", maxWidth: 400 }}>
-          <TextField
-            label="Email address"
-            variant="outlined"
-            fullWidth
-            sx={{ marginTop: 0 }}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <TextField
-            label="Password"
-            type="password"
-            variant="outlined"
-            fullWidth
-            sx={{ marginTop: 2, marginBottom: 1 }}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-
+        <Formik
+          initialValues={{
+            email: "",
+            password: "",
+          }}
+          validationSchema={LoginSchema}
+          onSubmit={handleLogin}
+        >
+         {({ errors, touched, isSubmitting }) => (
+          <Form>
+           <Box  sx={{ width: "100%", maxWidth: 400 }}>
+                <Field
+                  name="email"
+                  as={TextField}
+                  label="Email address"
+                  variant="outlined"
+                  fullWidth
+                  sx={{ marginTop: 0, marginBottom: 0 }}
+                  error={touched.email && Boolean(errors.email)}
+                  helperText={touched.email && errors.email? errors.email: ' '}
+                />
+                <Field
+                  name="password"
+                  as={TextField}
+                  type="password"
+                  label="Password"
+                  variant="outlined"
+                  fullWidth
+                  sx={{ marginTop: 0, marginBottom:0,}}
+                  error={touched.password && Boolean(errors.password)}
+                  helperText={touched.password && errors.password ?  errors.password  : ""}
+                />
           <Typography
             variant="body2"
             textAlign="end"
@@ -165,17 +181,22 @@ const AdminLogin = () => {
             open={isModalOpen}
             handleClose={handleCloseModal}
           />
+
           <Box display={"flex"} justifyContent={"center"}>
             <Button
               variant="contained"
               color="primary"
               sx={{ marginTop: 1, width: "30%" }}
-              onClick={handleLogin}
-            >
-              Log In
+              type="submit"
+              disabled={isSubmitting}
+              >
+              {isSubmitting ? "..." : "Log In"}
             </Button>
           </Box>
         </Box>
+        </Form>
+         )}
+         </Formik>
       </Grid>
     </Grid>
   );

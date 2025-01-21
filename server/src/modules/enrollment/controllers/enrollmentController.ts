@@ -5,7 +5,6 @@ import Enrollment from '../models/enrollmentModel'
 import { IEnrollmentService } from "../services/IEnrollmentService";
 import { IEnrollmentController } from "./IEnrollmentController";
 
-// const enrollmentService = new EnrollmentService(new EnrollmentRepository())
 
 
 export class enrollmentController implements IEnrollmentController {

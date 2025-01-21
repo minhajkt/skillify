@@ -48,9 +48,7 @@ export class TutorController implements ITutorController {
         const courseId = req.params.courseId
         const courseDetails = await this.tutorService.getCourseDetails(courseId)
 
-        // if(!courseDetails) {
-        //     return res.status(404).json({message: "Course not found!"})
-        // }
+
         console.log("Course Details Response:", courseDetails);
          res.status(200).json(courseDetails)
     } catch (error) {

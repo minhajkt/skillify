@@ -1,33 +1,34 @@
 import { useEffect, useState } from "react";
-import { loginUser } from "../../api/authApi";
+import { loginUser, googleSignIn } from "../../api/authApi";
 import { Link, useNavigate } from "react-router-dom";
-import { Box, Grid, Typography, TextField, Button } from "@mui/material";
+import {
+  Box,
+  Grid,
+  Typography,
+  TextField,
+  Button,
+  Snackbar,
+} from "@mui/material";
 import ForgotPasswordModal from "../shared/ForgotPasswordModal";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
-import { googleSignIn } from "../../api/authApi";
-import { Snackbar } from "@mui/material";
+import * as Yup from "yup";
+import { Formik, Form, Field } from "formik";
 
-// interface GoogleCredentialResponse {
-//   credential: string;
-// }
+export const LoginSchema = Yup.object().shape({
+  email: Yup.string()
+    .email("Invalid email address")
+    .required("Email is required"),
+  password: Yup.string()
+    .min(3, "Password must be at least 3 characters long")
+    .required("Password is required"),
+});
+
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // const { state } = useLocation();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [openSnackbar, setOpenSnackbar] = useState(false);
 
-  const handleOpenModal = () => setIsModalOpen(true);
-  const handleCloseModal = () => setIsModalOpen(false);
-
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (email !== "" || password !== "") {
-      setErrorMessage(null);
-    }
-  }, [email, password]);
 
   useEffect(() => {
     if (localStorage.getItem("logoutSuccess") === "true") {
@@ -36,22 +37,23 @@ const Login = () => {
     }
   }, []);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMessage(null);
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
+
+  const handleLogin = async (values: { email: string; password: string }) => {
+    setErrorMessage(null); 
     try {
+      const { email, password } = values;
       const userData = await loginUser(email, password);
       if (userData) {
         localStorage.setItem("loginSuccess", "true");
         navigate("/home");
       }
-      console.log("userData is ", userData);
     } catch (error: unknown) {
       if (error instanceof Error) {
-        console.error("Error in logging in", error);
         setErrorMessage(error.message);
       } else {
-        setErrorMessage("An unexpected error occured");
+        setErrorMessage("An unexpected error occurred");
       }
     }
   };
@@ -67,9 +69,10 @@ const Login = () => {
       }
     } catch (error) {
       setErrorMessage("Your account is temporarily suspended");
-      console.log("Google sign in error", error);
+      console.error("Google sign in error:", error);
     }
   };
+
   return (
     <Grid container sx={{ height: "100vh", width: "100%" }}>
       <Snackbar
@@ -80,6 +83,7 @@ const Login = () => {
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
         sx={{ zIndex: 2000 }}
       />
+
       <Grid
         item
         xs={12}
@@ -95,28 +99,14 @@ const Login = () => {
           px: 18,
         }}
       >
-        <Typography
-          variant="h3"
-          fontWeight="bold"
-          align="center"
-          textAlign="start"
-          gutterBottom
-        >
+        <Typography variant="h3" fontWeight="bold" align="center" gutterBottom>
           Welcome to our community
         </Typography>
-        <Typography variant="h6" textAlign="start" sx={{ marginBottom: 4 }}>
+        <Typography variant="h6" textAlign="center" sx={{ marginBottom: 4 }}>
           <span style={{ color: "#999999", fontWeight: "bold" }}>Skillify</span>{" "}
           provides you with an exceptional option to learn and upskill without
           any problems. You can learn at your own pace from your comfort zone.
         </Typography>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            textAlign: "left",
-            flexDirection: "column",
-          }}
-        ></Box>
       </Grid>
 
       <Grid
@@ -130,35 +120,15 @@ const Login = () => {
           justifyContent: "center",
           alignItems: "center",
           padding: 4,
-          marginLeft: { xs: 7, sm: 0 },
         }}
       >
-        <Typography
-          variant="h3"
-          sx={{
-            textAlign: "start",
-            display: "block",
-            fontSize: { xs: "1.6rem", sm: "2rem" },
-          }}
-          gutterBottom
-        >
+        <Typography variant="h3" gutterBottom>
           Skillify Login
         </Typography>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            textAlign: "start",
-            alignItems: "start",
-          }}
-        >
-          <Typography variant="body1" sx={{ marginTop: 1 }}>
-            Log in to continue your learning process <br /> with{" "}
-            <span style={{ color: "#999999", fontWeight: "bold" }}>
-              Skillify
-            </span>
-          </Typography>
-        </Box>
+        <Typography variant="body1" sx={{ marginTop: 1 }}>
+          Log in to continue your learning process <br /> with{" "}
+          <span style={{ color: "#999999", fontWeight: "bold" }}>Skillify</span>
+        </Typography>
 
         <Box sx={{ minHeight: "20px" }}>
           <Typography variant="caption" color="red">
@@ -166,63 +136,88 @@ const Login = () => {
           </Typography>
         </Box>
 
-        <Box component="form" sx={{ width: "100%", maxWidth: 400 }}>
-          <TextField
-            label="Email address"
-            variant="outlined"
-            fullWidth
-            sx={{ marginTop: 0 }}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <TextField
-            label="Password"
-            type="password"
-            variant="outlined"
-            fullWidth
-            sx={{ marginTop: 2, marginBottom: 1 }}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+        <Formik
+          initialValues={{
+            email: "",
+            password: "",
+          }}
+          validationSchema={LoginSchema}
+          onSubmit={handleLogin}
+        >
+          {({ errors, touched, isSubmitting }) => (
+            <Form>
+              <Box sx={{ width: "100%", maxWidth: 400 }}>
+                <Field
+                  name="email"
+                  as={TextField}
+                  label="Email address"
+                  variant="outlined"
+                  fullWidth
+                  sx={{ marginTop: 0, marginBottom: 0 }}
+                  error={touched.email && Boolean(errors.email)}
+                  helperText={
+                    touched.email && errors.email ? errors.email : " "
+                  }
+                />
+                <Field
+                  name="password"
+                  as={TextField}
+                  type="password"
+                  label="Password"
+                  variant="outlined"
+                  fullWidth
+                  sx={{ marginTop: 0, marginBottom: 0 }}
+                  error={touched.password && Boolean(errors.password)}
+                  helperText={
+                    touched.password && errors.password ? errors.password : " "
+                  }
+                />
 
-          <Typography
-            variant="body2"
-            textAlign="end"
-            sx={{ marginBottom: 1, color: "#1e90ff", cursor: "pointer" }}
-            onClick={handleOpenModal}
+                <Typography
+                  variant="body2"
+                  textAlign="end"
+                  sx={{ marginBottom: 1, color: "#1e90ff", cursor: "pointer" }}
+                  onClick={handleOpenModal}
+                >
+                  Forgot password?
+                </Typography>
+
+                <ForgotPasswordModal
+                  open={isModalOpen}
+                  handleClose={handleCloseModal}
+                />
+
+                <Box display={"flex"} justifyContent={"center"}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    sx={{ marginTop: 1, width: "30%" }}
+                    type="submit"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "..." : "Log In"}
+                  </Button>
+                </Box>
+              </Box>
+            </Form>
+          )}
+        </Formik>
+
+        <Typography variant="body2" textAlign="center" marginTop={2}>
+          Don't have an account?{" "}
+          <Link
+            to="/signup"
+            style={{ textDecoration: "none", color: "#1e90ff" }}
           >
-            Forgot password?
-          </Typography>
+            Create free account
+          </Link>
+        </Typography>
 
-          <ForgotPasswordModal
-            open={isModalOpen}
-            handleClose={handleCloseModal}
-          />
-          <Box display={"flex"} justifyContent={"center"}>
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{ marginTop: 1, width: "30%" }}
-              onClick={handleLogin}
-            >
-              Log In
-            </Button>
-          </Box>
-
-          <Typography variant="body2" textAlign="center" marginTop={2}>
-            Don't have an account?{" "}
-            <Link
-              to="/signup"
-              style={{ textDecoration: "none", color: "#1e90ff" }}
-            >
-              Create free account
-            </Link>
-          </Typography>
-        </Box>
         <Typography variant="subtitle2" marginTop={2}>
           <span style={{ color: "grey" }}>--------- </span>Or{" "}
           <span style={{ color: "grey" }}>--------- </span>
         </Typography>
+
         <GoogleLogin
           onSuccess={handleGoogleSuccess}
           onError={() => setErrorMessage("Google sign in failed")}

@@ -4,7 +4,7 @@ import MainBanner from "../../components/user/MainBanner";
 import Category from "../../components/user/Category";
 import OurCourses from "../../components/user/OurCourses";
 import HiringPartners from "../../components/user/HiringPartners";
-import StudentsReview from "../../components/user/StudentsReview";
+// import StudentsReview from "../../components/user/StudentsReview";
 import Footer from "../../components/shared/Footer";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";

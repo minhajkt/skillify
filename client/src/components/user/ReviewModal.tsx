@@ -20,6 +20,7 @@ interface ReviewModalProps {
   setReviewText: (value: string) => void;
   onSubmit: () => void;
   onDelete: () =>  void
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   userReview: any
 }
 

@@ -1,91 +1,97 @@
 import React from "react";
 
 import { Box, Button, Grid, TextField, Typography } from "@mui/material";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { signupTutor } from "../../api/authApi";
 import { Link } from "react-router-dom";
 import SignupOTPModal from "../shared/SignupOTPModal";
+import { Formik, Form, Field, FormikHelpers } from "formik";
+import * as Yup from "yup";
+
+interface TutorSignupValues {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  bio: string;
+  certificates: FileList | null;
+}
+
+const TutorSignupSchema = Yup.object().shape({
+  name: Yup.string().required("Full Name is required"),
+  email: Yup.string()
+    .email("Invalid email address")
+    .required("Email is required"),
+  password: Yup.string()
+    .min(3, "Password must be at least 3 characters")
+    .required("Password is required"),
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref("password"), undefined], "Passwords must match")
+    .required("Confirm Password is required"),
+  bio: Yup.string()
+    .max(500, "Bio cannot exceed 500 characters")
+    .required("Bio is required"),
+  certificates: Yup.mixed()
+    .nullable()
+    .test("fileSize", "File too large", (value) => {
+      if (value && value instanceof FileList) {
+        return Array.from(value).every((file) => file.size <= 5 * 1024 * 1024);
+      }
+      return true;
+    })
+    .test("fileType", "Unsupported file format", (value) => {
+      if (value && value instanceof FileList) {
+        return Array.from(value).every((file) =>
+          ["application/pdf", "image/png", "image/jpeg"].includes(file.type)
+        );
+      }
+      return true; 
+    })
+    .required("Certificates are required"),
+});
+
 
 const TutorSignup = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [bio, setBio] = useState("");
-  const [certificates, setCertificates] = useState<FileList | null>(null);
-  const [errorMessage, setErrorMessage] = useState("");
   const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
   const [emailForOtp, setEmailForOtp] = useState("");
-  const [status, setStatus] = useState<
-    "idle" | "loading" | "success" | "error"
-  >("idle");
+  const [generalError, setGeneralError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (
-      name !== "" ||
-      email !== "" ||
-      password !== "" ||
-      confirmPassword !== "" ||
-      bio !== "" ||
-      certificates
-    ) {
-      setErrorMessage("");
-    }
-  }, [name, email, password, confirmPassword, bio, certificates]);
+const handleInputChange = (e) => {
+  setGeneralError(null);
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
+};
 
-    setErrorMessage("");
-
-    // if (!name || !email || !password || !confirmPassword) {
-    //   setErrorMessage("All fields except bio and certificates are required!");
-    //   return;
-    // }
-
-    // if(!bio) {
-    //    setErrorMessage("Please provide a description of you");
-    //    return;
-    // }
-
-    if (password !== confirmPassword) {
-      setErrorMessage("Passwords do not match!");
-      return;
-    }
-
+  const handleSignup = async (
+    values: TutorSignupValues,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    { setSubmitting, setErrors }: FormikHelpers<TutorSignupValues>
+  ) => {
     try {
-      setStatus("loading");
+      const { name, email, password, confirmPassword, bio, certificates } =
+        values;
 
       const userData = await signupTutor(
         name,
         email,
         password,
         confirmPassword,
-        bio || "",
+        bio,
         certificates
       );
 
       if (userData) {
-        // setOpenSnackbar(true);
         setEmailForOtp(email);
         setIsOtpModalOpen(true);
       }
-      setErrorMessage("");
-      setStatus("idle");
     } catch (error) {
       if (error instanceof Error) {
-        setErrorMessage(error.message);
+        setGeneralError( error.message );
       }
-      setStatus("idle");
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      setCertificates(files);
-    }
-  };
 
   return (
     <Box>
@@ -95,33 +101,6 @@ const TutorSignup = () => {
           handleClose={() => setIsOtpModalOpen(false)}
           email={emailForOtp}
         />
-        {/* <Snackbar
-          open={openSnackbar}
-          message="Your Request is under Review. We will get back to you within 24 hours"
-          autoHideDuration={600000}
-          onClose={() => setOpenSnackbar(false)}
-          anchorOrigin={{ vertical: "top", horizontal: "center" }}
-          sx={{ width: "500px", position: "absolute" }}
-          action={
-            <IconButton
-              size="small"
-              color="inherit"
-              onClick={() => {
-                setOpenSnackbar(false);
-                navigate("/tutors/login");
-              }}
-              sx={{
-                position: "relative",
-                right: "-6px",
-                top: "-60px",
-                zIndex: 1000,
-                color: "white",
-              }}
-            >
-              <CloseIcon />
-            </IconButton>
-          }
-        /> */}
 
         <Grid
           item
@@ -190,87 +169,149 @@ const TutorSignup = () => {
               Skillify
             </span>
           </Typography>
-
-          <Box sx={{ minHeight: "20px" }}>
-            <Typography variant="caption" color="red">
-              {errorMessage || "\u00A0"}
+          {generalError && (
+            <Typography variant="caption" color="error">
+              {generalError}
             </Typography>
-          </Box>
+          )}
+          <Formik
+            initialValues={{
+              name: "",
+              email: "",
+              password: "",
+              confirmPassword: "",
+              bio: "",
+              certificates: null as FileList | null,
+            }}
+            validationSchema={TutorSignupSchema}
+            onSubmit={handleSignup}
+          >
+            {({ errors, touched, setFieldValue, isSubmitting }) => (
+              <Form>
+                <Box sx={{ width: "100%", maxWidth: 400 }}>
+                  <Field
+                    name="name"
+                    as={TextField}
+                    label="Full Name"
+                    variant="outlined"
+                    fullWidth
+                    sx={{
+                      marginTop: 0,
+                      marginBottom: "0",
+                    }}
+                    error={touched.name && Boolean(errors.name)}
+                    helperText={touched.name && errors.name ? errors.name : " "}
+                  />
+                  <Field
+                    name="email"
+                    as={TextField}
+                    label="Email Address"
+                    variant="outlined"
+                    fullWidth
+                    
+                    sx={{
+                      marginTop: 0,
+                      marginBottom: "0",
+                    }}
+                    error={touched.email && Boolean(errors.email)}
+                    helperText={
+                      touched.email && errors.email ? errors.email : " "
+                    }
+                  />
+                  <Field
+                    name="password"
+                    as={TextField}
+                    type="password"
+                    label="Password"
+                    variant="outlined"
+                    fullWidth
+                    sx={{
+                      marginTop: 0,
+                      marginBottom: "0",
+                    }}
+                    error={touched.password && Boolean(errors.password)}
+                    helperText={
+                      touched.password && errors.password
+                        ? errors.password
+                        : " "
+                    }
+                  />
+                  <Field
+                    name="confirmPassword"
+                    as={TextField}
+                    type="password"
+                    label="Confirm Password"
+                    variant="outlined"
+                    fullWidth
+                    sx={{
+                      marginTop: 0,
+                      marginBottom: "0",
+                    }}
+                    error={
+                      touched.confirmPassword && Boolean(errors.confirmPassword)
+                    }
+                    helperText={
+                      touched.confirmPassword && errors.confirmPassword
+                        ? errors.confirmPassword
+                        : " "
+                    }
+                  />
+                  <Field
+                    name="bio"
+                    as={TextField}
+                    label="Bio"
+                    variant="outlined"
+                    // multiline
+                    fullwidth
+                    sx={{
+                      marginTop: 0,
+                      marginBottom: "0",
+                    }}
+                    rows={2}
+                    fullWidth
+                    error={touched.bio && Boolean(errors.bio)}
+                    helperText={touched.bio && errors.bio ? errors.bio : " "}
+                  />
+                  <input
+                    name="certificates"
+                    type="file"
+                    accept="image/*,application/pdf"
+                    multiple
+                    onChange={(e) =>
+                      setFieldValue("certificates", e.target.files)
+                    }
+                  />
+                  {touched.certificates && errors.certificates && (
+                    <Typography variant="caption" color="error">
+                      {errors.certificates}
+                    </Typography>
+                  )}
 
-          <Box component="form" sx={{ width: "100%", maxWidth: 400 }}>
-            <TextField
-              label="Full Name"
-              variant="outlined"
-              fullWidth
-              sx={{ marginTop: 1 }}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-            <TextField
-              label="Email address"
-              variant="outlined"
-              fullWidth
-              sx={{ marginTop: 1 }}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <TextField
-              label="Password"
-              type="password"
-              variant="outlined"
-              fullWidth
-              sx={{ marginTop: 1 }}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <TextField
-              label="Confirm Password"
-              variant="outlined"
-              type="password"
-              fullWidth
-              sx={{ marginTop: 1 }}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-            <TextField
-              label="Bio"
-              variant="outlined"
-              type="text"
-              fullWidth
-              sx={{ marginTop: 1 }}
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-            />
-            <input
-              type="file"
-              accept="image/*,application/pdf"
-              onChange={handleFileChange}
-              multiple
-              style={{ marginTop: "1rem" }}
-            />
+                  <Box display={"flex"} justifyContent={"center"}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      sx={{ marginTop: 1, width: "30%" }}
+                      type="submit"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? "..." : "Sign up"}
+                    </Button>
+                  </Box>
 
-            <Box display={"flex"} justifyContent={"center"}>
-              <Button
-                variant="contained"
-                color="primary"
-                sx={{ marginTop: 1, width: "30%" }}
-                onClick={handleSignup}
-                disabled={status === "loading"}
-              >
-                {status === "loading" ? "Signing up" : "Sign up"}
-              </Button>
-            </Box>
-
-            <Typography variant="body2" textAlign="center" marginTop={1}>
-              Already have an account?{" "}
-              <Link
-                to="/tutors/login"
-                style={{ textDecoration: "none", color: "#1e90ff" }}
-              >
-                Login
-              </Link>
-            </Typography>
-          </Box>
+                  <Typography variant="body2" textAlign="center" marginTop={1}>
+                    Already have an account?{" "}
+                    <Link
+                      to="/tutors/login"
+                      style={{ textDecoration: "none", color: "#1e90ff" }}
+                    >
+                      Login
+                    </Link>
+                  </Typography>
+                </Box>
+              </Form>
+            )}
+          </Formik>
         </Grid>
       </Grid>
     </Box>
@@ -278,3 +319,4 @@ const TutorSignup = () => {
 };
 
 export default TutorSignup;
+

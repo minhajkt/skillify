@@ -52,11 +52,7 @@ export class reviewController implements IReviewController{
     try {
       const { userId, courseId } = req.params;
       const review = await this.reviewService.getUserReview(userId, courseId); 
-      // if (!review) {
-      //   return res
-      //     .status(404)
-      //     .json({ message: "Review not found for this course" });
-      // }
+
        res.status(200).json(review); 
     } catch (error) {
        res.status(500).json({message: "An unexpected error occurred while getting the review data",error: (error as Error).message,});

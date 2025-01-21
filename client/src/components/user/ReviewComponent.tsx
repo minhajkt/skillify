@@ -1,7 +1,6 @@
 import { CalendarToday } from "@mui/icons-material";
 import { Avatar, Box, Card, CardContent, Divider, Rating, Stack, Typography } from "@mui/material"
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import { getReviews } from "../../api/reviewApi";
 
 const ReviewComponent = ({ courseId, setAverageRating, setTotalReviews }) => {

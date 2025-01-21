@@ -7,20 +7,6 @@ import {
 import { useEffect, useState } from "react";
 import { enrolledStudents } from "../../api/enrollmentApi";
 
-// const salesData = [
-//   { month: "Jan", value: 4000 },
-//   { month: "Feb", value: 5000 },
-//   { month: "Mar", value: 6000 },
-//   { month: "Apr", value: 4000 },
-//   { month: "May", value: 8000 },
-//   { month: "Jun", value: 9000 },
-//   { month: "Jul", value: 10000 },
-//   { month: "Aug", value: 8500 },
-//   { month: "Sep", value: 11000 },
-//   { month: "Oct", value: 9500 },
-//   { month: "Nov", value: 10000 },
-//   { month: "Dec", value: 9000 },
-// ];
 
 const courseStrength = [
   { name: "MERN Stack", value: 10 },

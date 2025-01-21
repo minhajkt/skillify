@@ -11,8 +11,7 @@ import {
   TableRow,
   Button,
   CircularProgress,
-  Chip,
-  Container,
+
 } from "@mui/material";
 import { School, Category, CheckCircle, Cancel } from "@mui/icons-material";
 import { fetchTutorCourses } from "../../api/tutorApi";
@@ -197,49 +196,7 @@ const AllCoursePage = () => {
           </Table>
         </TableContainer>
       )}
-    </Box> // <Box>
-    //   <Navbar />
-    //   <Typography variant="h4" color="initial" gutterBottom>
-    //     Your Courses
-    //   </Typography>
-
-    //   {loading ? (
-    //     <CircularProgress />
-    //   ) : error ? (
-    //     <Typography color="error">{error}</Typography>
-    //   ) : courses.length === 0 ? (
-    //     <Typography>No courses found.</Typography>
-    //   ) : (
-    //     <TableContainer component={Paper}>
-    //       <Table>
-    //         <TableHead>
-    //           <TableRow>
-    //             <TableCell>Name</TableCell>
-    //             <TableCell>Category</TableCell>
-    //             <TableCell>Status</TableCell>
-    //             <TableCell>Actions</TableCell>
-    //           </TableRow>
-    //         </TableHead>
-    //         <TableBody>
-    //           {courses.map((course) => (
-    //             <TableRow key={course._id}>
-    //               <TableCell>{course.title}</TableCell>
-    //               <TableCell>{course.category}</TableCell>
-    //               <TableCell>
-    //                 {course.isApproved}
-    //               </TableCell>
-    //               <TableCell>
-    //                 <Button variant="contained" color="primary" onClick={() => handleViewCourse(course._id)}>
-    //                   View Course
-    //                 </Button>
-    //               </TableCell>
-    //             </TableRow>
-    //           ))}
-    //         </TableBody>
-    //       </Table>
-    //     </TableContainer>
-    //   )}
-    // </Box>
+    </Box> 
   );
 };
 

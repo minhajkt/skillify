@@ -3,7 +3,6 @@ import { axiosInstance } from "./axiosInstance";
 import Cookies from 'js-cookie';
 import { store } from "../store/store";
 import { loginSuccess } from "../store/authSlice";
-import { useEffect } from "react";
 
 export const loginUser = async(email:string, password:string) => {
   try {
@@ -218,46 +217,4 @@ export const googleSignIn = async (idToken: string) => {
   return data;
 };
 
-
-
-
-// export const checkUserStatus = async () => {
-//   try {
-//     const token = Cookies.get("authToken");
-
-//     if (!token) {
-//       throw new Error("No authentication token found.");
-//     }
-
-//     const response = await axiosInstance.get("/users/me", {
-//       headers: { Authorization: `Bearer ${token}` }, // Include token in the request
-//     });
-
-//     const { isActive, user } = response.data;
-
-//     if (!isActive) {
-//       handleBlockedUser();
-//     } else {
-//       store.dispatch(loginSuccess({ token, user }));
-//     }
-//   } catch (error) {
-//     console.error("Failed to check user status", error);
-//     handleLogout();
-//   }
-// };
-
-// const handleBlockedUser = () => {
-//   store.dispatch(logout());
-//   Cookies.remove("authToken");
-//   alert("You have been blocked by the admin.");
-//   window.location.href = "/login"; 
-// };
-
-// const handleLogout = () => {
-//   store.dispatch(logout());
-//   Cookies.remove("authToken");
-//   window.location.href = "/login";
-// };
-
-// checkUserStatus();
 

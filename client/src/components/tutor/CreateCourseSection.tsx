@@ -1,4 +1,3 @@
-// import { Box, Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
 import {
   Box,
   Card,
@@ -12,6 +11,7 @@ import {
   InputLabel,
   Grid,
   Paper,
+  CircularProgress,
 } from "@mui/material";
 import { Upload as UploadIcon } from "@mui/icons-material";
 import React, { useEffect, useState } from "react";
@@ -21,6 +21,9 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { User } from "../../types/User";
 import Navbar from "../shared/Navbar";
+import * as Yup from "yup";
+import { Formik, Form, Field, FormikHelpers } from "formik";
+
 
 interface AuthState {
   user: User | null;
@@ -30,23 +33,51 @@ interface RootState {
   auth: AuthState;
 }
 
+
+interface CreateCourseValues {
+  title: string;
+  description: string;
+  category: string;
+  price: string;
+  thumbnail: File | null;
+}
+
+const CreateCourseSchema = Yup.object().shape({
+  title: Yup.string().required("Course title is required"),
+  description: Yup.string().required("Course description is required"),
+  category: Yup.string()
+    .notOneOf(["select"], "Please select a category")
+    .required("Category is required"),
+  price: Yup.number()
+    .required("Course price is required")
+    .positive("Price must be positive"),
+  thumbnail: Yup.mixed()
+    .required("Thumbnail is required")
+    .test("fileSize", "File size is too large", (value) => {
+      const file = value as File;
+      return file ? file.size <= 5 * 1024 * 1024 : true; 
+    })
+    .test("fileType", "Invalid file type", (value) => {
+      const file = value as File;
+      return file
+        ? ["image/png", "image/jpeg", "image/webp"].includes(file.type)
+        : true; 
+    }),
+});
+
+
 const CreateCourseSection = () => {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [category, setCategory] = useState<string>("");
+
   const [categories, setCategories] = useState<string[]>([]);
-  const [price, setPrice] = useState("");
-  const [thumbnail, setThumbnail] = useState<string>("");
+  const [status, setStatus] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [status, setStatus] = useState("");
   const tutor = useSelector((state: RootState) => state.auth.user);
   const tutorId = tutor?._id;
+ const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    if (title !== "" || description !== "" || price !== "" || category !== "") {
-      setErrorMessage("");
-    }
-  }, [title, description, price, category]);
+ const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+   setSearchQuery(e.target.value);
+ };
 
   useEffect(() => {
     const getCategories = async() => {
@@ -58,33 +89,15 @@ const CreateCourseSection = () => {
 
   const navigate = useNavigate();
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const files = e.target.files;
-  if (files) {
-      setThumbnail(files[0]);
-  }
-  };
 
-  const handleCreateCourse = async (e: React.FormEvent) => {
-    e.preventDefault();
+
+  const handleCreateCourse = async (
+    values: CreateCourseValues,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    { setSubmitting, setErrors }: FormikHelpers<CreateCourseValues>
+  ) => {
     setErrorMessage("");
-    if (!title) {
-      setErrorMessage("Title is required");
-      return;
-    } else if (!description) {
-      setErrorMessage("Description is required");
-      return;
-    } else if (!category || category.includes('select')) {
-      setErrorMessage("Select a Category");
-      return;
-    } else if (!price) {
-      setErrorMessage("Price is required ");
-      return;
-    }else if(!thumbnail) {
-        setErrorMessage('Thumbnail is required')
-        return
-    }
-
+    const { title, description, category, price, thumbnail } = values;
     if (!tutorId) {
       setErrorMessage("Tutor ID is missing. Please log in again.");
       return;
@@ -101,7 +114,6 @@ const CreateCourseSection = () => {
       formData.append("thumbnail", thumbnail);
     }
 
-    // const courseData = {title, description,category,thumbnail: "default-thumbnail.jpg", price: Number(price), createdBy: tutorId}
     try {
       setStatus("loading");
       const response = await createCourse(formData);
@@ -113,262 +125,245 @@ const CreateCourseSection = () => {
     } catch (error) {
       setErrorMessage((error as Error).message);
       console.log(error);
-    }finally {
-        setStatus('')
+    } finally {
+      setStatus("");
+      setSubmitting(false)
     }
   };
 
   return (
-    <Box sx={{ minWidth: "90vw", bgcolor: "#f8fafc", p: { xs: 4, md: 8 } }}>
-      <Navbar />
-      <Box sx={{ maxWidth: "800px", mx: "auto", mt:"54px" }}>
-        <Card sx={{ bgcolor: "white", boxShadow: 3, borderRadius: 2 }}>
+    <Box sx={{ minWidth: "100vw", bgcolor: "#f1f5f9", py: 6 }}>
+      <Navbar searchQuery={searchQuery} onSearchChange={handleSearchChange} />
+
+      <Box sx={{ maxWidth: "900px", mx: "auto", mt: 6, px: { xs: 3, md: 0 } }}>
+        <Card
+          sx={{
+            bgcolor: "white",
+            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+            borderRadius: 4,
+            overflow: "hidden",
+          }}
+        >
           <CardContent sx={{ p: { xs: 4, md: 6 } }}>
             <Typography
               variant="h4"
-              sx={{ mb: 2, fontWeight: "bold", color: "#1e293b" }}
+              sx={{
+                mb: 2,
+                fontWeight: "bold",
+                color: "#1e293b",
+                textAlign: "center",
+              }}
             >
-              Create New Course
+              Create a New Course
             </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-              Share your knowledge by creating a comprehensive course.
-            </Typography>
-
-            <Box
-              component="form"
-              sx={{ display: "flex", flexDirection: "column", gap: 3 }}
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              sx={{ mb: 4, textAlign: "center" }}
             >
-              {errorMessage && (
-                <Paper
-                  sx={{
-                    p: 2,
-                    bgcolor: "#FFF5F5",
-                    border: "1px solid #FED7D7",
-                    borderRadius: 1,
-                  }}
-                >
-                  <Typography color="error">{errorMessage}</Typography>
-                </Paper>
-              )}
+              Share your knowledge and inspire learners by creating a compelling
+              course.
+            </Typography>
 
-              <TextField
-                fullWidth
-                label="Course Title"
-                variant="outlined"
-                placeholder="Enter course title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                sx={{ borderRadius: 2 }}
-              />
-
-              <TextField
-                fullWidth
-                label="Course Description"
-                placeholder="Describe your course content and learning outcomes"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                multiline
-                rows={4}
-                variant="outlined"
-                sx={{ borderRadius: 2 }}
-              />
-
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
-                  <FormControl fullWidth>
-                    <InputLabel>Category</InputLabel>
-                    <Select
-                      value={category}
-                      label="Category"
-                      onChange={(e) => setCategory(e.target.value)}
-                      sx={{ borderRadius: 2 }}
+            <Formik
+              initialValues={{
+                title: "",
+                description: "",
+                category: "select",
+                price: "",
+                thumbnail: null,
+              }}
+              validationSchema={CreateCourseSchema}
+              onSubmit={handleCreateCourse}
+            >
+              {({ values, setFieldValue, isSubmitting, touched, errors }) => (
+                <Form>
+                  {/* Error Message */}
+                  {errorMessage && (
+                    <Paper
+                      sx={{
+                        p: 2,
+                        bgcolor: "#FFECEC",
+                        border: "1px solid #F87171",
+                        borderRadius: 2,
+                        mb: 3,
+                      }}
                     >
-                      <MenuItem value="select" disabled>
-                        Select a category
-                      </MenuItem>
-                      {categories.map((cat) => (
-                        <MenuItem key={cat} value={cat}>
-                          {cat}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
+                      <Typography color="error">{errorMessage}</Typography>
+                    </Paper>
+                  )}
 
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    type="number"
-                    label="Price"
-                    placeholder="Set your course price"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    variant="outlined"
-                    sx={{ borderRadius: 2 }}
-                  />
-                </Grid>
-              </Grid>
+                  <Box
+                    sx={{ display: "flex", flexDirection: "column", gap: 3 }}
+                  >
+                    <Field
+                      name="title"
+                      as={TextField}
+                      label="Course Title"
+                      variant="outlined"
+                      fullWidth
+                      error={touched.title && Boolean(errors.title)}
+                      helperText={touched.title && errors.title}
+                    />
 
-              <Box>
-                <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                  Course Thumbnail
-                </Typography>
-                <Paper
-                  variant="outlined"
-                  component="label"
-                  sx={{
-                    height: 250,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                    bgcolor: "#f8fafc",
-                    border: "2px dashed #e2e8f0",
-                    borderRadius: 2,
-                    "&:hover": {
-                      bgcolor: "#f1f5f9",
-                    },
-                  }}
-                >
-                  <input
-                    type="file"
-                    hidden
-                    onChange={handleFileChange}
-                    accept="image/*"
-                  />
-                  <Box sx={{ textAlign: "center" }}>
-                    {thumbnail ? (
-                      <Typography variant="body2" color="text.secondary">
-                        File selected
-                      </Typography>
-                    ) : (
-                      <>
-                        <UploadIcon
-                          sx={{ fontSize: 48, color: "#94a3b8", mb: 1 }}
+                    <Field
+                      name="description"
+                      as={TextField}
+                      label="Course Description"
+                      variant="outlined"
+                      multiline
+                      rows={4}
+                      fullWidth
+                      error={touched.description && Boolean(errors.description)}
+                      helperText={touched.description && errors.description}
+                    />
+
+                    <Grid container spacing={3}>
+                      {/* Category */}
+                      <Grid item xs={12} md={6}>
+                        <FormControl fullWidth>
+                          <InputLabel>Category</InputLabel>
+                          <Field
+                            name="category"
+                            as={Select}
+                            label="Category"
+                            error={touched.category && Boolean(errors.category)}
+                          >
+                            <MenuItem value="select" disabled>
+                              Select a category
+                            </MenuItem>
+                            {categories.map((cat) => (
+                              <MenuItem key={cat} value={cat}>
+                                {cat}
+                              </MenuItem>
+                            ))}
+                          </Field>
+                          {touched.category && errors.category && (
+                            <Typography
+                              variant="caption"
+                              color="error"
+                              sx={{ mt: 1 }}
+                            >
+                              {errors.category}
+                            </Typography>
+                          )}
+                        </FormControl>
+                      </Grid>
+
+                      {/* Price */}
+                      <Grid item xs={12} md={6}>
+                        <Field
+                          name="price"
+                          as={TextField}
+                          type="number"
+                          label="Price"
+                          variant="outlined"
+                          fullWidth
+                          error={touched.price && Boolean(errors.price)}
+                          helperText={touched.price && errors.price}
                         />
-                        <Typography color="text.secondary">
-                          Click to upload course thumbnail
-                        </Typography>
-                      </>
-                    )}
-                  </Box>
-                </Paper>
-              </Box>
+                      </Grid>
+                    </Grid>
 
-              <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 4 }}>
-                <Button
-                  variant="contained"
-                  onClick={handleCreateCourse}
-                  disabled={status === "loading"}
-                  sx={{
-                    width: { xs: "100%", md: "auto" },
-                    minWidth: { md: 200 },
-                    borderRadius: 2,
-                    bgcolor: "#2563eb",
-                    "&:hover": {
-                      bgcolor: "#1d4ed8",
-                    },
-                  }}
-                >
-                  {status === "loading" ? "Loading..." : "Create Course"}
-                </Button>
-              </Box>
-            </Box>
+                    <Box>
+                      <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                        Course Thumbnail
+                      </Typography>
+                      <Paper
+                        variant="outlined"
+                        component="label"
+                        sx={{
+                          height: 250,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                          bgcolor: "#f8fafc",
+                          border: "2px dashed #cbd5e1",
+                          borderRadius: 4,
+                          "&:hover": {
+                            bgcolor: "#f1f5f9",
+                          },
+                        }}
+                      >
+                        <input
+                          type="file"
+                          hidden
+                          onChange={(e) =>
+                            setFieldValue(
+                              "thumbnail",
+                              e.target.files ? e.target.files[0] : null
+                            )
+                          }
+                          accept="image/*"
+                        />
+                        <Box sx={{ textAlign: "center" }}>
+                          {values.thumbnail ? (
+                            <Typography variant="body2" color="text.secondary">
+                              {values.thumbnail.name}
+                            </Typography>
+                          ) : (
+                            <>
+                              <UploadIcon
+                                sx={{ fontSize: 48, color: "#94a3b8", mb: 1 }}
+                              />
+                              <Typography color="text.secondary">
+                                Click to upload course thumbnail
+                              </Typography>
+                            </>
+                          )}
+                        </Box>
+                      </Paper>
+                      {touched.thumbnail && errors.thumbnail && (
+                        <Typography
+                          variant="caption"
+                          color="error"
+                          sx={{ mt: 1 }}
+                        >
+                          {errors.thumbnail}
+                        </Typography>
+                      )}
+                    </Box>
+                  </Box>
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      mt: 4,
+                    }}
+                  >
+                    <Button
+                      variant="contained"
+                      type="submit"
+                      disabled={isSubmitting || status === "loading"}
+                      sx={{
+                        px: 5,
+                        py: 1.5,
+                        borderRadius: 4,
+                        bgcolor: "#2563eb",
+                        fontWeight: "bold",
+                        "&:hover": {
+                          bgcolor: "#1e40af",
+                        },
+                      }}
+                    >
+                      {status === "loading" ? (
+                        <CircularProgress size={24} color="inherit" />
+                      ) : (
+                        "Create Course"
+                      )}
+                    </Button>
+                  </Box>
+                </Form>
+              )}
+            </Formik>
           </CardContent>
         </Card>
       </Box>
     </Box>
-
-    // <Box>
-    //   <Typography
-    //     variant="h3"
-    //     sx={{
-    //       textAlign: "start",
-    //       display: "block",
-    //       fontSize: { xs: "1.6rem", sm: "2rem" },
-    //       marginTop: { xs: 5, sm: 0, md: 7 },
-    //     }}
-    //     gutterBottom
-    //   >
-    //     Create Course
-    //   </Typography>
-    //   <Typography variant="body1" sx={{ marginTop: 0 }}>
-    //     Please fill all the fields to continue
-    //   </Typography>
-
-    //   <Box sx={{ minHeight: "20px" }}>
-    //     <Typography variant="caption" color="red">
-    //       {errorMessage || "\u00A0"}
-    //     </Typography>
-    //   </Box>
-
-    //   <Box component="form" sx={{ width: "100%", maxWidth: 400 }}>
-    //     <TextField
-    //       label="Title"
-    //       variant="outlined"
-    //       fullWidth
-    //       sx={{ marginTop: 1 }}
-    //       value={title}
-    //       onChange={(e) => setTitle(e.target.value)}
-    //     />
-    //     <TextField
-    //       label="Description"
-    //       variant="outlined"
-    //       fullWidth
-    //       multiline
-    //       rows={4}
-    //       sx={{ marginTop: 1 }}
-    //       value={description}
-    //       onChange={(e) => setDescription(e.target.value)}
-    //     />
-    //     <FormControl fullWidth sx={{ marginTop: 1 }}>
-    //       <InputLabel>Category</InputLabel>
-    //       <Select
-    //         label="Category"
-    //         value={category}
-    //         onChange={(e) => setCategory(e.target.value)}
-    //       >
-    //         <MenuItem value="select" disabled>
-    //           Select a category
-    //         </MenuItem>
-    //         {categories.map((cat) => (
-    //           <MenuItem key={cat} value={cat}>
-    //             {cat}
-    //           </MenuItem>
-    //         ))}
-    //       </Select>
-    //     </FormControl>
-
-    //     <TextField
-    //       label="Price"
-    //       variant="outlined"
-    //       fullWidth
-    //       sx={{ marginTop: 1 }}
-    //       value={price}
-    //       onChange={(e) => setPrice(e.target.value)}
-    //     />
-
-    //     <input
-    //       type="file"
-    //       accept="image/**"
-    //       onChange={handleFileChange}
-    //       style={{ marginTop: "1rem", width: "100%" }}
-    //     />
-
-    //     <Box display={"flex"} justifyContent={"center"}>
-    //       <Button
-    //         variant="contained"
-    //         color="primary"
-    //         sx={{ marginTop: 1, width: "30%" }}
-    //         onClick={handleCreateCourse}
-    //         disabled={status === "loading"}
-    //       >
-    //         {status === "loading" ? "Loading" : "Continue"}
-    //       </Button>
-    //     </Box>
-    //   </Box>
-    // </Box>
   );
 };
 
 export default CreateCourseSection;
+

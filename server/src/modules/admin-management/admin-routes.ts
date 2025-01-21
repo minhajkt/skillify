@@ -17,15 +17,7 @@ const adminRepository = new AdminRepository()
 const adminService = new AdminService(adminRepository)
 const adminController = new AdminController(adminService)
 
-// adminRouter.post("/admin/login", validateUserLogin, UserController.loginAdmin);
-// adminRouter.post("/admin/forgot-password", UserController.forgotPassword);
-// adminRouter.post(
-//   "/admin/reset-password",
-//   validateForgotPassword,
-//   handleValidationErrors,
-//   UserController.resetPassword
-// );
-// adminRouter.post("/admin/logout", UserController.logoutUser);
+
 
 adminRouter.get(
   "/admin/students",
@@ -60,13 +52,5 @@ adminRouter.patch(
 
 adminRouter.get("/admin/courses", adminController.getAllCourse.bind(adminController));
 
-// adminRouter.get("/admin/coursesforfrontend", AdminController.getAllCourseForFrontend);
-// adminRouter.get('/admin/course-requests', AdminController.getCourseRequests)
-// adminRouter.patch(
-//   "/admin/tutor-course/:id/approval",
-//   authenticateJWT,
-//   checkRole(["admin"]),
-//   AdminController.updateCourseApproval
-// );
 
 export default adminRouter;
