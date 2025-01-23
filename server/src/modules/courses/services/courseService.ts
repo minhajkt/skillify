@@ -30,6 +30,30 @@ export class CourseService implements ICourseService {
     }
   }
 
+  async editCourse(
+    courseId: string,
+    updatedData: Partial<ICourse>,
+    file?: Express.Multer.File
+  ): Promise<ICourse | null> {
+    try {
+      if (file) {
+        const result = await cloudinary.v2.uploader.upload(file.path, {
+          folder: "course_thumbnails",
+          resource_type: "auto",
+        });
+        updatedData.thumbnail = result.secure_url;
+      }
+      return await this.courseRepo.updateCourse(
+        courseId,
+        updatedData,
+        "pending",
+        "pending"
+      );
+    } catch (error) {
+      throw new Error(`Error editing course: ${(error as Error).message}`);
+    }
+  }
+
   async getAllCourses(): Promise<ICourse[]> {
     return await this.courseRepo.getAllCourses();
   }
@@ -41,13 +65,13 @@ export class CourseService implements ICourseService {
       throw new Error("Failed to fetch categories");
     }
   }
-  
+
   async getUserCourse(courseId: string): Promise<ICourse | null> {
     const userCourse = await this.courseRepo.getUserCourse(courseId);
-    if(!userCourse) {
-      throw new Error ("No course found for user")
+    if (!userCourse) {
+      throw new Error("No course found for user");
     }
-    return userCourse
+    return userCourse;
   }
 
   async addLectureToCourse(
@@ -57,4 +81,18 @@ export class CourseService implements ICourseService {
     await this.courseRepo.addLecture(courseId, lectureId);
   }
 
+  async toggleBlockStatus(courseId:string, status:string):Promise<ICourse> {
+    const validStatuses = ["pending", "approved", "rejected", "blocked"];
+      if (!validStatuses.includes(status)) {
+        throw new Error(`Invalid status: ${status}`);
+      }
+
+    const course = await this.courseRepo.updateBlockStatus(courseId, status);
+
+    if (!course) {
+      throw new Error("Course not found");
+    }
+
+    return course;
+  }
 }

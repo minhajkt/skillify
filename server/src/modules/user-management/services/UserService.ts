@@ -95,11 +95,27 @@ export class UserService implements IUserService {
     throw new Error("User not found.");
   }
 
+  async resendOtp(email: string): Promise<void> {
+    const user = await this.userRepository.getUserByEmail(email);
+
+    if (!user) {
+      const error = new Error("User not found");
+      (error as any).statusCode = 404;
+      throw error;
+    }
+
+    const otp = await sendOtpToEmail(email);
+
+    storeOtp(email, otp);
+    console.log("otp is ", otp);
+
+    // await this.otpService.sendOtpToEmail(email, otp);
+  }
+
   async loginUser(
     email: string,
     password: string
   ): Promise<{ token: string; user: IUser }> {
-
     const user = await this.authenticateUser(email, password);
     if (user.role !== "user") {
       throw new Error("Access denied. Only students can log in here.");
@@ -154,7 +170,7 @@ export class UserService implements IUserService {
     });
     return { token, user };
   }
-  async getUserById(id: string): Promise<IUser | null> {    
+  async getUserById(id: string): Promise<IUser | null> {
     return this.userRepository.getUserById(id);
   }
 

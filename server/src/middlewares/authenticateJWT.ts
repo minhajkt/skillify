@@ -17,27 +17,37 @@ export const authenticateJWT = async(req: RequestWithUser, res: Response, next: 
     }
 
     try {
-        const decoded = verifyToken(token) as DecodedToken
-        
-        console.log(decoded);
-        const user = await User.findById(decoded.id); 
+      const decoded = verifyToken(token) as DecodedToken;
 
-        if (!user) {
-          res.status(404).json({ message: "User not found" });
-          return;
-        }
+      console.log(decoded);
+      const user = await User.findById(decoded.id);
 
-        if (!user.isActive) {
-          res.status(403).json({ message: "Your account is blocked" });
-          return;
-        }
-        
-        // req.user = user;
-        req.user = user; 
+      if (!user) {
+        res.status(404).json({ message: "User not found" });
+        return;
+      }
 
-        next()
+      if (!user.isActive) {
+        res.status(403).json({ message: "Your account is blocked" });
+        return;
+      }
+
+
+      // req.user = user;
+      req.user = user;
+
+      next();
     } catch (error) {
         res.status(403).json({message: 'Invalid Token'})
         return; 
     }
 }
+
+
+
+// if (requiredRole && user.role !== requiredRole) {
+//   res
+//     .status(403)
+//     .json({ message: `User is not authorized as ${requiredRole}` });
+//   return;
+// }

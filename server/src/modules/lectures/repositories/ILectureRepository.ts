@@ -7,4 +7,5 @@ export interface ILectureRepository {
   updateCourseStatus(courseId: mongoose.Types.ObjectId, status: string): Promise<ICourse | null>
   getLecturesByCourse(courseId: string): Promise<ILecture[]>;
   addLecture(courseId: mongoose.Types.ObjectId,lectureId: mongoose.Types.ObjectId): Promise<void>
+  updateLecture(lectureId: string,updatedData: Partial<ILecture>): Promise<ILecture | null> 
 }

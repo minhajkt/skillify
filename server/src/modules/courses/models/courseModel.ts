@@ -10,6 +10,8 @@ export interface ICourse extends Document {
   createdAt: Date;
   isActive: boolean;
   isApproved: string;
+  isBlocked: boolean;
+  editStatus: string;
   lectures: mongoose.Types.ObjectId[];
 }
 
@@ -21,7 +23,9 @@ const courseSchema: Schema = new Schema({
   price: { type: Number, required: true },
   createdBy: { type: Schema.Types.ObjectId, ref:"User",required: true },
   isActive: { type: Boolean, default: true },
-  isApproved: { type: String, enum: ["draft","pending", "approved", "rejected"], default: "draft"},
+  isApproved: { type: String, enum: ["pending", "approved", "rejected", 'blocked'], default: "pending"},
+  isBlocked: {type: Boolean , default: 'false'},
+  editStatus: {type : String, enum: ['pending','appproved', 'rejected', 'null'], default: 'null'},
   lectures: [{type: Schema.Types.ObjectId, ref:"Lecture", default:[] }]
 },
 {strict:true,timestamps: true}

@@ -7,7 +7,6 @@ import {
   InputAdornment,
   Menu,
   MenuItem,
-  Snackbar,
   TextField,
   Toolbar,
   Typography,
@@ -20,12 +19,10 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { logout } from "../../store/authSlice";
 import ProfileModal from "./ProfileModal";
-import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
-import SwapVertOutlinedIcon from "@mui/icons-material/SwapVertOutlined";
 
 interface NavbarProps {
-  searchQuery: string;
-  onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  searchQuery?: string;
+  onSearchChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {

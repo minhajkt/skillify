@@ -13,6 +13,7 @@ const lectureService = new LectureService(lectureRepository)
 const lectureController = new LectureController(lectureService)
 
 lectureRouter.post("/lectures",uploadVideo.array('videoFiles'), lectureController.createLecture.bind(lectureController));
+lectureRouter.put("/lecture/:lectureId",uploadVideo.array('videoFiles'), lectureController.editLecture.bind(lectureController));
 lectureRouter.get(
   "/courses/:courseId/lectures",
   lectureController.getLecturesByCourse.bind(lectureController)

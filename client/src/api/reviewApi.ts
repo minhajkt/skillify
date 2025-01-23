@@ -22,7 +22,7 @@ export const getReviews = async(courseId: string) => {
     }
 }
 
-export const fetchUserReview = async (courseId, userId) => {
+export const fetchUserReview = async (courseId:string, userId:string) => {
   try {
     const response = await axiosInstance.get(`/reviews/user/${userId}/course/${courseId}`);
     return response.data;  

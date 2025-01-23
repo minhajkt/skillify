@@ -161,6 +161,23 @@ const AdminLayout = () => {
               }}
             />
           </ListItem>
+          <ListItem
+            sx={{ cursor: "pointer" }}
+            button
+            onClick={() => navigate("/admin/course-complaints")}
+          >
+            <ListItemIcon>
+              <RequestIcon />
+            </ListItemIcon>
+            <ListItemText
+              primary="Course Complaints"
+              sx={{
+                "& .MuiListItemText-primary": {
+                  fontSize: { xs: "0.8rem", sm: "1rem" },
+                },
+              }}
+            />
+          </ListItem>
           <ListItem>
             <ListItemIcon>
               <PaymentIcon />

@@ -7,4 +7,6 @@ export interface ICourseService {
     getCategories(): Promise<string[]>;
     getUserCourse(courseId: string): Promise<ICourse | null>
     addLectureToCourse(courseId: mongoose.Types.ObjectId,lectureId: mongoose.Types.ObjectId): Promise<void> 
+     editCourse(courseId: string,updatedData: Partial<ICourse>, file?: Express.Multer.File): Promise<ICourse | null>
+     toggleBlockStatus(courseId:string, status:string):Promise<ICourse>
 }

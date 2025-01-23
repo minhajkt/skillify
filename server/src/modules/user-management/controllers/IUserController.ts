@@ -14,5 +14,6 @@ export interface IUserController {
   getCourseById(req: Request, res: Response): Promise<void>;
   logoutUser(req: Request, res: Response): Promise<void>;
   stripePayment(req: Request, res: Response): Promise<void>;
+  resendOtp(req: Request, res: Response): Promise<void>;
 }
 

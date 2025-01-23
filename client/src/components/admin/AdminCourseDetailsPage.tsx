@@ -16,7 +16,7 @@ import {
   Snackbar,
 } from "@mui/material";
 import { axiosInstance } from "../../api/axiosInstance";
-import { updateCourseApproval } from "../../api/adminApi";
+import { updateCourseApproval, updateCourseBlock } from "../../api/adminApi";
 
 type Lectures = {
   _id: string;
@@ -31,6 +31,7 @@ type Course = {
   title: string;
   description: string;
   isApproved: string
+  isBlocked: boolean;
 };
 
 const AdminCourseDetailsPage = () => {
@@ -107,7 +108,23 @@ const handleApprove = async (courseId: string) => {
     console.error("Failed to approve course request.", error);
   }
 };
-
+const handleBlockToggle = async (courseId: string, newStatus: string) => {
+  try {
+    const updatedCourse = await updateCourseBlock(courseId, newStatus);
+    setSnackbar({
+      open: true,
+      message: `Course ${newStatus === "blocked" ? "blocked" : "unblocked"} successfully!`,
+    });
+    setCourse((prev) =>
+      prev && prev._id === courseId ? { ...prev, isApproved: newStatus } : prev
+    );
+  } catch (error) {
+    console.error(
+      `Failed to ${newStatus === "blocked" ? "block" : "unblock"} the course.`,
+      error
+    );
+  }
+};
     const handleReject = async (courseId: string) => {
       try {
         const updatedCourse = await updateCourseApproval(courseId, "rejected");
@@ -279,6 +296,27 @@ const handleApprove = async (courseId: string) => {
               </>
             )}
           </Box>
+          {["approved", "blocked"].includes(course.isApproved) && (
+            <Box sx={{ marginTop: 2 }}>
+              <Button
+                variant="contained"
+                color="error"
+                sx={{ marginRight: 2 }}
+                onClick={() => handleBlockToggle(course._id, "blocked")}
+                disabled={course.isApproved === "blocked"}
+              >
+                Block
+              </Button>
+              <Button
+                variant="contained"
+                color="success"
+                onClick={() => handleBlockToggle(course._id, "approved")}
+                disabled={course.isApproved === "approved"}
+              >
+                Unblock
+              </Button>
+            </Box>
+          )}
           <Snackbar
             open={snackbar.open}
             onClose={() => setSnackbar({ ...snackbar, open: false })}

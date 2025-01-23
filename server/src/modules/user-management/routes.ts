@@ -33,6 +33,7 @@ router.post(
 );
 
 router.post("/users/verify-otp", userController.verifyOtp.bind(userController));
+router.post('/users/resend-otp', userController.resendOtp.bind(userController))
 router.post(
   "/users/login",
   validateUserLogin,
@@ -46,7 +47,7 @@ router.get(
 router.put(
   "/users/update-user/:id",
   authenticateJWT,
-
+  // authenticateJWT("user"),
   upload.single("profilePhoto"),
   validateUserUpdation,
   handleValidationErrors,

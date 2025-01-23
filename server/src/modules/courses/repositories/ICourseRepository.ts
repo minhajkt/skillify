@@ -8,4 +8,6 @@ export interface ICourseRepository {
   getUserCourse(courseId:string): Promise<ICourse | null>
   addLecture(courseId: mongoose.Types.ObjectId, lectureId: mongoose.Types.ObjectId): Promise<void> 
   findCourseById(courseId: string): Promise<ICourse | null> 
+  updateCourse(courseId: string, updatedData: Partial<ICourse>, isApproved:string, editStatus: string): Promise<ICourse | null>
+  updateBlockStatus(courseId:string, status: string): Promise<ICourse | null>
 }

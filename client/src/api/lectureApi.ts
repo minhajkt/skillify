@@ -23,4 +23,10 @@ export const getLecturesByCourseId = async (courseId: string) => {
     // throw new Error(`Error fetching lectures: ${(error as Error).message}`);
     throw handleAxiosError(error);
   }
+  
 };
+
+// export const updateLecture = async (lectureId: string, lectureData: FormData) => {
+//     const response = await axiosInstance.put(`/lecture/${lectureId}`, lectureData);
+//     return response.data;
+// };

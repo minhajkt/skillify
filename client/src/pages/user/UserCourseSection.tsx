@@ -14,11 +14,16 @@ import { getUserCourseDetails } from "../../api/userApi";
 import { useParams } from "react-router-dom";
 import Navbar from "../../components/shared/Navbar";
 import LanguageOutlinedIcon from "@mui/icons-material/LanguageOutlined";
+import ReportLectureModal from "../../components/user/ReportLectureModal";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store/store";
 
 const UserCourseSection = () => {
   const [course, setCourse] = useState(null);
   const [error, setError] = useState("");
   const [selectedLecture, setSelectedLecture] = useState(null);
+const [reportModalOpen, setReportModalOpen] = useState(false);
+  const user = useSelector((state: RootState) => state.auth.user); 
 
   const { courseId } = useParams();
 
@@ -54,7 +59,6 @@ const UserCourseSection = () => {
   if (!course) return <p>Loading...</p>;
 
   return (
-
     <Box>
       <Navbar />
       <Box sx={{ px: 10, py: 5, mt: { xs: "64px", md: "80px" } }}>
@@ -111,7 +115,6 @@ const UserCourseSection = () => {
           <Box sx={{ width: "300px", p: 2 }}>
             {course.lectures && course.lectures.length > 0 ? (
               course.lectures.map((lecture) => (
-
                 <Button key={lecture._id}>
                   <Typography
                     sx={{
@@ -134,6 +137,8 @@ const UserCourseSection = () => {
             )}
           </Box>
         </Card>
+
+
 
         <Box>
           <Tabs value={tab} onChange={handleTabChange}>
@@ -179,6 +184,21 @@ const UserCourseSection = () => {
             </Box>
           )}
         </Box>
+              <Button
+          variant="contained"
+          color="warning"
+          sx={{ mb: 2 }}
+          onClick={() => setReportModalOpen(true)}
+        >
+          Report an Issue
+        </Button>
+
+        <ReportLectureModal
+          open={reportModalOpen}
+          onClose={() => setReportModalOpen(false)} 
+          courseId={courseId} 
+          lectureId={selectedLecture?._id} 
+        />
       </Box>
     </Box>
   );

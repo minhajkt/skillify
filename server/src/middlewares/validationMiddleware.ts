@@ -143,6 +143,27 @@ export const validateCourseCreation = [
     .trim(),
 ];
 
+export const validateCourseUpdate = [
+  body("title")
+    .optional()
+    .isString()
+    .isLength({ min: 3 })
+    .withMessage("Title should contain at least 3 characters"),
+  body("description")
+    .optional()
+    .isString()
+    .isLength({ min: 3 })
+    .withMessage("Description should contain at least 3 characters"),
+  body("category")
+    .optional()
+    .isIn(["Software", "Business", "Accounts"])
+    .withMessage("Select a valid category"),
+  body("price")
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage("Enter a valid price"),
+];
+
 export const handleValidationErrors = async(req: Request, res: Response, next: NextFunction): Promise<void> => {
     const errors = validationResult(req)
     if(!errors.isEmpty()) {

@@ -8,7 +8,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { axiosInstance } from "../../api/axiosInstance";
 import { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
@@ -31,6 +31,18 @@ const SignupOTPModal = ({
     "idle" | "loading" | "success" | "error"
   >("idle");
   const navigate = useNavigate();
+  const [timer, setTimer] = useState(60); 
+  const [canResend, setCanResend] = useState(false);
+
+useEffect(() => {
+  let interval: NodeJS.Timeout;
+  if (timer > 0) {
+    interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
+  } else {
+    setCanResend(true); 
+  }
+  return () => clearInterval(interval); 
+}, [timer]);
 
   const handleSubmit = async () => {
     try {
@@ -68,6 +80,23 @@ const SignupOTPModal = ({
       setStatus("idle");
     }
   };
+
+    const handleResendOtp = async () => {
+      try {
+        setCanResend(false); 
+        setTimer(60); 
+        await axiosInstance.post("/users/resend-otp", { email }); 
+        setSuccessMessage("A new OTP has been sent to your email.");
+            setTimeout(() => {
+              setSuccessMessage("");
+            }, 2000);
+      } catch (error: unknown) {
+        const errorMsg =
+          (error instanceof AxiosError && error.response?.data?.message) ||
+          "Failed to resend OTP.";
+        setErrorMessage(errorMsg);
+      }
+    };
 
   return (
     <div>
@@ -157,6 +186,17 @@ const SignupOTPModal = ({
               disabled={status === "loading"}
             >
               {status === "loading" ? "Confirming..." : "Verify"}
+            </Button>
+          </Box>
+          <Box textAlign="center"  sx={{ display: "flex", flexDirection: "column", alignItems: "center",mt:1 }}>
+            <Typography variant="caption">Resend OTP in {timer}s</Typography>
+            <Button
+              variant="text"
+              onClick={handleResendOtp}
+              disabled={!canResend}
+              sx={{ textTransform: "none", marginTop: 0 }}
+            >
+              Resend OTP
             </Button>
           </Box>
         </Box>

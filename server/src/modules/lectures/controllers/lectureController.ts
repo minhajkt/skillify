@@ -76,7 +76,10 @@ export class LectureController implements ILectureController {
 
         const lectureId: mongoose.Types.ObjectId =
           newLecture._id as mongoose.Types.ObjectId;
-        await this.lectureService.addLectureToCourse(lectureData.courseId, lectureId);
+        await this.lectureService.addLectureToCourse(
+          lectureData.courseId,
+          lectureId
+        );
 
         createdLectures.push(newLecture);
       }
@@ -91,6 +94,41 @@ export class LectureController implements ILectureController {
     }
   }
 
+  async editLecture(req: Request, res: Response): Promise<void> {
+    try {
+      const lectureId = req.params.lectureId;
+      const updatedData = req.body;
+
+    if (Array.isArray(req.files) && req.files.length > 0) {
+      updatedData.videoUrls = req.files.map((file) => file.path); 
+    }
+    else if (
+      req.files &&
+      Object.values(req.files).some((files) => files.length > 0)
+    ) {
+      const videoFiles = Object.values(req.files).flat();
+      updatedData.videoUrls = videoFiles.map((file) => file.path);
+    }
+    
+      const updatedLecture = await this.lectureService.editLecture(
+        lectureId,
+        updatedData,
+        req.file
+      );
+
+      if (!updatedLecture) {
+        res.status(404).json({ message: "Lecture not found" });
+        return;
+      }
+
+      res.status(200).json({
+        message: "Lecture updated successfully",
+        lecture: updatedLecture,
+      });
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+    }
+  }
 
   async getLecturesByCourse(req: Request, res: Response): Promise<void> {
     try {
@@ -100,5 +138,5 @@ export class LectureController implements ILectureController {
     } catch (error) {
       res.status(500).json({ message: (error as Error).message });
     }
-  };
+  }
 }

@@ -11,4 +11,5 @@ export interface ILectureService {
     lectureId: mongoose.Types.ObjectId
   ): Promise<void>;
   getLecturesByCourse(courseId: string): Promise<ILecture[]>;
+  editLecture(lectureId: string,updatedData: Partial<ILecture>, file?: Express.Multer.File): Promise<ILecture | null>
 }

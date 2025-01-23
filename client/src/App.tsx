@@ -33,6 +33,9 @@ import { loadStripe } from "@stripe/stripe-js";
 import MyCourses from "./pages/user/MyCourses";
 import UserCourseSection from "./pages/user/UserCourseSection";
 import Wishlist from "./components/user/Wishlist";
+import EditCourse from "./pages/tutor/EditCourse";
+import EditLecture from "./pages/tutor/EditLecture";
+import CourseComplaints from "./components/admin/CourseComplaints";
 
 const stripePromise = loadStripe(
   "pk_test_51QfLoJF574cRRlb7gt4W52ZaKOrTVvdRuxGB5nDgXRQhugeedtvDfqKPFTVryX1uBAnthR40zUGYMeyE7baknYkD00Ar4wRwmH"
@@ -55,7 +58,16 @@ function App() {
             <Route path="/tutors/signup" element={<TutorSignupPage />} />
             <Route path="/tutors/login" element={<TutorLoginPage />} />
             <Route path="/tutors/home" element={<TutorHome />} />
+            <Route
+              path="/tutor/edit-course/:courseId"
+              element={<EditCourse />}
+            />
+            <Route
+              path="/tutor/:courseId/edit-lecture"
+              element={<EditLecture />}
+            />
             <Route path="/admin/login" element={<AdminLoginPage />} />
+
             {/* <Route path="/users/course-details/:courseId" element={<UserCourseDetailsPage />} /> */}
             <Route
               path="/users/course-details/:courseId"
@@ -66,7 +78,10 @@ function App() {
               }
             />
             <Route path="/users/my-courses" element={<MyCourses />} />
-            <Route path="/users/course-section/:courseId" element={<UserCourseSection />} />
+            <Route
+              path="/users/course-section/:courseId"
+              element={<UserCourseSection />}
+            />
             <Route path="/wishlist" element={<Wishlist />} />
 
             <Route path="/admin" element={<AdminLayout />}>
@@ -77,6 +92,7 @@ function App() {
               <Route path="students" element={<AdminStudent />} />
               <Route path="tutor-requests" element={<AdminTutorRequest />} />
               <Route path="course-requests" element={<AdminCourseRequest />} />
+              <Route path="course-complaints" element={<CourseComplaints />} />
               <Route
                 path="/admin/course-details/:courseId"
                 element={<AdminCourseDetailsPage />}

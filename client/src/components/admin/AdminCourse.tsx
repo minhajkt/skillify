@@ -194,9 +194,8 @@ const AdminCourse = () => {
                   Tutor
                 </TableSortLabel>
               </TableCell>
-              <TableCell>
-                  
-              </TableCell>
+              <TableCell>Status</TableCell>
+              <TableCell></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -207,6 +206,21 @@ const AdminCourse = () => {
                   <TableCell>{course.title}</TableCell>
                   <TableCell>{course.category}</TableCell>
                   <TableCell>{course.tutor}</TableCell>
+                  <TableCell>
+                    <Typography
+                      style={{
+                        color:
+                          course.isApproved === "approved"
+                            ? "green"
+                            : course.isApproved === "blocked"
+                            ? "red"
+                            : "black",
+                        // fontWeight: "bold",
+                      }}
+                    >
+                      {course.isApproved}
+                    </Typography>
+                  </TableCell>
                   <TableCell>
                     <Button
                       variant="outlined"

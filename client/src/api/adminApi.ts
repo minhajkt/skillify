@@ -100,6 +100,20 @@ export const updateCourseApproval = async(id: string, isApproved: string) => {
     }
 }
 
+export const updateCourseBlock = async (id: string, isApproved: string) => {
+  try {
+    const response = await axiosInstance.patch(
+      `/admin/course-request/${id}/approval`,
+      { isApproved }
+    );
+    console.log("course approvehandle in admin api", response);
+
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
 
 export const fetchAllCourses = async() => {
   try {

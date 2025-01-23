@@ -2,6 +2,7 @@ import express from "express";
 import {
   handleValidationErrors,
   validateCourseCreation,
+  validateCourseUpdate,
 } from "../../middlewares/validationMiddleware";
 import { upload } from "../../config/cloudinaryConfig";
 import { CourseRepository } from "./repositories/courseRepository";
@@ -21,7 +22,10 @@ courseRouter.post(
   handleValidationErrors,
   coursecontroller.createCourse.bind(coursecontroller)
 );
+
+courseRouter.put('/course/:courseId', upload.single('thumbnail'), validateCourseUpdate, handleValidationErrors, coursecontroller.editCourse.bind(coursecontroller))
 courseRouter.get('/course/categories', coursecontroller.getCategories.bind(coursecontroller))
 courseRouter.get('/users/course-section/:courseId', coursecontroller.getUserCourse.bind(coursecontroller))
+courseRouter.patch("/course-request/:id/approval", coursecontroller.blockCourse.bind(coursecontroller));
 
 export default courseRouter;

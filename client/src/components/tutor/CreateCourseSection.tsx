@@ -43,8 +43,12 @@ interface CreateCourseValues {
 }
 
 const CreateCourseSchema = Yup.object().shape({
-  title: Yup.string().required("Course title is required"),
-  description: Yup.string().required("Course description is required"),
+  title: Yup.string()
+    .min(3, "Course title should be of minimum 3 charecters")
+    .required("Course title is required"),
+  description: Yup.string()
+    .min(3, "Course description should be of minimum 3 charecters")
+    .required("Course description is required"),
   category: Yup.string()
     .notOneOf(["select"], "Please select a category")
     .required("Category is required"),
@@ -55,13 +59,13 @@ const CreateCourseSchema = Yup.object().shape({
     .required("Thumbnail is required")
     .test("fileSize", "File size is too large", (value) => {
       const file = value as File;
-      return file ? file.size <= 5 * 1024 * 1024 : true; 
+      return file ? file.size <= 5 * 1024 * 1024 : true;
     })
     .test("fileType", "Invalid file type", (value) => {
       const file = value as File;
       return file
         ? ["image/png", "image/jpeg", "image/webp"].includes(file.type)
-        : true; 
+        : true;
     }),
 });
 
@@ -219,7 +223,6 @@ const CreateCourseSection = () => {
                     />
 
                     <Grid container spacing={3}>
-                      {/* Category */}
                       <Grid item xs={12} md={6}>
                         <FormControl fullWidth>
                           <InputLabel>Category</InputLabel>
@@ -250,7 +253,6 @@ const CreateCourseSection = () => {
                         </FormControl>
                       </Grid>
 
-                      {/* Price */}
                       <Grid item xs={12} md={6}>
                         <Field
                           name="price"

@@ -8,6 +8,14 @@ export class CourseRepository implements ICourseRepository {
     return await course.save();
   }
 
+  async updateCourse(courseId: string, updatedData: Partial<ICourse>, isApproved:string,editStatus: string): Promise<ICourse | null> {
+  return await Course.findByIdAndUpdate(
+    courseId,
+    { ...updatedData, isApproved, editStatus },
+    { new: true }
+  );
+  }
+
   async getAllCourses(): Promise<ICourse[]> {
     return await Course.find();
   }
@@ -40,5 +48,13 @@ export class CourseRepository implements ICourseRepository {
   
   async findCourseById(courseId: string): Promise<ICourse | null> {
     return await Course.findById(courseId);
+  }
+
+    async updateBlockStatus(courseId:string, status: string): Promise<ICourse | null> {
+    return await Course.findByIdAndUpdate(
+      courseId,
+      { isApproved: status },
+      { new: true }
+    );
   }
 }

@@ -27,10 +27,10 @@ interface AuthRequest extends Request {
 }
 
 
-export class UserController implements IUserController{
-  private userService: IUserService
+export class UserController implements IUserController {
+  private userService: IUserService;
   constructor(userService: IUserService) {
-    this.userService = userService
+    this.userService = userService;
   }
 
   async createUser(req: Request, res: Response): Promise<void> {
@@ -38,18 +38,18 @@ export class UserController implements IUserController{
       const { name, email, password, confirmPassword, bio } = req.body;
       const certificates = req.files as Express.Multer.File[];
 
-
-      const role = req.originalUrl.includes('tutor') ? 'tutor' : 'user';
+      const role = req.originalUrl.includes("tutor") ? "tutor" : "user";
       const userData = { name, email, password, role, bio };
 
       const user = await this.userService.createUser(userData, certificates);
-      res.status(201).json({ message: 'User created. OTP is sent to the email' });
+      res
+        .status(201)
+        .json({ message: "User created. OTP is sent to the email" });
     } catch (error) {
-      console.error('Error in createUser:', error);
+      console.error("Error in createUser:", error);
       res.status(500).json({ error: (error as Error).message });
     }
   }
-
 
   async verifyOtp(req: Request, res: Response): Promise<void> {
     try {
@@ -57,13 +57,34 @@ export class UserController implements IUserController{
 
       const user = await this.userService.verifyOtp(email, otp);
 
-      if(user) {
+      if (user) {
         res.status(200).json({ user, message: "OTP verified successfully!" });
-      }else {
-        res.status(400).json({ error: "User not found or OTP verification failed." });
-      }     
+      } else {
+        res
+          .status(400)
+          .json({ error: "User not found or OTP verification failed." });
+      }
     } catch (error) {
       res.status(400).json({ error: (error as Error).message });
+    }
+  }
+
+  async resendOtp(req: Request, res: Response): Promise<void> {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        res.status(400).json({ error: "Email is required" });
+        return;
+      }
+
+      await this.userService.resendOtp(email);
+
+      res.status(200).json({ message: "OTP resent successfully" });
+    } catch (error: any) {
+      res
+        .status(error.statusCode || 500)
+        .json({ error: error.message || "Failed to resend OTP" });
     }
   }
 
@@ -85,12 +106,15 @@ export class UserController implements IUserController{
       res.status(500).json({ error: (error as Error).message });
       return;
     }
-  };
+  }
 
   async loginTutor(req: Request, res: Response): Promise<void> {
     try {
       const { email, password } = req.body;
-      const { token, user } = await this.userService.loginTutor(email, password);
+      const { token, user } = await this.userService.loginTutor(
+        email,
+        password
+      );
 
       if (!token) {
         res.status(404).json({ message: "Tutor not found" });
@@ -105,11 +129,14 @@ export class UserController implements IUserController{
       res.status(500).json({ error: (error as Error).message });
       return;
     }
-  };
+  }
   async loginAdmin(req: Request, res: Response): Promise<void> {
     try {
       const { email, password } = req.body;
-      const { token, user } = await this.userService.loginAdmin(email, password);
+      const { token, user } = await this.userService.loginAdmin(
+        email,
+        password
+      );
 
       if (!token) {
         res.status(404).json({ message: "Admin not found" });
@@ -124,9 +151,9 @@ export class UserController implements IUserController{
       res.status(500).json({ error: (error as Error).message });
       return;
     }
-  };
+  }
 
-  async getUserById(req: Request, res: Response): Promise<void>  {
+  async getUserById(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const user = await this.userService.getUserById(id);
@@ -134,17 +161,19 @@ export class UserController implements IUserController{
         res.status(404).json({ mesage: "User not found" });
         return;
       }
-    // console.log("userrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr", user);
+      // console.log("userrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr", user);
 
       res.status(200).json({ user });
     } catch (error) {
       res.status(500).json({ message: "Error fetching user", error });
     }
-  };
+  }
 
-  async updateUser(req: Request, res: Response): Promise<void>  {
+  async updateUser(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.params.id;
+      // console.log('id from jwt', userId);
+      // console.log('role from jwt', req.user?.role);
 
       const userData = req.body;
       if (req.file) {
@@ -164,7 +193,7 @@ export class UserController implements IUserController{
     } catch (error) {
       res.status(500).json({ error: (error as Error).message });
     }
-  };
+  }
 
   async logoutUser(req: Request, res: Response): Promise<void> {
     try {
@@ -173,14 +202,11 @@ export class UserController implements IUserController{
     } catch (error) {
       res.status(500).json({ message: "Error in logging out", error });
     }
-  };
+  }
 
   //   controller to handle forgot password
 
-  async forgotPassword(
-    req: Request,
-    res: Response
-  ): Promise<void> {
+  async forgotPassword(req: Request, res: Response): Promise<void> {
     try {
       const { email } = req.body;
 
@@ -195,13 +221,11 @@ export class UserController implements IUserController{
     } catch (error) {
       res.status(500).json({ message: "Error in sending link", error });
     }
-  };
+  }
 
   async resetPassword(req: Request, res: Response): Promise<void> {
     try {
       const { token, newPassword, confirmNewPassword } = req.body;
-
- 
 
       const decoded = verifyResetToken(token);
       if (!decoded) {
@@ -230,7 +254,7 @@ export class UserController implements IUserController{
       console.error("Error resetting password:", error);
       res.status(500).json({ message: "Error resetting password", error });
     }
-  };
+  }
 
   async googleSignIn(req: Request, res: Response): Promise<void> {
     try {
@@ -291,7 +315,7 @@ export class UserController implements IUserController{
       console.error("Error in Google Sign-In:", error);
       res.status(500).json({ error: (error as Error).message });
     }
-  };
+  }
 
   async getCourseById(req: Request, res: Response): Promise<void> {
     try {
@@ -307,7 +331,7 @@ export class UserController implements IUserController{
       res.status(500).json({ message: "An unexpected error occured", error });
       return;
     }
-  };
+  }
 
   async stripePayment(req: Request, res: Response): Promise<void> {
     try {
@@ -321,7 +345,7 @@ export class UserController implements IUserController{
       const course = await this.userService.getCourseById(courseId);
       if (!course) {
         res.status(404).json({ message: "Course not found" });
-        return
+        return;
       }
 
       const session = await stripe.checkout.sessions.create({
@@ -354,8 +378,10 @@ export class UserController implements IUserController{
       console.error("Stripe payment error:", error);
       res
         .status(500)
-        .json({ message: "Payment setup failed", error: (error as Error).message });
+        .json({
+          message: "Payment setup failed",
+          error: (error as Error).message,
+        });
     }
-  };
-
+  }
 }
