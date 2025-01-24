@@ -59,13 +59,12 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
 
   const handleLogout = async () => {
     try {
-      // await logoutUser();
       dispatch(logout());
       console.log("logged out");
       localStorage.setItem("logoutSuccess", "true");
-      if (user.role === "tutor") {
+      if (user?.role === "tutor") {
         navigate("/tutors/login");
-      } else if (user.role === "admin") {
+      } else if (user?.role === "admin") {
         navigate("/admin/login");
       } else {
         navigate("/login");
@@ -316,7 +315,7 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
           )}
         </Box>
       </Toolbar>
-      {modalOpen && <ProfileModal user={user} onClose={handleCloseModal} />}
+      {modalOpen && user && <ProfileModal user={user} onClose={handleCloseModal} />}
     </AppBar>
   );
 };

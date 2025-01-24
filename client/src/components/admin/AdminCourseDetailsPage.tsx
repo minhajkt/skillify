@@ -17,27 +17,13 @@ import {
 } from "@mui/material";
 import { axiosInstance } from "../../api/axiosInstance";
 import { updateCourseApproval, updateCourseBlock } from "../../api/adminApi";
+import {ICourse , ILectures} from '../../types/types'
 
-type Lectures = {
-  _id: string;
-  title: string;
-  description: string;
-  videoUrl?: string;
-  order: number;
-};
-
-type Course = {
-  _id: string;
-  title: string;
-  description: string;
-  isApproved: string
-  isBlocked: boolean;
-};
 
 const AdminCourseDetailsPage = () => {
   const { courseId } = useParams();
-  const [course, setCourse] = useState<Course | null>(null);
-  const [lectures, setLectures] = useState<{ [key: string]: Lectures }>({});
+  const [course, setCourse] = useState<ICourse | null>(null);
+  const [lectures, setLectures] = useState<{ [key: string]: ILectures & { videoLoaded: boolean }}>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [snackbar, setSnackbar] = useState({
@@ -46,6 +32,10 @@ const AdminCourseDetailsPage = () => {
   });
 
   const fetchCourseDetails = async () => {
+    if (!courseId) {
+      setError("Course ID is missing");
+      return;
+    }
     try {
       const response = await axiosInstance.get(`tutor/courses/${courseId}`);
       setCourse(response.data);
@@ -61,7 +51,7 @@ const AdminCourseDetailsPage = () => {
   const fetchLectureDetails = async (courseId: string) => {
     try {
       const { data } = await axiosInstance.get(`/courses/${courseId}/lectures`);
-      let lecturesArray: Lectures[] = [];
+      let lecturesArray: ILectures[] = [];
 
       if (Array.isArray(data)) {
         lecturesArray = data;
@@ -73,21 +63,44 @@ const AdminCourseDetailsPage = () => {
       }
 
       const lectureMap = lecturesArray.reduce(
-        (acc: { [key: string]: Lectures }, lecture: Lectures) => {
-          acc[lecture._id] = lecture;
+        (acc: { [key: string]: ILectures & { videoLoaded: boolean }}, lecture: ILectures) => {
+          acc[lecture._id] = { ...lecture, videoLoaded: false };
           return acc;
         },
         {}
       );
 
-      setLectures((prevLectures) => ({
-        ...prevLectures,
-        ...lectureMap,
-      }));
+      // setLectures((prevLectures) => ({
+      //   ...prevLectures,
+      //   ...lectureMap,
+      // }));
+      setLectures(lectureMap);
     } catch (error) {
       console.error("Error fetching lecture details:", error);
     }
   };
+
+  const handleVideoLoad = async (lectureId: string) => {
+    try {
+      const { data: lecture } = await axiosInstance.get(
+        `/lectures/${lectureId}`
+      );
+      // console.log("Loaded lecture data:", lecture);
+
+      setLectures((prevLectures) => ({
+        ...prevLectures,
+        [lecture._id]: {
+          ...prevLectures[lecture._id],
+          videoUrl: lecture.videoUrl,
+          videoLoaded: true,
+        },
+      }));
+    } catch (error) {
+      console.error("Error loading video:", error);
+    }
+  };
+
+
 const handleApprove = async (courseId: string) => {
   try {
     const updatedCourse = await updateCourseApproval(courseId, "approved");
@@ -110,6 +123,7 @@ const handleApprove = async (courseId: string) => {
 };
 const handleBlockToggle = async (courseId: string, newStatus: string) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const updatedCourse = await updateCourseBlock(courseId, newStatus);
     setSnackbar({
       open: true,
@@ -127,6 +141,7 @@ const handleBlockToggle = async (courseId: string, newStatus: string) => {
 };
     const handleReject = async (courseId: string) => {
       try {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const updatedCourse = await updateCourseApproval(courseId, "rejected");
         setSnackbar({
           open: true,
@@ -256,7 +271,7 @@ const handleBlockToggle = async (courseId: string, newStatus: string) => {
                           </Tooltip>
                         </TableCell>
                         <TableCell>
-                          {lecture.videoUrl ? (
+                          {/* {lecture.videoUrl ? (
                             <video
                               src={lecture.videoUrl}
                               controls
@@ -264,6 +279,19 @@ const handleBlockToggle = async (courseId: string, newStatus: string) => {
                             />
                           ) : (
                             "No video available"
+                          )} */}
+                          {lecture.videoLoaded ? (
+                            <video
+                              src={lecture.videoUrl}
+                              controls
+                              style={{ maxWidth: "200px" }}
+                            />
+                          ) : (
+                            <button
+                              onClick={() => handleVideoLoad(lecture._id)}
+                            >
+                              Load Video
+                            </button>
                           )}
                         </TableCell>
                       </TableRow>

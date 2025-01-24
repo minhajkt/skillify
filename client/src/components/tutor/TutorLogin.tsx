@@ -5,7 +5,7 @@ import { loginTutor } from "../../api/authApi";
 import ForgotPasswordModal from "../shared/ForgotPasswordModal";
 // import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
-import { LoginSchema } from "../user/Login";
+import { LoginSchema } from "../../schemas/schemas";
 
 
 
@@ -213,7 +213,6 @@ const TutorLogin = () => {
             Create free account
           </Link>
         </Typography>
-        {/* </Box> */}
       </Grid>
     </Grid>
   );

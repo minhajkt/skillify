@@ -13,7 +13,6 @@ import {
   CircularProgress,
 
 } from "@mui/material";
-import { School, Category, CheckCircle, Cancel } from "@mui/icons-material";
 import { fetchTutorCourses } from "../../api/tutorApi";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/shared/Navbar";
@@ -39,7 +38,7 @@ const AllCoursePage = () => {
           setError("No courses are created.");
         }
       } catch (error) {
-        setError("You have no active courses");
+        // setError("You have no active courses");
         console.error(error);
       } finally {
         setLoading(false);
@@ -58,8 +57,8 @@ const AllCoursePage = () => {
       sx={{
         p: 4,
         backgroundColor: "#f5f7fa",
-        minWidth:"80vw",
-        mx:15
+        minWidth: "80vw",
+        mx: 15,
       }}
     >
       <Navbar />
@@ -95,17 +94,50 @@ const AllCoursePage = () => {
           {error}
         </Typography>
       ) : courses.length === 0 ? (
-        <Typography
+        <Box
           sx={{
-            p: 4,
             textAlign: "center",
-            bgcolor: "#fff",
-            borderRadius: 1,
-            boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+            bgcolor: "#f9f9f9",
+            p: 4,
+            borderRadius: "12px",
+            boxShadow: 2,
+
+            // maxWidth: 500,
+            mx: "auto",
           }}
         >
-          No courses found.
-        </Typography>
+          <img
+            src="/images/00.png"
+            alt="No courses illustration"
+            style={{
+              maxWidth: "20%",
+              height: "auto",
+              marginBottom: "16px",
+            }}
+          />
+          <Typography variant="h5" sx={{ fontWeight: "bold", mb: 2 }}>
+            No Courses Created Yet!
+          </Typography>
+          <Typography variant="body1" sx={{ color: "text.secondary", mb: 3 }}>
+            It looks like you haven't created any courses. Start creating
+            courses to begin your teaching journey with us.
+          </Typography>
+          <Button
+            variant="contained"
+            size="large"
+            onClick={() => navigate("/tutors/create-course")}
+            sx={{
+              // background: "linear-gradient(45deg, #6a11cb, #2575fc)",
+              color: "#fff",
+              fontWeight: "bold",
+              textTransform: "none",
+              px: 4,
+              py: 1.5,
+            }}
+          >
+            Browse Courses
+          </Button>
+        </Box>
       ) : (
         <TableContainer
           component={Paper}
@@ -164,7 +196,10 @@ const AllCoursePage = () => {
                       sx={{
                         display: "inline-block",
                         // bgcolor: course.isApproved ? "#e8f5e9" : "#fff3e0",
-                        color: course.isApproved === 'approved' ? "#2e7d32" : "#ed6c02",
+                        color:
+                          course.isApproved === "approved"
+                            ? "#2e7d32"
+                            : "#ed6c02",
                         px: 2,
                         py: 0.5,
                         borderRadius: 1,
@@ -196,7 +231,7 @@ const AllCoursePage = () => {
           </Table>
         </TableContainer>
       )}
-    </Box> 
+    </Box>
   );
 };
 

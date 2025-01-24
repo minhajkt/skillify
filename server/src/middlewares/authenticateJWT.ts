@@ -1,11 +1,15 @@
 import { NextFunction } from "express"
 import { verifyToken } from "../utils/jwtUtil"
 import { Request, Response } from "express"
-import User from '../modules/user-management/models/UserModel'
+import User, {IUser} from '../modules/user-management/models/UserModel'
 import { JwtPayload } from "jsonwebtoken";
 
 interface DecodedToken extends JwtPayload {
   id: string; 
+}
+
+interface RequestWithUser extends Request {
+  user: IUser; 
 }
 
 export const authenticateJWT = async(req: RequestWithUser, res: Response, next: NextFunction):Promise<void> => {

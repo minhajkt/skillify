@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
+
 import {
   Table,
   TableBody,
@@ -22,38 +26,44 @@ import { useEffect, useState } from "react";
 import { fetchAllCourses, fetchTutorById } from "../../api/adminApi";
 import { fetchCategories } from "../../api/courseApi";
 import { useNavigate } from "react-router-dom";
+import {ICourse } from '../../types/types'
 
-
+type SortKey = "name" | "category" | "tutor" | "createdAt"; 
 
 const AdminCourse = () => {
   const [coursesData, setCoursesData] = useState<any[]>([]);
   const [filteredCourses, setFilteredCourses] = useState<any[]>([]);
+
   const [error, setError] = useState("");
-  const [sortConfig, setSortConfig] = useState({
+  const [sortConfig, setSortConfig] = useState<{
+    key: SortKey;
+    direction: "asc" | "desc";
+  }>({
     key: "createdAt",
     direction: "desc",
   });
-  const navigate = useNavigate()
+
+  const navigate = useNavigate();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [categories, setCategories] = useState<string[]>([]);
-  
+
   useEffect(() => {
     const showCourses = async () => {
       try {
         const courses = await fetchAllCourses();
 
-        const categories = await fetchCategories()
+        const categories = await fetchCategories();
         setCategories(categories);
 
-        const tutorIds = courses.map((course) => course.createdBy);
+        const tutorIds = courses.map((course: ICourse) => course.createdBy);
         const tutors = await Promise.all(
-          tutorIds.map((tutorId) => fetchTutorById(tutorId))
+          tutorIds.map((tutorId:string) => fetchTutorById(tutorId))
         );
-        
-        const coursesWithTutors = courses.map((course, index) => ({
+
+        const coursesWithTutors = courses.map((course:ICourse, index:number) => ({
           ...course,
           name: course.title,
           tutor: tutors[index]?.name || "Unknown",
@@ -62,16 +72,16 @@ const AdminCourse = () => {
         setCoursesData(coursesWithTutors);
         setFilteredCourses(coursesWithTutors);
       } catch (error) {
-        setError("Failed to fetch the courses");
+        setError(`Failed to fetch the courses`);
         console.log(error);
       }
     };
     showCourses();
   }, []);
 
-    const handleOpenModal = (course: Course) => {
-      navigate(`/admin/course-details/${course._id}`);
-    };
+  const handleOpenModal = (course: ICourse) => {
+    navigate(`/admin/course-details/${course._id}`);
+  };
 
   useEffect(() => {
     let updatedCourses = [...coursesData];
@@ -101,7 +111,7 @@ const AdminCourse = () => {
     setFilteredCourses(updatedCourses);
   }, [coursesData, searchQuery, categoryFilter, sortConfig]);
 
-  const handleSort = (key: string) => {
+  const handleSort = (key: SortKey) => {
     const isAsc = sortConfig.key === key && sortConfig.direction === "asc";
     setSortConfig({ key, direction: isAsc ? "desc" : "asc" });
   };
@@ -176,7 +186,7 @@ const AdminCourse = () => {
                 <TableSortLabel
                   active={sortConfig.key === "category"}
                   direction={
-                    sortConfig.key === "category" ? sortConfig.direction : "asc"
+                    sortConfig.direction
                   }
                   onClick={() => handleSort("category")}
                 >

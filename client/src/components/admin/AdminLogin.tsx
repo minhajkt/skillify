@@ -3,17 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { loginAdmin } from "../../api/authApi";
 import { Box, Button, Grid, TextField, Typography } from "@mui/material";
 import ForgotPasswordModal from "../shared/ForgotPasswordModal";
-import * as Yup from "yup";
+// import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
+import { LoginSchema } from "../../schemas/schemas";
 
-const LoginSchema = Yup.object().shape({
-  email: Yup.string()
-    .email("Invalid email address")
-    .required("Email is required"),
-  password: Yup.string()
-    .min(3, "Password must be at least 3 characters long")
-    .required("Password is required"),
-});
+// const LoginSchema = Yup.object().shape({
+//   email: Yup.string()
+//     .email("Invalid email address")
+//     .required("Email is required"),
+//   password: Yup.string()
+//     .min(3, "Password must be at least 3 characters long")
+//     .required("Password is required"),
+// });
 
 const AdminLogin = () => {
 

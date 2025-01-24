@@ -19,14 +19,14 @@ import { createCourse, fetchCategories } from "../../api/courseApi";
 import { useSelector } from "react-redux";
 // import { RootState } from "../../store/store";
 import { useNavigate } from "react-router-dom";
-import { User } from "../../types/User";
+import { IUser } from "../../types/types";
 import Navbar from "../shared/Navbar";
-import * as Yup from "yup";
 import { Formik, Form, Field, FormikHelpers } from "formik";
-
+import { ICreateCourse } from "../../types/types";
+import { CreateCourseSchema } from "../../schemas/schemas";
 
 interface AuthState {
-  user: User | null;
+  user: IUser | null;
 }
 
 interface RootState {
@@ -34,74 +34,38 @@ interface RootState {
 }
 
 
-interface CreateCourseValues {
-  title: string;
-  description: string;
-  category: string;
-  price: string;
-  thumbnail: File | null;
-}
-
-const CreateCourseSchema = Yup.object().shape({
-  title: Yup.string()
-    .min(3, "Course title should be of minimum 3 charecters")
-    .required("Course title is required"),
-  description: Yup.string()
-    .min(3, "Course description should be of minimum 3 charecters")
-    .required("Course description is required"),
-  category: Yup.string()
-    .notOneOf(["select"], "Please select a category")
-    .required("Category is required"),
-  price: Yup.number()
-    .required("Course price is required")
-    .positive("Price must be positive"),
-  thumbnail: Yup.mixed()
-    .required("Thumbnail is required")
-    .test("fileSize", "File size is too large", (value) => {
-      const file = value as File;
-      return file ? file.size <= 5 * 1024 * 1024 : true;
-    })
-    .test("fileType", "Invalid file type", (value) => {
-      const file = value as File;
-      return file
-        ? ["image/png", "image/jpeg", "image/webp"].includes(file.type)
-        : true;
-    }),
-});
 
 
 const CreateCourseSection = () => {
-
   const [categories, setCategories] = useState<string[]>([]);
   const [status, setStatus] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState("");
   const tutor = useSelector((state: RootState) => state.auth.user);
   const tutorId = tutor?._id;
- const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
- const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-   setSearchQuery(e.target.value);
- };
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
 
   useEffect(() => {
-    const getCategories = async() => {
-        const response = await fetchCategories()
-        setCategories(response)
-    }
-    getCategories()
-  }, [])
+    const getCategories = async () => {
+      const response = await fetchCategories();
+      setCategories(response);
+    };
+    getCategories();
+  }, []);
 
   const navigate = useNavigate();
 
-
-
   const handleCreateCourse = async (
-    values: CreateCourseValues,
+    values: ICreateCourse,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    { setSubmitting, setErrors }: FormikHelpers<CreateCourseValues>
+    { setSubmitting, setErrors }: FormikHelpers<ICreateCourse>
   ) => {
     setErrorMessage("");
     const { title, description, category, price, thumbnail } = values;
+
     if (!tutorId) {
       setErrorMessage("Tutor ID is missing. Please log in again.");
       return;
@@ -111,7 +75,7 @@ const CreateCourseSection = () => {
     formData.append("title", title);
     formData.append("description", description);
     formData.append("category", category);
-    formData.append("price", price);
+    formData.append("price", price.toString());
     formData.append("createdBy", tutorId);
 
     if (thumbnail) {
@@ -131,7 +95,7 @@ const CreateCourseSection = () => {
       console.log(error);
     } finally {
       setStatus("");
-      setSubmitting(false)
+      setSubmitting(false);
     }
   };
 
@@ -175,14 +139,13 @@ const CreateCourseSection = () => {
                 description: "",
                 category: "select",
                 price: "",
-                thumbnail: null,
+                thumbnail: null as File | null,
               }}
               validationSchema={CreateCourseSchema}
               onSubmit={handleCreateCourse}
             >
               {({ values, setFieldValue, isSubmitting, touched, errors }) => (
                 <Form>
-                  {/* Error Message */}
                   {errorMessage && (
                     <Paper
                       sx={{
@@ -302,7 +265,7 @@ const CreateCourseSection = () => {
                         <Box sx={{ textAlign: "center" }}>
                           {values.thumbnail ? (
                             <Typography variant="body2" color="text.secondary">
-                              {values.thumbnail.name}
+                              {values.thumbnail?.name}
                             </Typography>
                           ) : (
                             <>
@@ -368,4 +331,3 @@ const CreateCourseSection = () => {
 };
 
 export default CreateCourseSection;
-

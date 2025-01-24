@@ -49,7 +49,7 @@ export class TutorController implements ITutorController {
         const courseDetails = await this.tutorService.getCourseDetails(courseId)
 
 
-        console.log("Course Details Response:", courseDetails);
+        // console.log("Course Details Response:", courseDetails);
          res.status(200).json(courseDetails)
     } catch (error) {
         res.status(500).json({message: "An unexpected error occured", error:(error as Error).message})

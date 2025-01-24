@@ -2,9 +2,10 @@ import { CalendarToday } from "@mui/icons-material";
 import { Avatar, Box, Card, CardContent, Divider, Rating, Stack, Typography } from "@mui/material"
 import { useEffect, useState } from "react";
 import { getReviews } from "../../api/reviewApi";
+import { ReviewComponentProps, IReview } from "../../types/types";
 
-const ReviewComponent = ({ courseId, setAverageRating, setTotalReviews }) => {
-  const [reviews, setReviews] = useState([]);
+const ReviewComponent:React.FC<ReviewComponentProps> = ({ courseId, setAverageRating, setTotalReviews }) => {
+  const [reviews, setReviews] = useState<IReview[]>([]);
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -102,7 +103,7 @@ const ReviewComponent = ({ courseId, setAverageRating, setTotalReviews }) => {
                     </Box>
                   </Box>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <CalendarToday size={16} />
+                    <CalendarToday fontSize="small" />
                     <Typography variant="caption" color="text.secondary">
                       {new Date(review.createdAt).toLocaleDateString("en-US", {
                         year: "numeric",

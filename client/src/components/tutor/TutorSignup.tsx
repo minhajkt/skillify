@@ -1,4 +1,3 @@
-import React from "react";
 
 import { Box, Button, Grid, TextField, Typography } from "@mui/material";
 import { useState } from "react";
@@ -6,65 +5,25 @@ import { signupTutor } from "../../api/authApi";
 import { Link } from "react-router-dom";
 import SignupOTPModal from "../shared/SignupOTPModal";
 import { Formik, Form, Field, FormikHelpers } from "formik";
-import * as Yup from "yup";
+// import * as Yup from "yup";
+import { ITutorSignupValues } from "../../types/types";
+import { TutorSignupSchema } from "../../schemas/schemas";
 
-interface TutorSignupValues {
-  name: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  bio: string;
-  certificates: FileList | null;
-}
 
-const TutorSignupSchema = Yup.object().shape({
-  name: Yup.string().required("Full Name is required"),
-  email: Yup.string()
-    .email("Invalid email address")
-    .required("Email is required"),
-  password: Yup.string()
-    .min(3, "Password must be at least 3 characters")
-    .required("Password is required"),
-  confirmPassword: Yup.string()
-    .oneOf([Yup.ref("password"), undefined], "Passwords must match")
-    .required("Confirm Password is required"),
-  bio: Yup.string()
-    .max(500, "Bio cannot exceed 500 characters")
-    .required("Bio is required"),
-  certificates: Yup.mixed()
-    .nullable()
-    .test("fileSize", "File too large", (value) => {
-      if (value && value instanceof FileList) {
-        return Array.from(value).every((file) => file.size <= 5 * 1024 * 1024);
-      }
-      return true;
-    })
-    .test("fileType", "Unsupported file format", (value) => {
-      if (value && value instanceof FileList) {
-        return Array.from(value).every((file) =>
-          ["application/pdf", "image/png", "image/jpeg"].includes(file.type)
-        );
-      }
-      return true; 
-    })
-    .required("Certificates are required"),
-});
 
 
 const TutorSignup = () => {
   const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
   const [emailForOtp, setEmailForOtp] = useState("");
   const [generalError, setGeneralError] = useState<string | null>(null);
+  const [otpSent, setOtpSent] = useState(false);
 
-const handleInputChange = (e) => {
-  setGeneralError(null);
 
-};
 
   const handleSignup = async (
-    values: TutorSignupValues,
+    values: ITutorSignupValues,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    { setSubmitting, setErrors }: FormikHelpers<TutorSignupValues>
+    { setSubmitting, setErrors }: FormikHelpers<ITutorSignupValues>
   ) => {
     try {
       const { name, email, password, confirmPassword, bio, certificates } =
@@ -82,6 +41,7 @@ const handleInputChange = (e) => {
       if (userData) {
         setEmailForOtp(email);
         setIsOtpModalOpen(true);
+        setOtpSent(true);
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -100,6 +60,8 @@ const handleInputChange = (e) => {
           open={isOtpModalOpen}
           handleClose={() => setIsOtpModalOpen(false)}
           email={emailForOtp}
+          setOtpSent={setOtpSent}
+          otpSent={otpSent}
         />
 
         <Grid

@@ -17,25 +17,31 @@ import LanguageOutlinedIcon from "@mui/icons-material/LanguageOutlined";
 import ReportLectureModal from "../../components/user/ReportLectureModal";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
+import { ILectures, ICourse } from "../../types/types"; 
 
 const UserCourseSection = () => {
-  const [course, setCourse] = useState(null);
+  const [course, setCourse] = useState<ICourse |null>(null);
   const [error, setError] = useState("");
-  const [selectedLecture, setSelectedLecture] = useState(null);
+  const [selectedLecture, setSelectedLecture] = useState<ILectures | null>(null);
 const [reportModalOpen, setReportModalOpen] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const user = useSelector((state: RootState) => state.auth.user); 
 
   const { courseId } = useParams();
 
   useEffect(() => {
     const fetchUserCourse = async () => {
+      if (!courseId) {
+        console.error("Course ID is undefined");
+        return;
+      }
       try {
         const courseDetails = await getUserCourseDetails(courseId);
         console.log("usercourse details response is ", courseDetails);
         setCourse(courseDetails);
         setSelectedLecture(courseDetails.lectures[0]);
       } catch (error) {
-        setError(error.message || "An unexpected error occurred");
+        setError((error as Error).message || "An unexpected error occurred");
       }
     };
     if (courseId) {
@@ -45,7 +51,7 @@ const [reportModalOpen, setReportModalOpen] = useState(false);
     }
   }, [courseId]);
 
-  const handleLectureSelect = (lecture) => {
+  const handleLectureSelect = (lecture: ILectures) => {
     setSelectedLecture(lecture);
   };
 
@@ -110,7 +116,6 @@ const [reportModalOpen, setReportModalOpen] = useState(false);
             sx={{ flex: 1, height: "400px" }}
             controls
             src={selectedLecture?.videoUrl || "default-video-url.mp4"}
-            alt="Course Video"
           />
           <Box sx={{ width: "300px", p: 2 }}>
             {course.lectures && course.lectures.length > 0 ? (
@@ -148,7 +153,7 @@ const [reportModalOpen, setReportModalOpen] = useState(false);
 
           {tab === 0 && (
             <Box sx={{ mt: 2, width: "60%" }}>
-              <Typography variant="h5">{selectedLecture.title}</Typography>
+              <Typography variant="h5">{selectedLecture?.title}</Typography>
               <Box sx={{ display: "flex", alignItems: "center", pt: 1 }}>
                 <LanguageOutlinedIcon fontSize="small" />
                 <Typography sx={{ marginLeft: 1 }}>English</Typography>
@@ -159,7 +164,7 @@ const [reportModalOpen, setReportModalOpen] = useState(false);
                 color="textSecondary"
                 sx={{ lineHeight: 2.5 }}
               >
-                {selectedLecture.description}
+                {selectedLecture?.description}
               </Typography>
             </Box>
           )}
@@ -193,12 +198,14 @@ const [reportModalOpen, setReportModalOpen] = useState(false);
           Report an Issue
         </Button>
 
-        <ReportLectureModal
-          open={reportModalOpen}
-          onClose={() => setReportModalOpen(false)} 
-          courseId={courseId} 
-          lectureId={selectedLecture?._id} 
-        />
+        {courseId && selectedLecture?._id && (
+          <ReportLectureModal
+            open={reportModalOpen}
+            onClose={() => setReportModalOpen(false)} 
+            courseId={courseId} 
+            lectureId={selectedLecture?._id} 
+          />
+        )}
       </Box>
     </Box>
   );

@@ -10,13 +10,8 @@ import {
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { postReport } from "../../api/courseApi";
+import { ReportLectureModalProps } from "../../types/types";
 
-interface ReportLectureModalProps {
-  open: boolean;
-  onClose: () => void;
-  courseId: string;
-  lectureId: string;
-}
 
 const ReportLectureModal: React.FC<ReportLectureModalProps> = ({
   open,
@@ -39,7 +34,7 @@ const ReportLectureModal: React.FC<ReportLectureModalProps> = ({
       courseId,
       lectureId,
       reportDescription,
-      userId: user._id,
+      userId: user?._id || "",
     };
 
     try {

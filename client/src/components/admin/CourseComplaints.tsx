@@ -15,18 +15,12 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { getComplaints } from "../../api/courseApi";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { IReport } from "../../types/types";
 
-type Report = {
-  _id: string;
-  courseId: { title: string } | null;
-  userId: { name: string } | null;
-  lectureId: { title: string } | null;
-  reportDescription: string;
-};
 
 const CourseComplaints = () => {
-  const [reports, setReports] = useState<Report[]>([]);
+  const [reports, setReports] = useState<IReport[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [page, setPage] = useState(0);
@@ -36,7 +30,6 @@ const CourseComplaints = () => {
     message: "",
   });
   const navigate = useNavigate()
-const {courseId} = useParams()
 
   useEffect(() => {
     const getReports = async () => {

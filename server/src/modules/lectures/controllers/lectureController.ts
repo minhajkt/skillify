@@ -99,17 +99,16 @@ export class LectureController implements ILectureController {
       const lectureId = req.params.lectureId;
       const updatedData = req.body;
 
-    if (Array.isArray(req.files) && req.files.length > 0) {
-      updatedData.videoUrls = req.files.map((file) => file.path); 
-    }
-    else if (
-      req.files &&
-      Object.values(req.files).some((files) => files.length > 0)
-    ) {
-      const videoFiles = Object.values(req.files).flat();
-      updatedData.videoUrls = videoFiles.map((file) => file.path);
-    }
-    
+      if (Array.isArray(req.files) && req.files.length > 0) {
+        updatedData.videoUrls = req.files.map((file) => file.path);
+      } else if (
+        req.files &&
+        Object.values(req.files).some((files) => files.length > 0)
+      ) {
+        const videoFiles = Object.values(req.files).flat();
+        updatedData.videoUrls = videoFiles.map((file) => file.path);
+      }
+
       const updatedLecture = await this.lectureService.editLecture(
         lectureId,
         updatedData,
@@ -133,9 +132,37 @@ export class LectureController implements ILectureController {
   async getLecturesByCourse(req: Request, res: Response): Promise<void> {
     try {
       const { courseId } = req.params;
+      console.log("id", courseId);
       const lectures = await this.lectureService.getLecturesByCourse(courseId);
-      res.status(200).json({ lectures });
+      console.log("back with vid", lectures);
+
+      const lecturesMetadata = lectures.map((lecture) => {
+        const { videoUrl, ...rest } = lecture.toObject();
+        // console.log("back without vid", rest);
+
+        return rest;
+      });
+      res.status(200).json({ lectures: lecturesMetadata });
     } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+    }
+  }
+
+  async getLectureById(req: Request, res: Response): Promise<void> {
+    try {
+      const { lectureId } = req.params;
+      // console.log("Fetching lecture by ID:", lectureId);
+
+      const lecture = await this.lectureService.getLectureById(lectureId);
+
+      if (!lecture) {
+        res.status(404).json({ message: "Lecture not found" });
+        return;
+      }
+
+      res.status(200).json(lecture);
+    } catch (error) {
+      console.error("Error fetching lecture by ID:", error);
       res.status(500).json({ message: (error as Error).message });
     }
   }

@@ -5,31 +5,31 @@ import {
   CardContent,
   CardMedia,
   Stack,
-  Avatar,
   Button,
   Snackbar,
   Alert,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { fetchUserEnrolledCourses } from "../../api/enrollmentApi";
-import { Person } from "@mui/icons-material";
 import Navbar from "../../components/shared/Navbar";
 import Person2OutlinedIcon from "@mui/icons-material/Person2Outlined";
 import { useLocation, useNavigate } from "react-router-dom";
 import ReviewModal from "../../components/user/ReviewModal";
 import { addCourseReview, deleteCourseReview, fetchUserReview, updateCourseReview } from "../../api/reviewApi";
 import { handleAxiosError } from "../../utils/errorHandler";
-import Footer from "../../components/shared/Footer";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
+import { ICourseForDisplay } from "../../types/types";
+
 
 const MyCourses = () => {
   const navigate = useNavigate();
-  const [enrolledCourses, setEnrolledCourses] = useState([]);
+  const [enrolledCourses, setEnrolledCourses] = useState<ICourseForDisplay[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [error, setError] = useState<string>("");
   const [openModal, setOpenModal] = useState(false);
-  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [selectedCourse, setSelectedCourse] = useState<ICourseForDisplay | null>(null);
   const [reviewText, setReviewText] = useState("");
   const [rating, setRating] = useState<number | null>(0);
   const [userReview, setUserReview] = useState(null);
@@ -39,7 +39,7 @@ const MyCourses = () => {
       const [deleteSnackbar, setDeleteSnackbar] = useState(false);
 
   const user = useSelector((state: RootState) => state.auth.user);
-  const userId = user._id;
+  const userId = user?._id;
 
     useEffect(() => {
       if (new URLSearchParams(location.search).get("success") === "true") {
@@ -54,10 +54,10 @@ const MyCourses = () => {
       try {
         const response = await fetchUserEnrolledCourses();
         setEnrolledCourses(response);
-        console.log('resposne for enrolledcourssssssssssssssssssse', response);
+        // console.log('resposne for enrolledcourssssssssssssssssssse', response);
         
       } catch (error) {
-        // setError("You have no courses enrolled");
+        console.log('Error', error);    
       } finally {
         setLoading(false);
       }
@@ -68,9 +68,8 @@ const MyCourses = () => {
 
 useEffect(() => {
   const getUserReview = async () => {
-    if (selectedCourse) {
+    if (selectedCourse && userId) {
       try {
-        // console.log('userrrrrrrrrrrrrrrrrrrrrrrrr', userId);
         
         const response = await fetchUserReview(
           selectedCourse.courseId._id,
@@ -92,7 +91,7 @@ useEffect(() => {
   getUserReview();
 }, [selectedCourse, userId]);
 
-  const handleOpenModal = (course) => {
+  const handleOpenModal = (course:ICourseForDisplay) => {
     
     setSelectedCourse(course);
     console.log('seelcted coures in modal', course);
@@ -116,9 +115,18 @@ useEffect(() => {
         //   rating,
         // });
 
+    if (!selectedCourse) {
+      setError("Selected course is not available.");
+      return;
+    }
+    
+    if(!userId) {
+      setError('No UserId found')
+      return
+    }
 
         const reviewData = {
-          courseId: selectedCourse.courseId._id,
+          courseId: selectedCourse?.courseId._id,
           rating,
           reviewText
         }
@@ -147,9 +155,19 @@ useEffect(() => {
     };
 
       const handleDeleteReview = async () => {
+        if (!selectedCourse) {
+          setError("Selected course is not available.");
+          return;
+        }
+    
+        if (!userId) {
+          setError("No UserId found");
+          return;
+        }
+
         if (userReview) {
           try {
-            await deleteCourseReview(selectedCourse.courseId._id, userId);
+            await deleteCourseReview(selectedCourse?.courseId._id, userId);
             setUserReview(null); 
             setReviewText("");
             setRating(null);

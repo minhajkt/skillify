@@ -1,9 +1,9 @@
 import { handleAxiosError } from "../utils/errorHandler";
 import { axiosInstance } from "./axiosInstance"
 
-export const createCourse = async(courseData :{title:string, description: string, category: string,thumbnail: string, price: number, createdBy:string}) => {
+export const createCourse = async(formData :FormData) => {
     try {
-        const response = await axiosInstance.post("/course/create-course", courseData, {
+        const response = await axiosInstance.post("/course/create-course", formData, {
       headers: { "Content-Type": "multipart/form-data" }
     });
         return response.data;

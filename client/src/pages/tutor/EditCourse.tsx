@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Box,
   Card,
@@ -22,54 +23,13 @@ import {
   updateCourseDetails,
 } from "../../api/courseApi";
 import { useSelector } from "react-redux";
-import { User } from "../../types/User";
+// import { User } from "../../types/types";
 
-import * as Yup from "yup";
 import { Formik, Form, Field, FormikHelpers } from "formik";
 import Navbar from "../../components/shared/Navbar";
+import { EditCourseSchema } from "../../schemas/schemas";
+import { IEditCourse } from "../../types/types";
 
-interface EditCourseValues {
-  title: string;
-  description: string;
-  category: string;
-  price: string;
-  thumbnail: File | string | null;
-}
-
-const EditCourseSchema = Yup.object().shape({
-  title: Yup.string()
-    .min(3, "Course title should be of minimum 3 characters")
-    .required("Course title is required"),
-  description: Yup.string()
-    .min(3, "Course description should be of minimum 3 characters")
-    .required("Course description is required"),
-  category: Yup.string()
-    .notOneOf(["select"], "Please select a category")
-    .required("Category is required"),
-  price: Yup.number()
-    .required("Course price is required")
-    .positive("Price must be positive"),
-  thumbnail: Yup.mixed()
-  .nullable()
-    .test("fileValidation", "Invalid file", function(value) {
-      if (!value || typeof value === 'string') {
-        return true;
-      }
-       const file = value as File;
-       const validTypes = ["image/png", "image/jpeg", "image/webp"];
-       const isValidSize = file.size <= 5 * 1024 * 1024;
-       const isValidType = validTypes.includes(file.type);
-
-       if (!isValidSize) {
-         return this.createError({ message: "File size is too large" });
-       }
-       if (!isValidType) {
-         return this.createError({ message: "Invalid file type" });
-       }
-
-       return true;
-    }),
-});
 
 const EditCourse = () => {
   const { courseId } = useParams();
@@ -90,8 +50,8 @@ const EditCourse = () => {
     const getCourseData = async () => {
       if (courseId) {
         const response = await fetchCourseDetails(courseId);
-        console.log('course det', response);
-        
+        console.log("course det", response);
+
         setCourse(response);
       }
     };
@@ -100,11 +60,17 @@ const EditCourse = () => {
   }, [courseId]);
 
   const handleEditCourse = async (
-    values: EditCourseValues,
-    { setSubmitting, setErrors }: FormikHelpers<EditCourseValues>
+    values: IEditCourse,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    { setSubmitting, setErrors }: FormikHelpers<IEditCourse>
   ) => {
     setErrorMessage("");
     const { title, description, category, price, thumbnail } = values;
+    if(!courseId) {
+      setErrorMessage("Course ID is missing")
+      return
+    }
+
     if (!tutorId) {
       setErrorMessage("Tutor ID is missing. Please log in again.");
       return;
@@ -122,9 +88,11 @@ const EditCourse = () => {
     }
 
     try {
+      
       setStatus("loading");
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const response = await updateCourseDetails(courseId, formData);
-    //   navigate(`/courses/${courseId}`);
+      //   navigate(`/courses/${courseId}`);
       navigate(`/tutor/${courseId}/edit-lecture`);
     } catch (error) {
       setErrorMessage((error as Error).message);
@@ -292,14 +260,12 @@ const EditCourse = () => {
                                 variant="body2"
                                 color="text.secondary"
                               >
-                                {
-                                  values.thumbnail instanceof File
-                                    ? values.thumbnail.name 
-                                    : typeof values.thumbnail === "string"
-                                    ? "Current thumbnail: " +
-                                      values.thumbnail.split("/").pop() 
-                                    : "Current thumbnail" 
-                                }
+                                {values.thumbnail instanceof File
+                                  ? values.thumbnail.name
+                                  : typeof values.thumbnail === "string"
+                                  ? "Current thumbnail: " +
+                                    values.thumbnail.split("/").pop()
+                                  : "Current thumbnail"}
                               </Typography>
                             ) : (
                               <UploadIcon

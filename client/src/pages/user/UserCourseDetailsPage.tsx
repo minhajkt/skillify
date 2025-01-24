@@ -1,25 +1,18 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Box,
   Typography,
   Card,
   CardContent,
-  Button,
   Rating,
-  Stack,
   Chip,
   Grid,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Divider,
-  Avatar,
   Alert,
   Snackbar,
 } from "@mui/material";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import LanguageOutlinedIcon from "@mui/icons-material/LanguageOutlined";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
-import Person2OutlinedIcon from "@mui/icons-material/Person2Outlined";
 
 
 import { useEffect, useState } from "react";
@@ -28,21 +21,18 @@ import { useLocation, useParams } from "react-router-dom";
 import { getTutorById } from "../../api/userApi";
 import Navbar from "../../components/shared/Navbar";
 import { getLecturesByCourseId } from "../../api/lectureApi";
-import { AccessTime, CalendarToday, ExpandMore, PlayCircleOutline, ThumbUp } from "@mui/icons-material";
 import CheckoutButton from "../../components/user/CheckoutButton";
-import { getReviews } from "../../api/reviewApi";
 import ReviewComponent from "../../components/user/ReviewComponent";
 import { fetchUserEnrolledCourses } from "../../api/enrollmentApi";
-import { useSelector } from "react-redux";
-import { RootState } from "../../store/store";
+import { ILectures, ICourse,ITutor } from "../../types/types";
 
 const UserCourseDetailsPage = () => {
-  const [course, setCourse] = useState("");
+  const [course, setCourse] = useState<ICourse>();
   const { courseId } = useParams();
-  const [tutor, setTutor] = useState('')
-  const [lectures, setLectures] = useState([])
+  const [tutor, setTutor] = useState<ITutor>()
+  const [lectures, setLectures] = useState<ILectures[]>([])
   const [totalHours, setTotalHours] = useState('')
-  const [reviews, setReviews] = useState([])
+  // const [reviews, setReviews] = useState([])
   const [averageRating, setAverageRating] = useState(0);
   const [totalReviews, setTotalReviews] = useState(0);
   const [isEnrolled, setIsEnrolled] = useState(false);
@@ -61,6 +51,10 @@ const UserCourseDetailsPage = () => {
 
   useEffect(() => {
     const getCourseDetails = async () => {
+      if (!courseId) {
+        console.error("Course ID is undefined");
+        return; 
+      }
       try {
         const data = await fetchCourseDetails(courseId);
         console.log(data);
@@ -75,15 +69,15 @@ const UserCourseDetailsPage = () => {
         const lectureData = await getLecturesByCourseId(courseId)
         // console.log('lect deatials ', lectures);
         setLectures(lectureData.lectures)
-        console.log("lecturedta.lectures", lectureData.lectures);
+        // console.log("lecturedta.lectures", lectureData.lectures);
         const totalDuration = lectureData.lectures.reduce(
-          (sum, lecture) => sum + lecture.duration,
+          (sum:number, lecture:ILectures) => sum + lecture.duration,
           0
         );
         setTotalHours((totalDuration / 60).toFixed(1))
         // console.log("Total Duration:", totalHours);
         const enrolledCourses = await fetchUserEnrolledCourses();
-        console.log("Enrolled Courses:", enrolledCourses);
+        // console.log("Enrolled Courses:", enrolledCourses);
     if (Array.isArray(enrolledCourses)) {
       const courseEnrolled = enrolledCourses.some(
         (enrolledCourse) =>
@@ -110,6 +104,7 @@ const UserCourseDetailsPage = () => {
   if (!course) {
     return <Box>Loading...</Box>;
   }
+
 
   return (
     <Box
@@ -150,7 +145,7 @@ const UserCourseDetailsPage = () => {
               <Typography variant="body2">({totalReviews} ratings)</Typography>
             </Box>
             <Typography variant="body2">
-              Course Created by: {tutor.name}
+              Course Created by: {tutor?.name}
             </Typography>
             <Box sx={{ display: "flex", alignItems: "center", pt: 1 }}>
               <LanguageOutlinedIcon fontSize="small" />
@@ -209,7 +204,11 @@ const UserCourseDetailsPage = () => {
             <CardContent>
               <Box sx={{ width: "100%", height: 200, mb: 2 }}>
                 <img
-                  src={course.thumbnail}
+                  src={
+                      typeof course.thumbnail === "string"
+                        ? course.thumbnail
+                        : undefined
+                    }
                   alt={course.title}
                   style={{
                     width: "100%",
@@ -267,7 +266,7 @@ const UserCourseDetailsPage = () => {
                   Created By :{" "}
                   <span style={{ fontSize: "16px", fontWeight: "bold" }}>
                     {" "}
-                    {tutor.name}
+                    {tutor?.name}
                   </span>
                 </Typography>
                 <Chip
@@ -291,11 +290,13 @@ const UserCourseDetailsPage = () => {
                   Your Payment was cancelled
                 </Alert>
               </Snackbar>
-      <ReviewComponent
-        courseId={courseId}
-        setAverageRating={setAverageRating}
-        setTotalReviews={setTotalReviews}
-      />
+              {courseId && (
+                <ReviewComponent
+                  courseId={courseId}
+                  setAverageRating={setAverageRating}
+                  setTotalReviews={setTotalReviews}
+                />
+              )}
     </Box>
   );
 };

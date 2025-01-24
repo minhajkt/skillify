@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -27,10 +28,15 @@ const CourseDetailsPage = () => {
 
   useEffect(() => {
     const fetchCourseDetails = async () => {
+      if(!courseId) {
+        setError('Course id is missing')
+        setLoading(false)
+        return
+      }
       try {
         const response = await fetchTutorCourseDetails(courseId);
         // console.log("lecture dataa length", response?.data.lectures.length);
-        console.log('ressssssssssssssssssss', response.data);
+        // console.log('ressssssssssssssssssss', response.data);
         
 
         if (response?.data) {

@@ -9,17 +9,18 @@ const Category = () => {
   const token = useSelector((state: RootState) => state.auth.token);
 
 
-  const [categories, setCategories] = useState<[]>([])
+  const [categories, setCategories] = useState<{name:string; icon: string}[]>([])
 
   useEffect(() => {
     const getCategories = async() => {
-      const response = await fetchCategories()
-      const icons = {
+      const response: string[] = await fetchCategories()
+      
+      const icons: Record<string, string> = {
         Software: "/images/web.png",
         Business: "/images/datascience.png",
         Accounts: "/images/accounts.png",
       };
-      const formattedResponse = response.map((cat) => ({
+      const formattedResponse = response.map((cat:string) => ({
         name: cat,
         icon: icons[cat]
       }))

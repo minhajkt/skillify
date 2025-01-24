@@ -25,19 +25,12 @@ import BlockIcon from "@mui/icons-material/Block";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { fetchStudents, updateStudentStatus } from "../../api/adminApi";
 import { AxiosError } from "axios";
-
-type Student = {
-  _id: string;
-  name: string;
-  email: string;
-  status: string; 
-  isActive: boolean;
-};
+import {IStudent} from '../../types/types'
 
 
 const AdminStudent = () => {
-  const [students, setStudents] = useState<Student[]>([]);
-  const [filteredStudents, setFilteredStudents] = useState<Student[]>([]); 
+  const [students, setStudents] = useState<IStudent[]>([]);
+  const [filteredStudents, setFilteredStudents] = useState<IStudent[]>([]); 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [sortConfig, setSortConfig] = useState<{

@@ -1,20 +1,21 @@
-import { Box, Button, FormControl, Grid, InputLabel, MenuItem, Select, Typography } from "@mui/material"
+import { Box, Button, FormControl, Grid, InputLabel, MenuItem, Select, Typography, SelectChangeEvent } from "@mui/material"
 import { useEffect, useState } from "react";
 import { fetchAllCourses, fetchTutorById } from "../../api/adminApi";
 import { useNavigate } from "react-router-dom";
-import { fetchCategories, fetchCourseDetails } from "../../api/courseApi";
-import { handleAxiosError } from "../../utils/errorHandler";
+import { fetchCategories } from "../../api/courseApi";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import axios from "axios";
 import { handleAddToWishlist, handleRemoveFromWishlist } from "../../api/wishlistApi";
+import { NavbarProps, ICourse, ICategory } from "../../types/types";
 
-const OurCourses = ({ searchQuery }) => {
-  const [courses, setCourses] = useState([]);
+
+const OurCourses = ({ searchQuery }: NavbarProps) => {
+  const [courses, setCourses] = useState<ICourse[]>([]);
   const [categoryFilter, setCategoryFilter] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
     const [sortBy, setSortBy] = useState("price"); 
-    const [categories, setCategories] = useState<[]>([]);
+    const [categories, setCategories] = useState<ICategory[]>([]);
     const [wishlist, setWishlist] = useState<string[]>([]);
   const navigate = useNavigate();
   useEffect(() => {
@@ -23,15 +24,15 @@ const OurCourses = ({ searchQuery }) => {
         const response = await fetchAllCourses();
         console.log("res is ", response);
 
-        const tutorIds = response.map((course) => course.createdBy);
+        const tutorIds = response.map((course: ICourse) => course.createdBy);
         console.log("tut id is ", tutorIds);
 
         const tutors = await Promise.all(
-          tutorIds.map((tutorId) => fetchTutorById(tutorId))
+          tutorIds.map((tutorId:string) => fetchTutorById(tutorId))
         );
         console.log("tut detaisl is ", tutors);
 
-        const coursesWithTutors = response.map((course, index) => ({
+        const coursesWithTutors = response.map((course:ICourse, index: number) => ({
           ...course,
           name: course.title,
           tutor: tutors[index]?.name || "Unknown",
@@ -83,8 +84,8 @@ const sortedCourses = filteredByCategory.sort((a, b) => {
 
   useEffect(() => {
     const getCategories = async() => {
-      const response = await fetchCategories()
-      const icons = {
+      const response:string[] = await fetchCategories()
+      const icons:Record<string, string> = {
         Software: "/images/web.png",
         Business: "/images/datascience.png",
         Accounts: "/images/accounts.png",
@@ -100,7 +101,9 @@ const sortedCourses = filteredByCategory.sort((a, b) => {
     getCategories()
   }, [])
 
-const handleSortChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+
+
+const handleSortChange = (event: SelectChangeEvent<`${string}_${string}`>) => {
   const [field, order] = (event.target.value as string).split("_");
   setSortBy(field); 
   setSortOrder(order); 
@@ -271,7 +274,11 @@ useEffect(() => {
                 >
                   <Box
                     component="img"
-                    src={course.thumbnail}
+                    src={
+                      typeof course.thumbnail === "string"
+                        ? course.thumbnail
+                        : undefined
+                    }
                     alt={course.name}
                     sx={{
                       width: { xs: "100%", sm: "100%" },
@@ -351,9 +358,9 @@ useEffect(() => {
                       onClick={(e) => {
                         e.stopPropagation();
                         if (isCourseInWishlist(course._id)) {
-                          handleRemoveFromWishlistHandler(course._id); 
+                          handleRemoveFromWishlistHandler(course._id);
                         } else {
-                          handleAddToWishlistHandler(course._id); 
+                          handleAddToWishlistHandler(course._id);
                         }
                       }}
                     >

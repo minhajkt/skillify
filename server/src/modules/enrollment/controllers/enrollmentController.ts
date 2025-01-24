@@ -29,8 +29,14 @@ export class enrollmentController implements IEnrollmentController {
       const enrolledCourses =
         await this.enrollmentService.getAllEnrolledCoursesByStudent(id);
 
+      if(!enrolledCourses || enrolledCourses.length === 0) {
+        res.status(404).json('No courses enrolled')
+      }   
+
       res.status(200).json(enrolledCourses);
     } catch (error) {
+      console.log('no course');
+      
       res
         .status(500)
         .json({

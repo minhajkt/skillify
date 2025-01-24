@@ -1,4 +1,4 @@
-import { Box, Card, CardContent, IconButton, List, ListItem, ListItemText, Typography } from "@mui/material"
+import { Box, Card, CardContent, IconButton, Typography } from "@mui/material"
 // import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
 import {
@@ -8,16 +8,17 @@ import { useEffect, useState } from "react";
 import { enrolledStudents } from "../../api/enrollmentApi";
 
 
-const courseStrength = [
-  { name: "MERN Stack", value: 10 },
-  { name: "Python", value: 8 },
-  { name: "Communication", value: 5 },
-  { name: "Accounts", value: 2 },
-];
+// const courseStrength = [
+//   { name: "MERN Stack", value: 10 },
+//   { name: "Python", value: 8 },
+//   { name: "Communication", value: 5 },
+//   { name: "Accounts", value: 2 },
+// ];
 
 
 
 const AdminDashBoard = () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [studentStrength, setStudentStregnth] = useState('')
   useEffect(() => {
     const fetchTotalStrength = async() => {
@@ -106,6 +107,7 @@ const AdminDashBoard = () => {
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const StatsCard = ({
   title,
   value,

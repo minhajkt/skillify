@@ -44,7 +44,7 @@ const CheckoutButton: React.FC<CheckoutButtonProps> = ({disabled}) => {
       }
     } catch (error) {
       console.error("checkout failed", error);
-      setError(error.message);
+      setError((error as Error).message);
       throw handleAxiosError(error);
     } finally {
       setIsLoading(false);

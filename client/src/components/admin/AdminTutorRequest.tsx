@@ -19,18 +19,13 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import { fetchTutorRequests, updateTutorsApproval } from "../../api/adminApi";
 import TutorDetailsModal from "./TutorDetailsModal";
+import { ITutor } from "../../types/types";
 
-type Tutor = {
-  _id: string;
-  name: string;
-  email: string;
-  status: string;
-  isApproved: string
-};
+
 
 const AdminTutorRequest = () => {
-  const [tutors, setTutors] = useState<Tutor[]>([]);
-  const [selectedTutor, setSelectedTutor] = useState<Tutor | null>(null);
+  const [tutors, setTutors] = useState<ITutor[]>([]);
+  const [selectedTutor, setSelectedTutor] = useState<ITutor | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [page, setPage] = useState(0);
@@ -59,7 +54,7 @@ const AdminTutorRequest = () => {
     getTutorRequests();
   }, []);
 
-    const handleOpenModal = (tutor: Tutor) => {
+    const handleOpenModal = (tutor: ITutor) => {
       setSelectedTutor(tutor);
       setModalOpen(true);
     };

@@ -24,20 +24,12 @@ import { useEffect, useState } from "react";
 import BlockIcon from "@mui/icons-material/Block";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { fetchTutors, updateTutorsStatus } from "../../api/adminApi";
+import {ITutor} from '../../types/types'
 
-
-
-type Tutor = {
-  _id: string;
-  name: string;
-  email: string;
-  status: string;
-  isActive: boolean;
-};
 
 const AdminTutor = () => {
-  const [tutors, setTutors] = useState<Tutor[]>([]);
-  const [filteredTutors, setFilteredTutors] = useState<Tutor[]>([]); 
+  const [tutors, setTutors] = useState<ITutor[]>([]);
+  const [filteredTutors, setFilteredTutors] = useState<ITutor[]>([]); 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [sortConfig, setSortConfig] = useState<{

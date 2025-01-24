@@ -1,19 +1,13 @@
 import React from "react";
 import { Modal, Box, Typography, Button } from "@mui/material";
 import { Visibility as VisibilityIcon } from "@mui/icons-material";
+import { ITutor } from "../../types/types";
 
-type Tutor = {
-  _id: string;
-  name: string;
-  email: string;
-  bio: string;
-  certificates: string[]; 
-};
 
 type TutorDetailModalProps = {
   open: boolean;
   onClose: () => void;
-  tutor: Tutor | null;
+  tutor: ITutor | null;
 };
 
 const TutorDetailsModal: React.FC<TutorDetailModalProps> = ({

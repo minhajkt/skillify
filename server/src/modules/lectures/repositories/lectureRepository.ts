@@ -39,12 +39,19 @@ export class LectureRepository implements ILectureRepository {
     }
   }
 
-  async updateLecture(lectureId: string,updatedData: Partial<ILecture>): Promise<ILecture | null> {
+  async updateLecture(
+    lectureId: string,
+    updatedData: Partial<ILecture>
+  ): Promise<ILecture | null> {
     return await Lecture.findByIdAndUpdate(lectureId, updatedData, {
-      new: true, 
+      new: true,
     });
   }
   async getLecturesByCourse(courseId: string): Promise<ILecture[]> {
     return await Lecture.find({ courseId }).sort({ order: 1 });
+  }
+
+  async getLectureById(lectureId: string): Promise<ILecture | null> {
+    return await Lecture.findById(lectureId);
   }
 }

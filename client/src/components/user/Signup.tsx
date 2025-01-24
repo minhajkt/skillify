@@ -4,22 +4,9 @@ import { googleSignIn, signupUser } from "../../api/authApi";
 import { Box, Grid, Typography, TextField, Button, } from "@mui/material";
 import SignupOTPModal from "../shared/SignupOTPModal";
 import { Formik, Form, Field } from "formik";
-import * as Yup from "yup";
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
-import { AxiosError } from "axios";
+import { SignupSchema } from "../../schemas/schemas";
 
-const SignupSchema = Yup.object().shape({
-  name: Yup.string().required("Full Name is required"),
-  email: Yup.string()
-    .email("Invalid email address")
-    .required("Email is required"),
-  password: Yup.string()
-    .min(3, "Password should be of minimum 3 charecters for user")
-    .required("Password is required"),
-  confirmPassword: Yup.string()
-    .oneOf([Yup.ref("password"), undefined], "Passwords must match")
-    .required("Confirm password is required"),
-});
 
 const Signup = () => {
   const navigate = useNavigate()
@@ -30,6 +17,9 @@ const Signup = () => {
   const [status, setStatus] = useState<
     "idle" | "loading" | "success" | "error"
   >("idle");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [otpSent, setOtpSent] = useState(false);
+  
 
     const handleGoogleSuccess = async (
       credentialResponse: CredentialResponse
@@ -54,6 +44,7 @@ const Signup = () => {
       if (userData) {
         setEmailForOtp(email);
         setIsOtpModalOpen(true);
+        setOtpSent(true)
       }
       setStatus("idle");
     } catch (error) {
@@ -72,6 +63,8 @@ const Signup = () => {
           open={isOtpModalOpen}
           handleClose={() => setIsOtpModalOpen(false)}
           email={emailForOtp}
+          setOtpSent={setOtpSent}
+          otpSent={otpSent}
         />
         <Grid
           item

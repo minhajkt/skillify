@@ -18,10 +18,15 @@ const SignupOTPModal = ({
   open,
   handleClose,
   email,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  setOtpSent,
+  otpSent
 }: {
   open: boolean;
   handleClose: () => void;
   email: string;
+  setOtpSent:  React.Dispatch<React.SetStateAction<boolean>>;
+  otpSent: boolean;
 }) => {
   const [OTP, setOTP] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -36,13 +41,16 @@ const SignupOTPModal = ({
 
 useEffect(() => {
   let interval: NodeJS.Timeout;
-  if (timer > 0) {
+  if (otpSent && timer > 0) {
     interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
-  } else {
-    setCanResend(true); 
+    // console.log(timer);
+  } else if(otpSent && timer < 1){
+    setCanResend(true);
   }
-  return () => clearInterval(interval); 
-}, [timer]);
+  return () => {
+    if (interval) clearInterval(interval);
+  };
+}, [timer, otpSent]);
 
   const handleSubmit = async () => {
     try {
@@ -83,10 +91,11 @@ useEffect(() => {
 
     const handleResendOtp = async () => {
       try {
+        setErrorMessage('')
         setCanResend(false); 
         setTimer(60); 
-        await axiosInstance.post("/users/resend-otp", { email }); 
         setSuccessMessage("A new OTP has been sent to your email.");
+        await axiosInstance.post("/users/resend-otp", { email }); 
             setTimeout(() => {
               setSuccessMessage("");
             }, 2000);

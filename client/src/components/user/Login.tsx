@@ -11,17 +11,9 @@ import {
 } from "@mui/material";
 import ForgotPasswordModal from "../shared/ForgotPasswordModal";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
-import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
+import { LoginSchema } from "../../schemas/schemas";
 
-export const LoginSchema = Yup.object().shape({
-  email: Yup.string()
-    .email("Invalid email address")
-    .required("Email is required"),
-  password: Yup.string()
-    .min(3, "Password must be at least 3 characters long")
-    .required("Password is required"),
-});
 
 const Login = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);

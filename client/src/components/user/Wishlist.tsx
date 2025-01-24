@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 // import FavoriteIcon from "@mui/icons-material/Favorite";
 import { Favorite as FavoriteIcon } from '@mui/icons-material';
 import { axiosInstance } from "../../api/axiosInstance";
+import Navbar from "../shared/Navbar";
 
 const Wishlist = () => {
   const [wishlistCourses, setWishlistCourses] = useState([]);
@@ -47,7 +48,7 @@ const Wishlist = () => {
         alignItems: "center",
       }}
     >
-      
+      <Navbar />
       <Typography
         variant="h4"
         sx={{
@@ -58,6 +59,7 @@ const Wishlist = () => {
           borderBottom: "3px solid #1a237e",
           paddingBottom: 2,
           display: "inline-block",
+          mt: "64px"
         }}
       >
         My Wishlist

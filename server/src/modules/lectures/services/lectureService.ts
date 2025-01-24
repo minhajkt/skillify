@@ -41,13 +41,17 @@ export class LectureService implements ILectureService {
     await this.lectureRepo.addLecture(courseId, lectureId);
   }
 
-  async editLecture(lectureId: string,updatedData: Partial<ILecture>, file?: Express.Multer.File): Promise<ILecture | null> {
+  async editLecture(
+    lectureId: string,
+    updatedData: Partial<ILecture>,
+    file?: Express.Multer.File
+  ): Promise<ILecture | null> {
     try {
-      if(file) {
+      if (file) {
         const result = await cloudinary.v2.uploader.upload(file.path, {
           folder: "lecture_videos",
-          resource_type:"auto"
-        })
+          resource_type: "auto",
+        });
         updatedData.videoUrl = result.secure_url;
         // console.log('updated videos', updatedData.videoUrl);
       }
@@ -60,11 +64,21 @@ export class LectureService implements ILectureService {
 
   async getLecturesByCourse(courseId: string): Promise<ILecture[]> {
     try {
-      return await this.lectureRepo.getLecturesByCourse(courseId);
+      const lecture = await this.lectureRepo.getLecturesByCourse(courseId);
+
+      return lecture;
     } catch (error) {
       throw new Error(
         `Error fetching lectures for course: ${(error as Error).message}`
       );
+    }
+  }
+
+  async getLectureById(lectureId: string): Promise<ILecture | null> {
+    try {
+      return await this.lectureRepo.getLectureById(lectureId);
+    } catch (error) {
+      throw new Error(`Error fetching lecture: ${(error as Error).message}`);
     }
   }
 }

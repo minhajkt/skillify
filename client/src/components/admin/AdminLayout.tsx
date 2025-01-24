@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Box,
   List,
@@ -60,8 +61,13 @@ const AdminLayout = () => {
       >
         <List>
           <ListItem
-            sx={{ cursor: "pointer" }}
-            button
+            sx={{
+              cursor: "pointer",
+              "&:hover": {
+                backgroundColor: "rgba(0, 0, 0, 0.04)",
+              },
+            }}
+            component="li"
             onClick={() => navigate("/admin/dashboard")}
           >
             <ListItemIcon>
@@ -77,8 +83,13 @@ const AdminLayout = () => {
             />
           </ListItem>
           <ListItem
-            sx={{ cursor: "pointer" }}
-            button
+            sx={{
+              cursor: "pointer",
+              "&:hover": {
+                backgroundColor: "rgba(0, 0, 0, 0.04)",
+              },
+            }}
+            component="li"
             onClick={() => navigate("/admin/courses")}
           >
             <ListItemIcon>
@@ -94,8 +105,13 @@ const AdminLayout = () => {
             />
           </ListItem>
           <ListItem
-            sx={{ cursor: "pointer" }}
-            button
+            sx={{
+              cursor: "pointer",
+              "&:hover": {
+                backgroundColor: "rgba(0, 0, 0, 0.04)",
+              },
+            }}
+            component="li"
             onClick={() => navigate("/admin/tutors")}
           >
             <ListItemIcon>
@@ -111,8 +127,13 @@ const AdminLayout = () => {
             />
           </ListItem>
           <ListItem
-            sx={{ cursor: "pointer" }}
-            button
+            sx={{
+              cursor: "pointer",
+              "&:hover": {
+                backgroundColor: "rgba(0, 0, 0, 0.04)",
+              },
+            }}
+            component="li"
             onClick={() => navigate("/admin/students")}
           >
             <ListItemIcon>
@@ -128,8 +149,13 @@ const AdminLayout = () => {
             />
           </ListItem>
           <ListItem
-            sx={{ cursor: "pointer" }}
-            button
+            sx={{
+              cursor: "pointer",
+              "&:hover": {
+                backgroundColor: "rgba(0, 0, 0, 0.04)",
+              },
+            }}
+            component="li"
             onClick={() => navigate("/admin/tutor-requests")}
           >
             <ListItemIcon>
@@ -145,8 +171,13 @@ const AdminLayout = () => {
             />
           </ListItem>
           <ListItem
-            sx={{ cursor: "pointer" }}
-            button
+            sx={{
+              cursor: "pointer",
+              "&:hover": {
+                backgroundColor: "rgba(0, 0, 0, 0.04)",
+              },
+            }}
+            component="li"
             onClick={() => navigate("/admin/course-requests")}
           >
             <ListItemIcon>
@@ -162,8 +193,13 @@ const AdminLayout = () => {
             />
           </ListItem>
           <ListItem
-            sx={{ cursor: "pointer" }}
-            button
+            sx={{
+              cursor: "pointer",
+              "&:hover": {
+                backgroundColor: "rgba(0, 0, 0, 0.04)",
+              },
+            }}
+            component="li"
             onClick={() => navigate("/admin/course-complaints")}
           >
             <ListItemIcon>
@@ -192,8 +228,13 @@ const AdminLayout = () => {
             />
           </ListItem>
           <ListItem
-            sx={{ cursor: "pointer" }}
-            button
+            sx={{
+              cursor: "pointer",
+              "&:hover": {
+                backgroundColor: "rgba(0, 0, 0, 0.04)",
+              },
+            }}
+            component="li"
             onClick={() => handleLogout()}
           >
             <ListItemIcon>

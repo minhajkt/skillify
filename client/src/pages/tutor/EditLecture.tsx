@@ -15,44 +15,10 @@ import { addLecture } from "../../api/lectureApi";
 import { useNavigate, useParams } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
 import { Formik, Form, Field, FormikHelpers, FieldArray } from "formik";
-import * as Yup from "yup";
-interface Lecture {
-  title: string;
-  description: string;
-  duration: string;
-  order: string;
-  videoFile: File | null;
-}
+import { formSchema } from "../../schemas/schemas";
+import { FormValues } from "../../types/types";
 
-interface FormValues {
-  lectures: Lecture[];
-}
-const lectureSchema = Yup.object().shape({
-  title: Yup.string().required("Title is required"),
-  description: Yup.string().required("Description is required"),
-  duration: Yup.number()
-    .required("Duration is required")
-    .positive("Duration must be a positive number"),
-  order: Yup.number()
-    .required("Order is required")
-    .positive("Order must be a positive number"),
-  videoFile: Yup.mixed()
-    .required("Video file is required")
-    .test("fileType", "Invalid video format", (value) => {
-      const file = value as File;
-      return file
-        ? ["video/mp4", "video/webm", "video/avi"].includes(file.type)
-        : true;
-    })
-    .test("fileSize", "Video file is too large", (value) => {
-      const file = value as File;
-      return file ? file.size <= 100 * 1024 * 1024 : true;
-    }),
-});
 
-const formSchema = Yup.object().shape({
-  lectures: Yup.array().of(lectureSchema),
-});
 
 const EditLecture = () => {
   const [errorMessage, setErrorMessage] = useState("");
@@ -257,10 +223,13 @@ const EditLecture = () => {
                                 {...field}
                                 error={
                                   touched.lectures?.[index]?.title &&
+                                  typeof errors.lectures?.[index] === "object" &&
+
                                   Boolean(errors.lectures?.[index]?.title)
                                 }
                                 helperText={
                                   touched.lectures?.[index]?.title &&
+                                  typeof errors.lectures?.[index] === "object" &&
                                   errors.lectures?.[index]?.title
                                     ? errors.lectures?.[index]?.title
                                     : " "
@@ -282,10 +251,12 @@ const EditLecture = () => {
                                 {...field}
                                 error={
                                   touched.lectures?.[index]?.description &&
+                                  typeof errors.lectures?.[index] === "object" &&
                                   Boolean(errors.lectures?.[index]?.description)
                                 }
                                 helperText={
                                   touched.lectures?.[index]?.description &&
+                                  typeof errors.lectures?.[index] === "object" &&
                                   errors.lectures?.[index]?.description
                                     ? errors.lectures?.[index]?.description
                                     : " "
@@ -307,10 +278,12 @@ const EditLecture = () => {
                                 {...field}
                                 error={
                                   touched.lectures?.[index]?.duration &&
+                                  typeof errors.lectures?.[index] === "object" &&
                                   Boolean(errors.lectures?.[index]?.duration)
                                 }
                                 helperText={
                                   touched.lectures?.[index]?.duration &&
+                                  typeof errors.lectures?.[index] === "object" &&
                                   errors.lectures?.[index]?.duration
                                     ? errors.lectures?.[index]?.duration
                                     : " "
@@ -332,10 +305,12 @@ const EditLecture = () => {
                                 {...field}
                                 error={
                                   touched.lectures?.[index]?.order &&
+                                  typeof errors.lectures?.[index] === "object" &&
                                   Boolean(errors.lectures?.[index]?.order)
                                 }
                                 helperText={
                                   touched.lectures?.[index]?.order &&
+                                  typeof errors.lectures?.[index] === "object" &&
                                   errors.lectures?.[index]?.order
                                     ? errors.lectures?.[index]?.order
                                     : " "
@@ -355,6 +330,7 @@ const EditLecture = () => {
                             style={{ marginTop: "8px", width: "100%" }}
                           />
                           {touched.lectures?.[index]?.videoFile &&
+                                  typeof errors.lectures?.[index] === "object" &&
                             errors.lectures?.[index]?.videoFile && (
                               <Typography variant="caption" color="error">
                                 {errors.lectures[index].videoFile

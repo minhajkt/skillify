@@ -3,6 +3,7 @@ import { authenticateJWT } from '../../middlewares/authenticateJWT';
 import { reviewController } from './controllers/reviewController';
 import { ReviewRepository } from './repositories/reviewRepository';
 import { ReviewService } from './services/reviewService';
+import Review from './models/reivewModel'
 
 const reviewRouter = express.Router()
 
@@ -15,6 +16,13 @@ reviewRouter.get('/reviews/:courseId', reviewcontroller.getReviews.bind(reviewco
 reviewRouter.get('/reviews/user/:userId/course/:courseId', reviewcontroller.getUserReview.bind(reviewcontroller))
 reviewRouter.put('/reviews/user/:userId/course/:courseId', reviewcontroller.updateCourseReview.bind(reviewcontroller));
 reviewRouter.delete('/reviews/:courseId/:userId', reviewcontroller.deleteReview.bind(reviewcontroller));
-
+reviewRouter.get("/api/reviews/ratings", async (req, res) => {
+  const ratings = await Review.aggregate([
+    { $group: { _id: "$courseId", averageRating: { $avg: "$rating" } } },
+  ]);
+  console.log('ratingns,', ratings);
+  
+  res.json(ratings);
+});
 export default reviewRouter;
 

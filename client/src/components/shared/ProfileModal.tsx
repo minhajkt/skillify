@@ -11,13 +11,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { axiosInstance } from "../../api/axiosInstance";
-import { updateUser } from "../../store/authSlice";
-
-interface User {
-  _id: string;
-  name: string;
-  profilePhoto: string;
-}
+import {User, updateUser } from "../../store/authSlice";
 
 interface ProfileModalProps {
   user: User;
@@ -65,7 +59,6 @@ const ProfileModal = ({ user, onClose }: ProfileModalProps) => {
       );
 
       dispatch(updateUser(response.data));
-      console.log("Profile updated:", response.data);
       setSuccessSnackbar(true);
       console.log("Snackbar should open:", successSnackbar);
       setTimeout(() => {
@@ -199,51 +192,6 @@ const ProfileModal = ({ user, onClose }: ProfileModalProps) => {
       </Box>
     </Box>
 
-    // <Box sx={{ bgcolor: "yellow" }}>
-    //   <h2>Update Profile</h2>
-
-    //   <TextField
-    //     label="Name"
-    //     variant="outlined"
-    //     value={name}
-    //     onChange={(e) => setName(e.target.value)}
-    //     fullWidth
-    //     margin="normal"
-    //   />
-
-    //   <Box display="flex" alignItems="center" gap={2}>
-    //     <Avatar
-    //       src={photo ? URL.createObjectURL(photo) : user?.profilePhoto}
-    //       sx={{ width: 56, height: 56 }}
-    //     />
-    //     <input
-    //       type="file"
-    //       accept="image/*"
-    //       onChange={handleFileChange}
-    //       style={{ display: "none" }}
-    //       id="profile-photo-input"
-    //     />
-    //     <label htmlFor="profile-photo-input">
-    //       <Button variant="outlined" component="span">
-    //         Change Photo
-    //       </Button>
-    //     </label>
-    //   </Box>
-
-    //   {error && <p style={{ color: "red" }}>{error}</p>}
-
-    //   <Button
-    //     variant="contained"
-    //     onClick={handleSaveProfile}
-    //     disabled={isLoading}
-    //     sx={{ marginTop: 2 }}
-    //   >
-    //     {isLoading ? <CircularProgress size={24} /> : "Save Profile"}
-    //   </Button>
-    //   <Button variant="outlined" onClick={onClose} sx={{ marginRight: 2, marginTop: 2}}>
-    //     Cancel
-    //   </Button>
-    // </Box>
   );
 };
 

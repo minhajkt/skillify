@@ -12,4 +12,5 @@ export interface ILectureService {
   ): Promise<void>;
   getLecturesByCourse(courseId: string): Promise<ILecture[]>;
   editLecture(lectureId: string,updatedData: Partial<ILecture>, file?: Express.Multer.File): Promise<ILecture | null>
+   getLectureById(lectureId: string): Promise<ILecture | null>
 }
