@@ -23,3 +23,13 @@ export const fetchTutorCourseDetails = async (courseId: string) => {
     handleAxiosError(error);
   }
 };
+
+export const getTutorCount = async() => {
+  try {
+    const response = await axiosInstance.get('/user/tutor-count')
+    return response.data
+    
+  } catch (error) {
+    handleAxiosError(error)
+  }
+}

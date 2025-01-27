@@ -146,8 +146,9 @@ const Signup = () => {
             }}
             validationSchema={SignupSchema}
             onSubmit={handleSignup}
+            validateOnMount={true}
           >
-            {({ isSubmitting, touched, errors }) => (
+            {({ isSubmitting, touched, errors, isValid }) => (
               <Form>
                 <Box component="div" sx={{ width: "100%", maxWidth: 400 }}>
                   <Field
@@ -226,7 +227,7 @@ const Signup = () => {
                       color="primary"
                       sx={{ marginTop: 1, width: "30%" }}
                       type="submit"
-                      disabled={isSubmitting || status === "loading"}
+                      disabled={isSubmitting || !isValid || status === "loading"}
                     >
                       {isSubmitting || status === "loading"
                         ? "Signing up..."

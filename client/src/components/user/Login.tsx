@@ -14,7 +14,6 @@ import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { Formik, Form, Field } from "formik";
 import { LoginSchema } from "../../schemas/schemas";
 
-
 const Login = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -33,7 +32,7 @@ const Login = () => {
   const handleCloseModal = () => setIsModalOpen(false);
 
   const handleLogin = async (values: { email: string; password: string }) => {
-    setErrorMessage(null); 
+    setErrorMessage(null);
     try {
       const { email, password } = values;
       const userData = await loginUser(email, password);
@@ -135,8 +134,9 @@ const Login = () => {
           }}
           validationSchema={LoginSchema}
           onSubmit={handleLogin}
+          validateOnMount={true}
         >
-          {({ errors, touched, isSubmitting }) => (
+          {({ errors, touched, isSubmitting, isValid }) => (
             <Form>
               <Box sx={{ width: "100%", maxWidth: 400 }}>
                 <Field
@@ -185,7 +185,7 @@ const Login = () => {
                     color="primary"
                     sx={{ marginTop: 1, width: "30%" }}
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || !isValid}
                   >
                     {isSubmitting ? "..." : "Log In"}
                   </Button>

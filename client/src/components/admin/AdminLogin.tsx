@@ -144,10 +144,11 @@ const AdminLogin = () => {
           }}
           validationSchema={LoginSchema}
           onSubmit={handleLogin}
+          validateOnMount={true}
         >
-         {({ errors, touched, isSubmitting }) => (
-          <Form>
-           <Box  sx={{ width: "100%", maxWidth: 400 }}>
+          {({ errors, touched, isSubmitting, isValid }) => (
+            <Form>
+              <Box sx={{ width: "100%", maxWidth: 400 }}>
                 <Field
                   name="email"
                   as={TextField}
@@ -156,7 +157,9 @@ const AdminLogin = () => {
                   fullWidth
                   sx={{ marginTop: 0, marginBottom: 0 }}
                   error={touched.email && Boolean(errors.email)}
-                  helperText={touched.email && errors.email? errors.email: ' '}
+                  helperText={
+                    touched.email && errors.email ? errors.email : " "
+                  }
                 />
                 <Field
                   name="password"
@@ -165,39 +168,41 @@ const AdminLogin = () => {
                   label="Password"
                   variant="outlined"
                   fullWidth
-                  sx={{ marginTop: 0, marginBottom:0,}}
+                  sx={{ marginTop: 0, marginBottom: 0 }}
                   error={touched.password && Boolean(errors.password)}
-                  helperText={touched.password && errors.password ?  errors.password  : ""}
+                  helperText={
+                    touched.password && errors.password ? errors.password : ""
+                  }
                 />
-          <Typography
-            variant="body2"
-            textAlign="end"
-            sx={{ marginBottom: 1, color: "#1e90ff", cursor: "pointer" }}
-            onClick={handleOpenModal}
-          >
-            Forgot password?
-          </Typography>
+                <Typography
+                  variant="body2"
+                  textAlign="end"
+                  sx={{ marginBottom: 1, color: "#1e90ff", cursor: "pointer" }}
+                  onClick={handleOpenModal}
+                >
+                  Forgot password?
+                </Typography>
 
-          <ForgotPasswordModal
-            open={isModalOpen}
-            handleClose={handleCloseModal}
-          />
+                <ForgotPasswordModal
+                  open={isModalOpen}
+                  handleClose={handleCloseModal}
+                />
 
-          <Box display={"flex"} justifyContent={"center"}>
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{ marginTop: 1, width: "30%" }}
-              type="submit"
-              disabled={isSubmitting}
-              >
-              {isSubmitting ? "..." : "Log In"}
-            </Button>
-          </Box>
-        </Box>
-        </Form>
-         )}
-         </Formik>
+                <Box display={"flex"} justifyContent={"center"}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    sx={{ marginTop: 1, width: "30%" }}
+                    type="submit"
+                    disabled={isSubmitting || !isValid}
+                  >
+                    {isSubmitting ? "..." : "Log In"}
+                  </Button>
+                </Box>
+              </Box>
+            </Form>
+          )}
+        </Formik>
       </Grid>
     </Grid>
   );

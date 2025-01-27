@@ -169,4 +169,7 @@ export class AdminController implements IAdminController {
   };
 
 
+  // for admin dashboard
+
+  async totalEnrollments
 }

@@ -214,12 +214,43 @@ const AdminLayout = () => {
               }}
             />
           </ListItem>
-          <ListItem>
+          <ListItem
+            sx={{
+              cursor: "pointer",
+              "&:hover": {
+                backgroundColor: "rgba(0, 0, 0, 0.04)",
+              },
+            }}
+            component="li"
+            onClick={() => navigate("/admin/pending-payments")}
+          >
             <ListItemIcon>
               <PaymentIcon />
             </ListItemIcon>
             <ListItemText
-              primary="Payments"
+              primary="Payments Pending"
+              sx={{
+                "& .MuiListItemText-primary": {
+                  fontSize: { xs: "0.8rem", sm: "1rem" },
+                },
+              }}
+            />
+          </ListItem>
+          <ListItem
+            sx={{
+              cursor: "pointer",
+              "&:hover": {
+                backgroundColor: "rgba(0, 0, 0, 0.04)",
+              },
+            }}
+            component="li"
+            onClick={() => navigate("/admin/payments-history")}
+          >
+            <ListItemIcon>
+              <PaymentIcon />
+            </ListItemIcon>
+            <ListItemText
+              primary="Payment History"
               sx={{
                 "& .MuiListItemText-primary": {
                   fontSize: { xs: "0.8rem", sm: "1rem" },

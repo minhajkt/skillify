@@ -9,4 +9,5 @@ export interface ICourseService {
     addLectureToCourse(courseId: mongoose.Types.ObjectId,lectureId: mongoose.Types.ObjectId): Promise<void> 
      editCourse(courseId: string,updatedData: Partial<ICourse>, file?: Express.Multer.File): Promise<ICourse | null>
      toggleBlockStatus(courseId:string, status:string):Promise<ICourse>
+     countCourses() : Promise<number>
 }

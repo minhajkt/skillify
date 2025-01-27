@@ -36,6 +36,10 @@ import Wishlist from "./components/user/Wishlist";
 import EditCourse from "./pages/tutor/EditCourse";
 import EditLecture from "./pages/tutor/EditLecture";
 import CourseComplaints from "./components/admin/CourseComplaints";
+import ProtectedRoutes from "./components/protectedRoutes/ProtectedRoutes";
+import PendingPayments from "./components/admin/PendingPayments";
+import PaymentHistory from "./components/admin/PaymentHistory";
+import TutorPayments from "./components/tutor/TutorPayments";
 
 const stripePromise = loadStripe(
   "pk_test_51QfLoJF574cRRlb7gt4W52ZaKOrTVvdRuxGB5nDgXRQhugeedtvDfqKPFTVryX1uBAnthR40zUGYMeyE7baknYkD00Ar4wRwmH"
@@ -58,6 +62,7 @@ function App() {
             <Route path="/tutors/signup" element={<TutorSignupPage />} />
             <Route path="/tutors/login" element={<TutorLoginPage />} />
             <Route path="/tutors/home" element={<TutorHome />} />
+            <Route path="/tutors/payment/:tutorId" element={<TutorPayments />} />
             <Route
               path="/tutor/edit-course/:courseId"
               element={<EditCourse />}
@@ -84,7 +89,14 @@ function App() {
             />
             <Route path="/wishlist" element={<Wishlist />} />
 
-            <Route path="/admin" element={<AdminLayout />}>
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoutes requiredRole="admin">
+                  <AdminLayout />
+                </ProtectedRoutes>
+              }
+            >
               <Route index element={<Navigate to={"dashboard"} />} />
               <Route path="dashboard" element={<AdminDashBoard />} />
               <Route path="courses" element={<AdminCourse />} />
@@ -93,6 +105,8 @@ function App() {
               <Route path="tutor-requests" element={<AdminTutorRequest />} />
               <Route path="course-requests" element={<AdminCourseRequest />} />
               <Route path="course-complaints" element={<CourseComplaints />} />
+              <Route path="pending-payments" element={<PendingPayments />} />
+              <Route path="payments-history" element={<PaymentHistory />} />
               <Route
                 path="/admin/course-details/:courseId"
                 element={<AdminCourseDetailsPage />}

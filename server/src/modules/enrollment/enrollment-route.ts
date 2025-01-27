@@ -14,7 +14,9 @@ const enrollmentcontroller = new enrollmentController(enrollmentService)
 // enrollmentRouter.post('/create-enrollment', enrollmentController.createEnrollment)   
 
 enrollmentRouter.get('/enrollment/my-courses', authenticateJWT, enrollmentcontroller.getAllEnrolledCoursesByStudent.bind(enrollmentcontroller))
-enrollmentRouter.get('/enrollment/total', enrollmentcontroller.totalEnrolledStudents.bind(enrollmentcontroller))
+enrollmentRouter.get('/enrollment/total',enrollmentcontroller.totalEnrolledStudents.bind(enrollmentcontroller))
+enrollmentRouter.get('/enrollment/total-revenue', enrollmentcontroller.totalRevenue.bind(enrollmentcontroller))
+enrollmentRouter.get('/enrollment/strength', enrollmentcontroller.courseStrength.bind(enrollmentcontroller))
 // enrollmentRouter.get('/enrollment/total/:couseId', enrollmentController.totalStudentsInEachCourse)
 
 export default enrollmentRouter;

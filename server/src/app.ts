@@ -14,6 +14,8 @@ import enrollmentRouter from './modules/enrollment/enrollment-route';
 import reviewRouter from './modules/review/review-routes'
 import wishlistRouter from './modules/wishlist/wishlist-route'
 import reportRouter from './modules/report/report-route'
+import paymentRouter from './modules/payments/payment-route'
+
 
 const app = express()
 
@@ -47,6 +49,7 @@ app.use('/api', enrollmentRouter)
 app.use('/api', reviewRouter)
 app.use("/api", wishlistRouter);
 app.use("/api", reportRouter);
+app.use("/api", paymentRouter);
 
 app.get('/', (req, res) => {
     res.send("hello world")

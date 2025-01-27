@@ -29,4 +29,14 @@ export class EnrollmentService implements IEnrollmentService{
         const totalStudents = await this.enrollmentRepo.countEnrollments()
         return totalStudents;
     }
+
+    async totalRevenue (): Promise<number> {
+        const totalRevenue = await this.enrollmentRepo.totalRevenue()
+        return totalRevenue
+    }
+
+    async courseStrength(): Promise<{name: string, value:number}[]> {
+        const courseStrength = await this.enrollmentRepo.courseStrength()
+        return courseStrength;
+    }
 }

@@ -33,8 +33,8 @@ export class UserRepository implements IUserRepository {
     return await User.find({ role: "user" });
   }
 
-  async findAllTutors(): Promise<IUser[]> {
-    return await User.find({ role: "tutor" });
+  async findAllTutors(approvalStatus: string): Promise<number> {
+    return await User.countDocuments({ role: "tutor", isApproved: approvalStatus })
   }
 
   async getUserById(id: String): Promise<IUser | null> {

@@ -57,4 +57,10 @@ export class CourseRepository implements ICourseRepository {
       { new: true }
     );
   }
+
+  async countCourses():Promise<number> {
+    const count = await Course.countDocuments();
+    // console.log(`Course count: ${count}`);
+    return count
+  }
 }

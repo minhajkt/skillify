@@ -274,13 +274,21 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
                     Wishlist
                   </MenuItem>
                 ) : user?.role === "tutor" ? (
-                  <MenuItem
-                    onClick={() => navigate("/tutors/create-course")}
-                    sx={{ fontSize: { xs: "small", md: "medium" } }}
-                  >
-                    Create Course
-                  </MenuItem>
+                    <MenuItem
+                      onClick={() => navigate("/tutors/create-course")}
+                      sx={{ fontSize: { xs: "small", md: "medium" } }}
+                    >
+                      Create Course
+                    </MenuItem>
                 ) : null}
+                {user?.role === 'tutor'? (
+                    <MenuItem
+                      onClick={() => navigate("/tutors/payment/:tutorId")}
+                      sx={{ fontSize: { xs: "small", md: "medium" } }}
+                    >
+                      Payments
+                    </MenuItem>
+                ): null}
                 <hr style={{ border: "1px solid #ECF2F0," }} />
                 <MenuItem
                   onClick={() => handleLogout()}
@@ -315,7 +323,9 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
           )}
         </Box>
       </Toolbar>
-      {modalOpen && user && <ProfileModal user={user} onClose={handleCloseModal} />}
+      {modalOpen && user && (
+        <ProfileModal user={user} onClose={handleCloseModal} />
+      )}
     </AppBar>
   );
 };

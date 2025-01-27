@@ -124,4 +124,18 @@ export class CourseController implements ICourseController {
       res.status(500).json({ message: (error as Error).message });
     }
   }
+
+  async countCourses(req: Request, res: Response): Promise<void> {
+    try {
+      const courseCount = await this.courseService.countCourses()
+      if(!courseCount) {
+        res.status(404).json('Course count not found')
+      }
+        res.status(200).json(courseCount)
+    } catch (error) {
+      console.log(error);
+      
+      res.status(500).json({message: (error as Error).message})
+    }
+  }
 }

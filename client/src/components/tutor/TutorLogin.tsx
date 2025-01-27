@@ -146,8 +146,9 @@ const TutorLogin = () => {
           }}
           validationSchema={LoginSchema}
           onSubmit={handleLogin}
+          validateOnMount={true}
         >
-          {({ errors, touched, isSubmitting }) => (
+          {({ errors, touched, isSubmitting, isValid }) => (
             <Form>
               <Box sx={{ width: "100%", maxWidth: 400 }}>
                 <Field
@@ -158,7 +159,9 @@ const TutorLogin = () => {
                   fullWidth
                   sx={{ marginTop: 0, marginBottom: 0 }}
                   error={touched.email && Boolean(errors.email)}
-                  helperText={touched.email && errors.email ? errors.email : " "}
+                  helperText={
+                    touched.email && errors.email ? errors.email : " "
+                  }
                 />
                 <Field
                   name="password"
@@ -172,7 +175,9 @@ const TutorLogin = () => {
                     marginBottom: 0,
                   }}
                   error={touched.password && Boolean(errors.password)}
-                  helperText={touched.password && errors.password? errors.password : " "}
+                  helperText={
+                    touched.password && errors.password ? errors.password : " "
+                  }
                 />
 
                 <Typography
@@ -194,7 +199,7 @@ const TutorLogin = () => {
                     color="primary"
                     sx={{ marginTop: 1, width: "30%" }}
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || !isValid}
                   >
                     {isSubmitting ? "..." : "Log In"}
                   </Button>

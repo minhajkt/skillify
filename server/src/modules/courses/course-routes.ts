@@ -24,8 +24,9 @@ courseRouter.post(
 );
 
 courseRouter.put('/course/:courseId', upload.single('thumbnail'), validateCourseUpdate, handleValidationErrors, coursecontroller.editCourse.bind(coursecontroller))
-courseRouter.get('/course/categories', coursecontroller.getCategories.bind(coursecontroller))
+courseRouter.get('/course/categories',coursecontroller.getCategories.bind(coursecontroller))
 courseRouter.get('/users/course-section/:courseId', coursecontroller.getUserCourse.bind(coursecontroller))
 courseRouter.patch("/course-request/:id/approval", coursecontroller.blockCourse.bind(coursecontroller));
+courseRouter.get('/total', coursecontroller.countCourses.bind(coursecontroller))
 
 export default courseRouter;

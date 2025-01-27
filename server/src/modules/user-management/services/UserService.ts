@@ -209,6 +209,9 @@ export class UserService implements IUserService {
     return this.userRepository.getCourseById(id);
   }
 
+  async getTutorCount(): Promise<number> {
+    return this.userRepository.findAllTutors('approved')
+  }
   // async getAllCourseForUser(): Promise<ICourse[]> {
   //   return await this.userRepository.getAllCourseForUser();
   // }

@@ -10,4 +10,5 @@ export interface ICourseRepository {
   findCourseById(courseId: string): Promise<ICourse | null> 
   updateCourse(courseId: string, updatedData: Partial<ICourse>, isApproved:string, editStatus: string): Promise<ICourse | null>
   updateBlockStatus(courseId:string, status: string): Promise<ICourse | null>
+  countCourses():Promise<number>
 }

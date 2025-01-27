@@ -147,8 +147,9 @@ const TutorSignup = () => {
             }}
             validationSchema={TutorSignupSchema}
             onSubmit={handleSignup}
+            validateOnMount={true}
           >
-            {({ errors, touched, setFieldValue, isSubmitting }) => (
+            {({ errors, touched, setFieldValue, isSubmitting, isValid }) => (
               <Form>
                 <Box sx={{ width: "100%", maxWidth: 400 }}>
                   <Field
@@ -170,7 +171,6 @@ const TutorSignup = () => {
                     label="Email Address"
                     variant="outlined"
                     fullWidth
-                    
                     sx={{
                       marginTop: 0,
                       marginBottom: "0",
@@ -255,7 +255,7 @@ const TutorSignup = () => {
                       color="primary"
                       sx={{ marginTop: 1, width: "30%" }}
                       type="submit"
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || !isValid}
                     >
                       {isSubmitting ? "..." : "Sign up"}
                     </Button>

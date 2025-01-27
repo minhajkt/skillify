@@ -6,4 +6,5 @@ export interface ICourseController {
   getCategories(req: Request, res: Response): Promise<void>;
   editCourse(req: Request, res: Response): Promise<void>;
   blockCourse(req: Request, res: Response): Promise<void>;
+  countCourses(req: Request, res: Response): Promise<void>;
 }

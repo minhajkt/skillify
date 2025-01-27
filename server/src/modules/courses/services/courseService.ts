@@ -95,4 +95,12 @@ export class CourseService implements ICourseService {
 
     return course;
   }
+
+  async countCourses() : Promise<number> {
+    const countCourse = await this.courseRepo.countCourses()
+if (typeof countCourse !== "number") {
+  throw new Error("Invalid count returned from repository");
+}
+    return countCourse
+  }
 }

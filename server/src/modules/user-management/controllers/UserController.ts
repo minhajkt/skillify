@@ -384,4 +384,18 @@ export class UserController implements IUserController {
         });
     }
   }
+
+  async getTutorCount(req: Request, res: Response): Promise<void> {
+    try {
+      const tutorCount = await this.userService.getTutorCount()
+      if(!tutorCount) {
+        res.status(404).json("No tutor")
+        return
+      }
+      res.status(200).json(tutorCount)
+    } catch (error) {
+      console.log(error);
+      res.status(500).json('An unexpected error occured')
+    }
+  }
 }

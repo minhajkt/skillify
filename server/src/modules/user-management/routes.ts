@@ -150,4 +150,6 @@ router.post(
   userController.stripePayment.bind(userController)
 );
 
+router.get('/user/tutor-count',userController.getTutorCount.bind(userController))
+
 export default router;

@@ -56,6 +56,35 @@ export class enrollmentController implements IEnrollmentController {
     }
   }
 
+  async totalRevenue(req: Request, res: Response): Promise<void> {
+    try {
+      const totalRevenue = await this.enrollmentService.totalRevenue()
+      if(!totalRevenue) {
+        res.status(404).json("Cannot find total revenue")
+        return
+      }
+      res.status(200).json(totalRevenue)
+    } catch (error) {
+      console.log("error occured while finding total revenue", error);
+      res.status(500).json('An unexpected error occured')
+    }
+  }
+
+  async courseStrength(req: Request, res: Response): Promise<void> {
+    try {
+      const courseStrength = await this.enrollmentService.courseStrength()
+      if(!courseStrength) {
+        res.status(404).json("No course strength found")
+        return
+      }
+      // console.log(courseStrength);
+      
+      res.status(200).json(courseStrength)
+    } catch (error) {
+      console.log('Failed to get course Strength', error);
+      res.status(500).json("An unexpected error occured")
+    }
+  }
   // for admin side displaying course strength
   
   // static totalStudentsInEachCourse = async(req: Request, res: Response) => {

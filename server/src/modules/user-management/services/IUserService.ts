@@ -25,4 +25,5 @@ export interface IUserService {
   updatePassword(userId: string, newPassword: string): Promise<IUser | null>;
   getUserByEmail(email: string): Promise<IUser | null>;
   getCourseById(id: string): Promise<IUser | null>;
+  getTutorCount(): Promise<number>;
 }
