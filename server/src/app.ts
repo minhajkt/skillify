@@ -1,4 +1,5 @@
 import express from 'express'
+import http from 'http'
 import cors from "cors"
 import connectDB from './config/db'
 import userRoutes from './modules/user-management/routes'
@@ -15,6 +16,9 @@ import reviewRouter from './modules/review/review-routes'
 import wishlistRouter from './modules/wishlist/wishlist-route'
 import reportRouter from './modules/report/report-route'
 import paymentRouter from './modules/payments/payment-route'
+import { initializeSocket } from './utils/socket'
+import messageRouter from './modules/messages/message-route'
+import progressRouter from './modules/courseProgress/progress-route'
 
 
 const app = express()
@@ -32,6 +36,9 @@ app.use("/webhook", express.raw({ type: "application/json" }), webhookRouter);
 
 app.use(express.json())
 
+const server = http.createServer(app)
+
+initializeSocket(server)
 
 const port = process.env.PORT || 5000;
 app.use(cookieParser());
@@ -50,12 +57,14 @@ app.use('/api', reviewRouter)
 app.use("/api", wishlistRouter);
 app.use("/api", reportRouter);
 app.use("/api", paymentRouter);
+app.use("/api", messageRouter);
+app.use('/api', progressRouter)
 
 app.get('/', (req, res) => {
     res.send("hello world")
 })
 
-app.listen(port , () => {
+server.listen(port , () => {
     console.log(`Listening to port ${port}`);
-    
 })
+

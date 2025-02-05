@@ -18,4 +18,5 @@ export interface IAdminRepository {
   getCourseRequests(): Promise<ICourse[]>;
 
   updatePassword(userId: string, newPassword: string): Promise<IUser | null>;
+  
 }

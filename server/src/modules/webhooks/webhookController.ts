@@ -3,6 +3,8 @@ import Stripe from "stripe";
 import Enrollment from "../enrollment/models/enrollmentModel";
 import Course from "../courses/models/courseModel";
 import Payment from "../payments/models/paymentModel";
+import Lecture from '../lectures/models/lectureModel'
+import Progress from '../courseProgress/models/progressModel'
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error(
@@ -16,6 +18,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 
 export default class WebhookController {
   static stripeWebhook = async (req: Request, res: Response): Promise<void> => {
+    console.log("Received a request at /webhook");
     const sig = req.headers["stripe-signature"] as string;
 
     let event;
@@ -26,6 +29,7 @@ export default class WebhookController {
         sig,
         process.env.STRIPE_WEBHOOK_SECRET!
       );
+      console.log("Webhook signature verification succeeded");
     } catch (error) {
       console.log(
         "Webhook signature verification failed:",
@@ -38,14 +42,18 @@ export default class WebhookController {
     let responseSent = false;
 
     try {
+      // console.log(`Received event of type: ${event.type}`);
+      // console.log("Event data:", JSON.stringify(event.data, null, 2));
       switch (event.type) {
         case "checkout.session.completed":
           const session = event.data.object as Stripe.Checkout.Session;
+          console.log("Checkout session completed:", session);
 
           const userId = session.metadata?.userId;
           const courseId = session.metadata?.courseId;
           const paymentMethod = session.payment_method_types[0];
           const amount = session.amount_total ? session.amount_total / 100 : 0;
+          console.log(`User ${userId} enrolled in course ${courseId}, amount: ${amount}`);
 
           await Enrollment.create({
             userId,
@@ -55,6 +63,23 @@ export default class WebhookController {
             amount,
           });
           console.log("Enrollment created for user", userId);
+
+// this is for progress tracking, creating progress model when a enrollment is created          
+          const totalLectures = await Lecture.countDocuments({courseId})
+
+          if(totalLectures === 0) {
+            console.log('No lectures found for this course');
+            return;
+          }
+
+          await Progress.create({
+            userId,
+            courseId,
+            totalLectures
+          })
+          console.log('Progress record this course for the user is created');
+          
+//
 
           const course = await Course.findById(courseId)
             .select("price createdBy")
@@ -104,9 +129,9 @@ export default class WebhookController {
           const failedAmount = paymentIntent.amount_received
             ? paymentIntent.amount_received / 100
             : 0;
-          console.log(
-            `Payment failed for user ${failedUserId}, amount: ${failedAmount}`
-          );
+          // console.log(
+          //   `Payment failed for user ${failedUserId}, amount: ${failedAmount}`
+          // );
 
           responseSent = true; 
           break;
@@ -129,89 +154,3 @@ export default class WebhookController {
     }
   };
 }
-
-/////////////////////////////////////////////////////////
-
-// import { Request, Response } from "express";
-// import Stripe from "stripe";
-// import Enrollment from "../enrollment/models/enrollmentModel";
-
-// if (!process.env.STRIPE_SECRET_KEY) {
-//   throw new Error(
-//     "STRIPE_SECRET_KEY is not defined in the environment variables."
-//   );
-// }
-
-// const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-//   apiVersion: "2024-12-18.acacia",
-// });
-
-// export default class WebhookController {
-//   static stripeWebhook = async (req: Request, res: Response): Promise<void> => {
-//     const sig = req.headers["stripe-signature"] as string;
-
-//     let event;
-
-//     try {
-//       event = stripe.webhooks.constructEvent(
-//         req.body,
-//         sig,
-//         process.env.STRIPE_WEBHOOK_SECRET!
-//       );
-//     } catch (error) {
-//       console.log(
-//         "Webhook signature verification failed:",
-//         (error as Error).message
-//       );
-//       res.status(400).send(`Webhook Error: ${(error as Error).message}`);
-//       return;
-//     }
-//     switch (event.type) {
-//       case "checkout.session.completed":
-//         const session = event.data.object as Stripe.Checkout.Session;
-
-//         try {
-//           const userId = session.metadata?.userId;
-//           const courseId = session.metadata?.courseId;
-//           const paymentMethod = session.payment_method_types[0];
-//           const amount = session.amount_total ? session.amount_total / 100 : 0;
-
-//           await Enrollment.create({
-//             userId,
-//             courseId,
-//             paymentMethod,
-//             paymentStatus: "Success",
-//             amount,
-//           });
-//           console.log("Enrollment created for user", userId);
-//         } catch (error) {
-//           console.log("Failed to create enrollment", (error as Error).message);
-//           res.status(500).send("Internal Server Error");
-//           return;
-//         }
-//         break;
-
-//       case "payment_intent.payment_failed":
-//         const paymentIntent = event.data.object as Stripe.PaymentIntent;
-
-//         try {
-//           const userId = paymentIntent.metadata?.userId;
-//           const amount = paymentIntent.amount_received
-//             ? paymentIntent.amount_received / 100
-//             : 0;
-//           console.log(`Payment failed for user ${userId}, amount: ${amount}`);
-//         } catch (error) {
-//           console.log(
-//             "Failed to handle failed payment",
-//             (error as Error).message
-//           );
-//           res.status(500).send("Internal Server Error");
-//           return;
-//         }
-//         break;
-//       default:
-//         console.log(`Unhandled event type ${event.type}`);
-//     }
-//     res.status(200).send("Event recieved");
-//   };
-// }

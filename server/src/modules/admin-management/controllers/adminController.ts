@@ -10,7 +10,6 @@ import { IAdminService } from "../services/IAdminService";
 import { IAdminController } from "./IAdminController";
 
 
-
 export class AdminController implements IAdminController {
   private adminService: IAdminService;
   constructor(adminService: IAdminService) {
@@ -46,7 +45,7 @@ export class AdminController implements IAdminController {
     try {
       const tutors = await this.adminService.getAllTutor();
       // console.log('tutors are', tutors);
-      
+
       res.status(200).json(tutors);
     } catch (error) {
       res.status(500).json({ message: (error as Error).message });
@@ -59,6 +58,18 @@ export class AdminController implements IAdminController {
       const tutor = await this.adminService.getTutorById(id);
 
       res.status(200).json(tutor);
+    } catch (error) {
+      console.log("error", error);
+      res.json(500).json({ message: "an error occured" });
+    }
+  }
+
+  async getStudentById(req: Request, res: Response): Promise<void> {
+    const { id } = req.params;
+    try {
+      const student = await this.adminService.getStudentById(id);
+
+      res.status(200).json(student);
     } catch (error) {
       console.log("error", error);
       res.json(500).json({ message: "an error occured" });
@@ -80,9 +91,9 @@ export class AdminController implements IAdminController {
       res.status(500).json({ message: (error as Error).message });
       return;
     }
-  };
+  }
 
-  async getTutorRequests(req: Request, res: Response):Promise<void> {
+  async getTutorRequests(req: Request, res: Response): Promise<void> {
     try {
       const tutorRequest = await this.adminService.getTutorRequests();
 
@@ -94,11 +105,9 @@ export class AdminController implements IAdminController {
       res.status(500).json({ message: (error as Error).message });
       return;
     }
-  };
+  }
 
-
-
-  async updateTutorApproval(req: Request,res: Response): Promise<void> {
+  async updateTutorApproval(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
     const { isApproved } = req.body;
 
@@ -124,9 +133,8 @@ export class AdminController implements IAdminController {
       res.status(500).json({ message: (error as Error).message });
       return;
     }
-  };
+  }
 
-  
   async getCourseRequests(req: Request, res: Response): Promise<void> {
     try {
       const courseRequest = await this.adminService.getCourseRequests();
@@ -143,20 +151,30 @@ export class AdminController implements IAdminController {
       });
       return;
     }
-  };
+  }
 
   async updateCourseApproval(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
     const { isApproved } = req.body;
     try {
-      const updatedCourse = await this.adminService.updateCourseApproval(id, isApproved)
+      const updatedCourse = await this.adminService.updateCourseApproval(
+        id,
+        isApproved
+      );
 
-      res.status(200).json({ message: "Course approval updated", updatedCourse });
+      res
+        .status(200)
+        .json({ message: "Course approval updated", updatedCourse });
     } catch (error) {
       console.log("error in course update");
-      res.status(500).json({message: "An unexpected error occured",error: (error as Error).message,});
+      res
+        .status(500)
+        .json({
+          message: "An unexpected error occured",
+          error: (error as Error).message,
+        });
     }
-  };
+  }
 
   async getAllCourse(req: Request, res: Response): Promise<void> {
     try {
@@ -164,12 +182,14 @@ export class AdminController implements IAdminController {
 
       res.status(200).json(courses);
     } catch (error) {
-       res.status(500).json({message: "An unexpected error occured",error: (error as Error).message,});
+      res
+        .status(500)
+        .json({
+          message: "An unexpected error occured",
+          error: (error as Error).message,
+        });
     }
-  };
+  }
 
-
-  // for admin dashboard
-
-  async totalEnrollments
+  
 }

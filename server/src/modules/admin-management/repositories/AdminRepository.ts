@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs'
 import Course from '../../courses/models/courseModel'
 
 export class AdminRepository implements IAdminRepository {
+
   async findAllStudents(): Promise<IUser[]> {
     return await User.find({ role: "user" });
   }
@@ -69,4 +70,6 @@ export class AdminRepository implements IAdminRepository {
       { new: true }
     );
   }
+
+  
 }

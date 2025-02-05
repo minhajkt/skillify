@@ -6,4 +6,6 @@ export interface IEnrollmentController {
   totalEnrolledStudents(req: Request, res: Response): Promise<void>;
   totalRevenue(req: Request, res: Response): Promise<void>;
   courseStrength(req: Request, res: Response): Promise<void>;
+  getTutorsStudents(req: Request, res: Response): Promise<void>;
+  revenueReport(req: Request, res: Response): Promise<void>;
 }

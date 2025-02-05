@@ -5,4 +5,6 @@ export interface IEnrollmentService {
   totalEnrolledStudents(): Promise<number>;
   totalRevenue(): Promise<number>;
   courseStrength(): Promise<{ name: string; value: number }[]>;
+  getEnrolledStudents(tutorId: string): Promise<IEnrollment[] | null>;
+  getRevenueReport(timeRange: string, startDate?: string, endDate?: string): Promise<any>
 }

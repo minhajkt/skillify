@@ -12,6 +12,19 @@ export const fetchUserEnrolledCourses = async() => {
     }
 }
 
+  export const getMyStudents = async () => {
+    try {
+      const response = await axiosInstance.get("/enrollment/my-students", {
+        withCredentials: true
+      });
+      console.log('stttttttttttttttttttttt', response.data);
+      
+      return response.data;
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  };
+
 export  const enrolledStudents = async () => {
     try {
       const response = await axiosInstance.get("/enrollment/total");
@@ -39,6 +52,25 @@ export const getCourseStrength = async () => {
     } catch (error) {
         throw handleAxiosError(error)
     }
-} 
+}
 
+export const getRevenueReport = async (timeRange, startDate, endDate) => {
+  try {
+    const params: any = { timeRange };
+    if (timeRange === "custom") {
+      params.startDate = startDate;
+      params.endDate = endDate;
+    }
+
+    const response = await axiosInstance.get("/enrollment/revenue-report", {
+      params
+    });
+    return response.data.map((item) => ({
+      date: item._id,
+      totalRevenue: item.totalRevenue,
+    }));
+  } catch (error) {
+    throw handleAxiosError(error);
+  }
+};
   

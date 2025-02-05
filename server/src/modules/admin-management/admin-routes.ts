@@ -33,6 +33,7 @@ adminRouter.patch(
 
 adminRouter.get("/admin/tutors", authenticateJWT, adminController.getTutors.bind(adminController));
 adminRouter.get("/admin/tutor/:id", adminController.getTutorById.bind(adminController));
+adminRouter.get("/admin/user/:id", adminController.getStudentById.bind(adminController));
 adminRouter.patch("/admin/tutors/:id/status",authenticateJWT,adminController.updateTutorStatus.bind(adminController));
 
 

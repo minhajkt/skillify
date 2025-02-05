@@ -12,13 +12,17 @@ import {
   Typography,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, store } from "../../store/store";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { logout } from "../../store/authSlice";
 import ProfileModal from "./ProfileModal";
+import { getMessages } from "../../api/messageApi";
+import { socket } from "../../utils/socket";
+import { fetchStudentById, fetchTutorById } from "../../api/adminApi";
+import Notification from "../chat/Notification";
 
 interface NavbarProps {
   searchQuery?: string;
@@ -28,10 +32,24 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
   const navigate = useNavigate();
 
+  const { tutorId, studentId } = useParams<{
+    tutorId?: string;
+    studentId?: string;
+  }>();
   const token = useSelector((state: RootState) => state.auth.token);
   const user = useSelector((state: RootState) => state.auth.user);
   console.log("tokn ies", token);
   console.log("user irssss ", user);
+  const [openNotification, setOpenNotification] = useState(false)
+  const [notificationMessage, setNotificationMessage] = useState('')
+  const [notificationSenderId, setNotificationSenderId] = useState<string | null>(null);
+  const senderId = user?._id;
+  const isTutor = user?.role === "tutor";
+  const recipientId = isTutor ? studentId : tutorId;
+  const [recipientName, setRecipientName] = useState("");
+  const [recipientRole, setRecipientRole] = useState("");
+  const [notificationSenderRole, setNotificationSenderRole] = useState<'tutor' | 'user' | null>(null);
+
 
   const dispatch = useDispatch();
   const [anchorE1, setAnchorE1] = useState<null | HTMLElement>(null);
@@ -74,6 +92,57 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
     }
   };
 
+     useEffect(() => {
+    if (!user) return;
+
+    const handleReceiveMessage = async (msg) => {
+      if (
+        msg.senderId !== user._id &&
+        msg.recipientId === user._id
+      ) {
+        try {
+          let senderData;
+          if (user.role === 'tutor') {
+            senderData = await fetchStudentById(msg.senderId);
+            
+            setNotificationSenderRole('user');
+          } else {
+            senderData = await fetchTutorById(msg.senderId);
+            setNotificationSenderRole('tutor');
+          }
+
+          setNotificationSenderId(msg.senderId);
+          setNotificationMessage(`New message from ${senderData?.name || 'Someone'}`);
+          setOpenNotification(true);
+        } catch (error) {
+          console.error("Failed to fetch sender details:", error);
+        }
+      }
+    };
+
+    socket.on("receive_message", handleReceiveMessage);
+
+    return () => {
+      socket.off("receive_message", handleReceiveMessage);
+    };
+  }, [user]);
+
+  const handleNotificationClose = () => {
+    setOpenNotification(false);
+  };
+
+  const handleNotificationClick = () => {
+    if (notificationSenderId) {
+      if (user?.role === 'user') {
+        navigate(`/messages/${notificationSenderId}`);
+      } else {
+        navigate(`/tutors/contacts/${notificationSenderId}`);
+      }
+      setOpenNotification(false);
+    }
+  };
+  
+
   return (
     <AppBar
       position="fixed"
@@ -86,6 +155,12 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
         zIndex: 1000,
       }}
     >
+      <Notification
+        open={openNotification}
+        message={notificationMessage}
+        onClose={handleNotificationClose}
+        onClick={handleNotificationClick}
+      />
       <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
         <Box
           // display="flex"
@@ -267,28 +342,44 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
                 ) : null}
                 <hr style={{ border: "1px solid #ECF2F0," }} />
                 {user?.role === "user" ? (
-                  <MenuItem
-                    onClick={() => navigate("/wishlist")}
-                    sx={{ fontSize: { xs: "small", md: "medium" } }}
-                  >
-                    Wishlist
-                  </MenuItem>
+                  <>
+                    <MenuItem
+                      onClick={() => navigate("/messages")}
+                      sx={{ fontSize: { xs: "small", md: "medium" } }}
+                    >
+                      Messages
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => navigate("/wishlist")}
+                      sx={{ fontSize: { xs: "small", md: "medium" } }}
+                    >
+                      Wishlist
+                    </MenuItem>
+                  </>
                 ) : user?.role === "tutor" ? (
+                  <>
                     <MenuItem
                       onClick={() => navigate("/tutors/create-course")}
                       sx={{ fontSize: { xs: "small", md: "medium" } }}
                     >
                       Create Course
                     </MenuItem>
-                ) : null}
-                {user?.role === 'tutor'? (
                     <MenuItem
-                      onClick={() => navigate("/tutors/payment/:tutorId")}
+                      onClick={() => navigate("/tutors/contacts")}
                       sx={{ fontSize: { xs: "small", md: "medium" } }}
                     >
-                      Payments
+                      Messages
                     </MenuItem>
-                ): null}
+                  </>
+                ) : null}
+                {user?.role === "tutor" ? (
+                  <MenuItem
+                    onClick={() => navigate("/tutors/payment/:tutorId")}
+                    sx={{ fontSize: { xs: "small", md: "medium" } }}
+                  >
+                    Payments
+                  </MenuItem>
+                ) : null}
                 <hr style={{ border: "1px solid #ECF2F0," }} />
                 <MenuItem
                   onClick={() => handleLogout()}

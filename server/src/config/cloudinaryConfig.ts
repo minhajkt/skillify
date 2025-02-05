@@ -28,6 +28,17 @@ const videoStorage = new CloudinaryStorage({
     format: file.mimetype.split("/")[1] || "mp4",
   }),
 });
+
+const pdfStorage = new CloudinaryStorage({
+  cloudinary: cloudinary.v2,
+  params: async () => ({
+    folder: "certificates",
+    resource_type: "raw", 
+    format: "pdf",
+  }),
+});
+
+
 const upload = multer({
   storage,
   limits: {
@@ -54,5 +65,7 @@ const uploadVideo = multer({
   },
 });
 
-export { cloudinary, upload, uploadVideo };
+const uploadPdf = multer({ storage: pdfStorage });
+
+export { cloudinary, upload, uploadVideo, uploadPdf };
 

@@ -8,6 +8,7 @@ import {
   Button,
   Snackbar,
   Alert,
+  LinearProgress,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { fetchUserEnrolledCourses } from "../../api/enrollmentApi";
@@ -20,6 +21,7 @@ import { handleAxiosError } from "../../utils/errorHandler";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { ICourseForDisplay } from "../../types/types";
+import { getProgress } from "../../api/progressApi";
 
 
 const MyCourses = () => {
@@ -37,6 +39,7 @@ const MyCourses = () => {
     const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false);
       const [snackbar, setSnackbar] = useState(false);
       const [deleteSnackbar, setDeleteSnackbar] = useState(false);
+      const [progressData, setProgressData] = useState<Record<string, number>>({})
 
   const user = useSelector((state: RootState) => state.auth.user);
   const userId = user?._id;
@@ -56,6 +59,20 @@ const MyCourses = () => {
         setEnrolledCourses(response);
         // console.log('resposne for enrolledcourssssssssssssssssssse', response);
         
+        const progressMap: Record<string, number> = {}
+        await Promise.all(
+          response.map(async (course) => {
+            try {
+              const progress = await getProgress(user?._id, course.courseId._id)
+              progressMap[course.courseId._id] = progress?.progressPercentage
+              
+            } catch (error) {
+              console.log('Error', error);
+              
+            }
+          })
+        )
+        setProgressData(progressMap)
       } catch (error) {
         console.log('Error', error);    
       } finally {
@@ -205,7 +222,7 @@ useEffect(() => {
                   key={course.courseId._id}
                   sx={{
                     display: "flex",
-                    height: "150px",
+                    height: "160px",
                     "&:hover": {
                       boxShadow: 3,
                     },
@@ -213,7 +230,7 @@ useEffect(() => {
                 >
                   <CardMedia
                     component="img"
-                    sx={{ width: 200, objectFit: "cover" }}
+                    sx={{ width: 220, objectFit: "cover" }}
                     image={course.courseId.thumbnail}
                     alt={course.courseId.title}
                   />
@@ -227,12 +244,24 @@ useEffect(() => {
                     }}
                   >
                     <CardContent sx={{ flex: "1 0 auto", p: 0 }}>
-                      <Typography component="div" variant="h6">
-                        {course.courseId.title}
-                      </Typography>
-                      <Typography component="div" variant="body1">
+                      <Box sx={{display:'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                        <Typography component="div" variant="h6">
+                          {course.courseId.title}
+                        </Typography>
+                        <Typography component="div" variant="body1">
                         {course.courseId.category}
                       </Typography>
+                      </Box>
+                      <Box sx={{ mt: 0 }}>
+                        <Typography variant="body2" color="text.secondary">
+                          Progress: {progressData[course.courseId._id] || 0}%
+                        </Typography>
+                        <LinearProgress
+                          variant="determinate"
+                          value={progressData[course.courseId._id] || 0}
+                          sx={{ height: 8, borderRadius: 4, mt: 1 }}
+                        />
+                      </Box>
 
                       <Stack
                         direction="row"
@@ -246,6 +275,7 @@ useEffect(() => {
                         </Typography>
                       </Stack>
                     </CardContent>
+
                     <Box
                       sx={{
                         display: "flex",
@@ -279,55 +309,54 @@ useEffect(() => {
               ))
             ) : (
               // <Typography>No Enrolled Courses</Typography>
-              
-                <Box
+
+              <Box
+                sx={{
+                  textAlign: "center",
+                  bgcolor: "#f9f9f9",
+                  p: 4,
+                  borderRadius: "12px",
+                  boxShadow: 2,
+
+                  // maxWidth: 500,
+                  mx: "auto",
+                }}
+              >
+                <img
+                  src="/images/00.png"
+                  alt="No courses illustration"
+                  style={{
+                    maxWidth: "20%",
+                    height: "auto",
+                    marginBottom: "16px",
+                  }}
+                />
+                <Typography variant="h5" sx={{ fontWeight: "bold", mb: 2 }}>
+                  No Enrolled Courses Yet!
+                </Typography>
+                <Typography
+                  variant="body1"
+                  sx={{ color: "text.secondary", mb: 3 }}
+                >
+                  It looks like you haven't enrolled in any courses. Start
+                  exploring our courses to begin your learning journey.
+                </Typography>
+                <Button
+                  variant="contained"
+                  size="large"
+                  onClick={() => navigate("/home")}
                   sx={{
-                    textAlign: "center",
-                    bgcolor: "#f9f9f9",
-                    p: 4,
-                    borderRadius: "12px",
-                    boxShadow: 2,
-                    
-                    // maxWidth: 500,
-                    mx: "auto",
+                    // background: "linear-gradient(45deg, #6a11cb, #2575fc)",
+                    color: "#fff",
+                    fontWeight: "bold",
+                    textTransform: "none",
+                    px: 4,
+                    py: 1.5,
                   }}
                 >
-                  <img
-                    src="/images/00.png" 
-                    alt="No courses illustration"
-                    style={{
-                      maxWidth: "20%",
-                      height: "auto",
-                      marginBottom: "16px",
-                    }}
-                  />
-                  <Typography variant="h5" sx={{ fontWeight: "bold", mb: 2 }}>
-                    No Enrolled Courses Yet!
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{ color: "text.secondary", mb: 3 }}
-                  >
-                    It looks like you haven't enrolled in any courses. Start
-                    exploring our courses to begin your learning
-                    journey.
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    size="large"
-                    onClick={() => navigate("/home")}
-                    sx={{
-                      // background: "linear-gradient(45deg, #6a11cb, #2575fc)",
-                      color: "#fff",
-                      fontWeight: "bold",
-                      textTransform: "none",
-                      px: 4,
-                      py: 1.5,
-                    }}
-                  >
-                    Browse Courses
-                  </Button>
-                </Box>
+                  Browse Courses
+                </Button>
+              </Box>
             )}
           </Stack>
         </Box>

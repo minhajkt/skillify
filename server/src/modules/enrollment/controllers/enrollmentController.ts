@@ -29,20 +29,44 @@ export class enrollmentController implements IEnrollmentController {
       const enrolledCourses =
         await this.enrollmentService.getAllEnrolledCoursesByStudent(id);
 
-      if(!enrolledCourses || enrolledCourses.length === 0) {
-        res.status(404).json('No courses enrolled')
-      }   
+      if (!enrolledCourses || enrolledCourses.length === 0) {
+        res.status(404).json("No courses enrolled");
+      }
 
       res.status(200).json(enrolledCourses);
     } catch (error) {
-      console.log('no course');
-      
-      res
-        .status(500)
-        .json({
-          message: "An unexpected error occured.",
-          error: (error as Error).message,
-        });
+      console.log("no course");
+
+      res.status(500).json({
+        message: "An unexpected error occured.",
+        error: (error as Error).message,
+      });
+    }
+  }
+
+  async getTutorsStudents(req: Request, res: Response): Promise<void> {
+    try {
+      const tutorId = req.user?.id;
+
+      if (!tutorId) {
+        res.status(400).json({ message: "User ID is required" });
+        return;
+      }
+
+      const enrolledStudents = await this.enrollmentService.getEnrolledStudents(
+        tutorId
+      );
+
+      if (!enrolledStudents || enrolledStudents.length === 0) {
+        res.status(404).json("No students enrolled");
+      }
+
+      res.status(200).json(enrolledStudents);
+    } catch (error) {
+      res.status(500).json({
+        message: "An unexpected error occured.",
+        error: (error as Error).message,
+      });
     }
   }
 
@@ -58,45 +82,48 @@ export class enrollmentController implements IEnrollmentController {
 
   async totalRevenue(req: Request, res: Response): Promise<void> {
     try {
-      const totalRevenue = await this.enrollmentService.totalRevenue()
-      if(!totalRevenue) {
-        res.status(404).json("Cannot find total revenue")
-        return
+      const totalRevenue = await this.enrollmentService.totalRevenue();
+      if (!totalRevenue) {
+        res.status(404).json("Cannot find total revenue");
+        return;
       }
-      res.status(200).json(totalRevenue)
+      res.status(200).json(totalRevenue);
     } catch (error) {
       console.log("error occured while finding total revenue", error);
-      res.status(500).json('An unexpected error occured')
+      res.status(500).json("An unexpected error occured");
     }
   }
 
   async courseStrength(req: Request, res: Response): Promise<void> {
     try {
-      const courseStrength = await this.enrollmentService.courseStrength()
-      if(!courseStrength) {
-        res.status(404).json("No course strength found")
-        return
+      const courseStrength = await this.enrollmentService.courseStrength();
+      if (!courseStrength) {
+        res.status(404).json("No course strength found");
+        return;
       }
       // console.log(courseStrength);
-      
-      res.status(200).json(courseStrength)
+
+      res.status(200).json(courseStrength);
     } catch (error) {
-      console.log('Failed to get course Strength', error);
-      res.status(500).json("An unexpected error occured")
+      console.log("Failed to get course Strength", error);
+      res.status(500).json("An unexpected error occured");
     }
   }
-  // for admin side displaying course strength
+
+  async revenueReport(req: Request, res: Response): Promise<void> {
+    try {
+      const { timeRange, startDate, endDate } = req.query;
+      const reportData = await this.enrollmentService.getRevenueReport(
+        timeRange as string,
+        startDate as string,
+        endDate as string
+      );
+      res.status(200).json(reportData);
+    } catch (error) {
+      console.log("Error fetching revenue report", error);
+      res.status(500).json("An unexpected error occurred");
+    }
+  }
+
   
-  // static totalStudentsInEachCourse = async(req: Request, res: Response) => {
-  //     try {
-  //   const courseId = req.params.courseId;
-  //   const count = await Enrollment.countDocuments({
-  //     courseId: courseId,
-  //     paymentStatus: "Success"
-  //   });
-  //   res.json({ count });
-  // } catch (error) {
-  //   res.status(500).json({ error: 'Failed to fetch enrollment count' });
-  // }
-  // }
 }

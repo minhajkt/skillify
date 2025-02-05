@@ -1,21 +1,14 @@
-import { Box, Card, CardContent, IconButton, List, ListItem, ListItemText, Typography } from "@mui/material"
-// import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
+import { Box, Card, CardContent, IconButton, List, ListItem, ListItemText, MenuItem, Select, TextField, Tooltip, Typography } from "@mui/material"
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import {
   FileDownload as ExportIcon,
 } from "@mui/icons-material";
 import { useEffect, useState } from "react";
-import { enrolledStudents, getCourseStrength, getTotalRevenue } from "../../api/enrollmentApi";
+import { enrolledStudents, getCourseStrength, getRevenueReport, getTotalRevenue } from "../../api/enrollmentApi";
 import { getCourseCount } from "../../api/courseApi";
 import { getTutorCount } from "../../api/tutorApi";
-
-
-// const courseStrength = [
-//   { name: "MERN Stack", value: 10 },
-//   { name: "Python", value: 8 },
-//   { name: "Communication", value: 5 },
-//   { name: "Accounts", value: 2 },
-// ];
+import { fillMissingDates } from "../../utils/missingDateHandler";
 
 
 
@@ -26,6 +19,10 @@ const AdminDashBoard = () => {
   const [tutorCount, setTutorCount] = useState<number>(0)
   const [totalRevenue, setTotalRevenue] = useState<number>(0);
   const [courseStrength, setCourseSterngth] = useState<{name: string; value: string}[]>([])
+  const [timeRange, setTimeRange] = useState("daily");
+const [customDates, setCustomDates] = useState({ startDate: "", endDate: "" });
+const [salesData, setSalesData] = useState<{ date: string; totalRevenue: number }[]>([]);
+
   useEffect(() => {
     const fetchTotalStrength = async() => {
       const response = await enrolledStudents();
@@ -68,6 +65,33 @@ const AdminDashBoard = () => {
     fetchCourseStrength()
   }, [])
 
+
+    useEffect(() => {
+      if (
+        timeRange === "custom" &&
+        (!customDates.startDate || !customDates.endDate)
+      )
+        return;
+      fetchRevenueReport();
+    }, [timeRange, customDates]);
+
+
+  const fetchRevenueReport = async () => {
+    try {
+      const data = await getRevenueReport(
+        timeRange,
+        customDates.startDate,
+        customDates.endDate
+      );
+      const formattedData = fillMissingDates(data, timeRange, customDates.startDate, customDates.endDate);
+      setSalesData(formattedData); 
+    } catch (error) {
+      console.error("Error fetching revenue data", error);
+    }
+  };
+
+
+
   return (
     <Box
       sx={{
@@ -109,12 +133,79 @@ const AdminDashBoard = () => {
             </Box>
           </Box>
           <Typography>Section for sales report</Typography>
-          {/* <LineChart width={800} height={300} data={salesData}> */}
-          {/* <CartesianGrid strokeDasharray="3 3" /> */}
-          {/* <XAxis dataKey="month" /> */}
-          {/* <YAxis /> */}
-          {/* <Line type="monotone" dataKey="value" stroke="#8884d8" /> */}
-          {/* </LineChart> */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "start",
+              height: "30px",
+              mb: 4,
+              mt: 2,
+              gap: 2,
+            }}
+          >
+            <Select
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value)}
+              size="small"
+            >
+              <MenuItem value="daily">Daily</MenuItem>
+              <MenuItem value="monthly">Monthly</MenuItem>
+              <MenuItem value="quarterly">Quarterly</MenuItem>
+              <MenuItem value="yearly">Yearly</MenuItem>
+              <MenuItem value="custom">Custom</MenuItem>
+            </Select>
+
+            {timeRange === "custom" && (
+              <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                <TextField
+                  type="date"
+                  label="Start Date"
+                  size="small"
+                  InputLabelProps={{ shrink: true }}
+                  onChange={(e) =>
+                    setCustomDates({
+                      ...customDates,
+                      startDate: e.target.value,
+                    })
+                  }
+                />
+                <TextField
+                  type="date"
+                  label="End Date"
+                  size="small"
+                  InputLabelProps={{ shrink: true }}
+                  onChange={(e) =>
+                    setCustomDates({ ...customDates, endDate: e.target.value })
+                  }
+                />
+              </Box>
+            )}
+          </Box>
+          <BarChart width={800} height={300} data={salesData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis
+              dataKey="date"
+              angle={0}
+              tickFormatter={(date) => {
+                const dateObj = new Date(date);
+                if (timeRange === "daily") {
+                  return dateObj.getDate();
+                } else if (timeRange === "monthly") {
+                  return dateObj.getMonth() + 1;
+                } else if (timeRange === "quarterly") {
+                  const quarter = Math.floor(dateObj.getMonth() / 3) + 1;
+                  return `Q${quarter}`;
+                } else if (timeRange === "yearly") {
+                  return dateObj.getFullYear();
+                }
+                return dateObj.toLocaleDateString();
+              }}
+            />
+
+            <YAxis />
+            <Tooltip />
+            <Bar dataKey="totalRevenue" fill="#107dac" barSize={30} />
+          </BarChart>
         </Card>
         <Card sx={{ flex: 1, p: 2, bgcolor: "#FAFAFA", mt: 3 }}>
           <Typography variant="h6" fontWeight={"bold"} sx={{ mb: 2 }}>
@@ -143,7 +234,7 @@ const AdminDashBoard = () => {
                             sx={{
                               width: `${(Number(course.value) / 10) * 100}%`,
                               height: "100%",
-                              bgcolor: "#8884d8",
+                              bgcolor: "#107dac",
                               borderRadius: 2,
                             }}
                           />

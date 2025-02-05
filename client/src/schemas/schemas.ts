@@ -37,7 +37,7 @@ export const TutorSignupSchema = Yup.object().shape({
     .test("fileType", "Unsupported file format", (value) => {
       if (value && value instanceof FileList) {
         return Array.from(value).every((file) =>
-          ["application/pdf", "image/png", "image/jpeg"].includes(file.type)
+          ["application/pdf", "image/png", "image/jpeg", "image/webp"].includes(file.type)
         );
       }
       return true;

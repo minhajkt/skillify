@@ -17,6 +17,8 @@ enrollmentRouter.get('/enrollment/my-courses', authenticateJWT, enrollmentcontro
 enrollmentRouter.get('/enrollment/total',enrollmentcontroller.totalEnrolledStudents.bind(enrollmentcontroller))
 enrollmentRouter.get('/enrollment/total-revenue', enrollmentcontroller.totalRevenue.bind(enrollmentcontroller))
 enrollmentRouter.get('/enrollment/strength', enrollmentcontroller.courseStrength.bind(enrollmentcontroller))
+enrollmentRouter.get('/enrollment/my-students',authenticateJWT, enrollmentcontroller.getTutorsStudents.bind(enrollmentcontroller))
+enrollmentRouter.get("/enrollment/revenue-report", enrollmentcontroller.revenueReport.bind(enrollmentcontroller));
 // enrollmentRouter.get('/enrollment/total/:couseId', enrollmentController.totalStudentsInEachCourse)
 
 export default enrollmentRouter;

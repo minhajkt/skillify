@@ -17,61 +17,80 @@ export class AdminService implements IAdminService {
     return this.adminRepository.findAllStudents();
   }
 
-  async updateUser(id: string, userData: Partial<IUser>): Promise<IUser | null> {
-    if(!id) {
-      throw new Error("User ID is required")
+  async updateUser(
+    id: string,
+    userData: Partial<IUser>
+  ): Promise<IUser | null> {
+    if (!id) {
+      throw new Error("User ID is required");
     }
 
-    const updatedUser =  this.adminRepository.updateUser(id, userData);
-    if(!updatedUser) {
-      throw new Error('User not found')
+    const updatedUser = this.adminRepository.updateUser(id, userData);
+    if (!updatedUser) {
+      throw new Error("User not found");
     }
-    return updatedUser
+    return updatedUser;
   }
 
-  async getAllTutor():Promise<IUser[]> {
+  async getAllTutor(): Promise<IUser[]> {
     return this.adminRepository.findAllTutors();
   }
 
-  async getTutorById(id: string):Promise<IUser | null> {
-    if(!id) {
-      throw new Error("ID is not found")
+  async getTutorById(id: string): Promise<IUser | null> {
+    if (!id) {
+      throw new Error("ID is not found");
     }
 
     const tutor = this.adminRepository.getUserById(id);
-    if(!tutor) {
-      throw new Error("Tutor not found")
+    if (!tutor) {
+      throw new Error("Tutor not found");
     }
-    return tutor
+    return tutor;
   }
-  
-  async getTutorRequests():Promise<IUser[]> {
 
-    const tutorRequests =  this.adminRepository.getTutorRequests();
-    if(!tutorRequests) {
+  async getStudentById(id: string): Promise<IUser | null> {
+    if (!id) {
+      throw new Error("ID is not found");
+    }
+
+    const student = this.adminRepository.getUserById(id);
+    if (!student) {
+      throw new Error("Student not found");
+    }
+    return student;
+  }
+
+  async getTutorRequests(): Promise<IUser[]> {
+    const tutorRequests = this.adminRepository.getTutorRequests();
+    if (!tutorRequests) {
       throw new Error("No requests pending");
     }
-    return tutorRequests
+    return tutorRequests;
   }
 
-  async updatetutorRequest(id: string,userData: Partial<IUser>): Promise<IUser | null> {
+  async updatetutorRequest(
+    id: string,
+    userData: Partial<IUser>
+  ): Promise<IUser | null> {
     const updatedTutor = this.adminRepository.updateUser(id, userData);
-    if(!updatedTutor) {
-      throw new Error("Tutor not found")
+    if (!updatedTutor) {
+      throw new Error("Tutor not found");
     }
-    return updatedTutor
+    return updatedTutor;
   }
 
   async getCourseRequests(): Promise<ICourse[]> {
-    
-    const courseRequests =  this.adminRepository.getCourseRequests();
-    if(!courseRequests) {
-      throw new Error("No course requests found")
+    const courseRequests = this.adminRepository.getCourseRequests();
+    if (!courseRequests) {
+      throw new Error("No course requests found");
     }
-    return courseRequests
+    return courseRequests;
   }
-  
-  async updateCourseApproval(id: string,status: string): Promise<ICourse | null> {
+
+  async updateCourseApproval(
+    id: string,
+    status: string
+  ): Promise<ICourse | null> {
     const updatedCourse = await this.adminRepository.updateCourseApproval(
       id,
       status
@@ -79,25 +98,24 @@ export class AdminService implements IAdminService {
     if (!updatedCourse) {
       throw new Error("No updated course found");
     }
-    const tutor = await this.adminRepository.getUserById(updatedCourse.createdBy.toString())
-    if(!tutor) {
-      throw new Error('Tutor not found')
+    const tutor = await this.adminRepository.getUserById(
+      updatedCourse.createdBy.toString()
+    );
+    if (!tutor) {
+      throw new Error("Tutor not found");
     }
-    console.log('tutor name from updatecourseapproval of the admin', tutor);
+    console.log("tutor name from updatecourseapproval of the admin", tutor);
 
-    await sendCourseApprovalEmail(tutor.email, tutor.name, status)
+    await sendCourseApprovalEmail(tutor.email, tutor.name, status);
     return updatedCourse;
   }
 
-
   async getAllCourse(): Promise<ICourse[]> {
-    const allCourses =  await this.adminRepository.getAllCourse();
-    if(!allCourses) {
-      throw new Error('No courses found')
+    const allCourses = await this.adminRepository.getAllCourse();
+    if (!allCourses) {
+      throw new Error("No courses found");
     }
-    return allCourses
+    return allCourses;
   }
-
-
-
+  
 }

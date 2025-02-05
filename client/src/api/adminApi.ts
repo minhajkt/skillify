@@ -44,6 +44,18 @@ export const fetchTutorById = async(tutorId: string) => {
   }
 }
 
+export const fetchStudentById = async (studentId: string) => {
+  try {
+    const response = await axiosInstance.get(`/admin/user/${studentId}`);
+    return response.data;
+  } catch (error) {
+    console.log("failed to fetch tutor by id", error);
+    handleAxiosError(error);
+  }
+};
+
+
+
 export const updateTutorsStatus = async (id: string, isActive: boolean) => {
   try {
     const response = await axiosInstance.patch(`/admin/tutors/${id}/status`, {
