@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { loginUser, googleSignIn } from "../../api/authApi";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import {
   Box,
   Grid,
@@ -13,13 +13,18 @@ import ForgotPasswordModal from "../shared/ForgotPasswordModal";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { Formik, Form, Field } from "formik";
 import { LoginSchema } from "../../schemas/schemas";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store/store";
 
 const Login = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [openSnackbar, setOpenSnackbar] = useState(false);
-
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated)
+  
   const navigate = useNavigate();
+
+
 
   useEffect(() => {
     if (localStorage.getItem("logoutSuccess") === "true") {
@@ -27,6 +32,11 @@ const Login = () => {
       localStorage.removeItem("logoutSuccess");
     }
   }, []);
+
+  
+  if (isAuthenticated) {
+    return <Navigate to={"/home"} />;
+  }
 
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);

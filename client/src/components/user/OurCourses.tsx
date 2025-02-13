@@ -22,22 +22,22 @@ const OurCourses = ({ searchQuery }: NavbarProps) => {
     const getCourses = async () => {
       try {
         const response = await fetchAllCourses();
-        console.log("res is ", response);
+        // console.log("res is ", response);
 
         const tutorIds = response.map((course: ICourse) => course.createdBy);
-        console.log("tut id is ", tutorIds);
+        // console.log("tut id is ", tutorIds);
 
         const tutors = await Promise.all(
           tutorIds.map((tutorId:string) => fetchTutorById(tutorId))
         );
-        console.log("tut detaisl is ", tutors);
+        // console.log("tut detaisl is ", tutors);
 
         const coursesWithTutors = response.map((course:ICourse, index: number) => ({
           ...course,
           name: course.title,
           tutor: tutors[index]?.name || "Unknown",
         }));
-        console.log("tut with coursees is ", coursesWithTutors);
+        // console.log("tut with coursees is ", coursesWithTutors);
 
         setCourses(coursesWithTutors);
         // console.log(coursesWithTutors);
@@ -55,9 +55,9 @@ const filteredBySearch =
         course.title?.toLowerCase().includes((searchQuery || "").toLowerCase())
       )
     : [];
-      console.log("Filtered by search:", filteredBySearch);
-      console.log("Search query:", searchQuery);
-      console.log("Courses:", courses);
+      // console.log("Filtered by search:", filteredBySearch);
+      // console.log("Search query:", searchQuery);
+      // console.log("Courses:", courses);
 // console.log("Filtered Courses: ", filteredCourses);
 
   const filteredByCategory = categoryFilter
@@ -95,7 +95,7 @@ const sortedCourses = filteredByCategory.sort((a, b) => {
         icon: icons[cat]
       }))
       setCategories(formattedResponse)
-      console.log('cat is ca', formattedResponse);
+      // console.log('cat is ca', formattedResponse);
       
     }
     getCategories()
@@ -121,7 +121,7 @@ const [visibleCourses, setVisibleCourses] = useState(4);
           const wishlistData = Array.isArray(response.data?.courses)
             ? response.data.courses
             : [];
-          console.log('wishllllllll', wishlistData)
+          // console.log('wishllllllll', wishlistData)
           setWishlist(wishlistData); 
         } catch (error) {
           console.error("Error fetching wishlist:", error);

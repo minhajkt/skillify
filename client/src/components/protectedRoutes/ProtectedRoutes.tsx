@@ -1,38 +1,37 @@
+import { useEffect } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { RootState } from "../../store/store";
-import {  Navigate } from "react-router-dom";
-
 
 interface ProtectedRouteProps {
-    children: React.ReactNode;
-    requiredRole? : string
+  children: React.ReactNode;
+  requiredRole?: string;
 }
 
 const ProtectedRoutes: React.FC<ProtectedRouteProps> = ({
-    children,
-    requiredRole
+  children,
+  requiredRole,
 }) => {
+  const user = useSelector((state: RootState) => state.auth.user);
+  const token = useSelector((state: RootState) => state.auth.token);
+  const navigate = useNavigate();
 
-    const user = useSelector((state: RootState) => state.auth.user) 
-    const token = useSelector((state: RootState) => state.auth.token)
-    // console.log('toooooooooooooknen', token);
-    // console.log("roooooole", user?.role);
-    
-    // const navigate = useNavigate()
-    if(!token) {
-        return <Navigate to="/admin/login" replace />;
-        // navigate('/login')
-        // return null
+  useEffect(() => {
+    if (!token) {
+
+      navigate("/login", { replace: true });
+      
+      return
+    } else if (requiredRole && user?.role !== requiredRole) {
+      navigate("/login", { replace: true });
     }
+  }, [token, user, requiredRole, navigate]); 
 
-    if(!requiredRole && user?.role !== requiredRole ) {
-        return <Navigate to="/admin/login" replace />;
+  if (!token || (requiredRole && user?.role !== requiredRole)) {
+    return null; 
+  }
 
-        // navigate('/login')
-        // return null
-    }
+  return <>{children}</>;
+};
 
-    return <>{children} </>
-}
-
-export default ProtectedRoutes
+export default ProtectedRoutes;

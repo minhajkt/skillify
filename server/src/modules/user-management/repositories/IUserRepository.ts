@@ -6,8 +6,8 @@ export interface IUserRepository {
   updateUser(id: string, userData: Partial<IUser>): Promise<IUser | null>;
   getUserByEmail(email: string): Promise<IUser | null>;
   getUserById(id: string): Promise<IUser | null>;
-  getAllUsers(): Promise<IUser[]>;
-  findAllStudents(): Promise<IUser[]>;
+  // getAllUsers(): Promise<IUser[]>;
+  // findAllStudents(): Promise<IUser[]>;
   findAllTutors(approvalStatus: string): Promise<number>;
   getCourseById(courseId: string): Promise<IUser | null>;
   // getAllCourseForUser(): Promise<ICourse[]>;

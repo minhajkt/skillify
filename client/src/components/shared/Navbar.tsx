@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   AppBar,
   Avatar,
@@ -14,15 +15,15 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState, store } from "../../store/store";
+import {  persistor, RootState, store } from "../../store/store";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { logout } from "../../store/authSlice";
 import ProfileModal from "./ProfileModal";
-import { getMessages } from "../../api/messageApi";
 import { socket } from "../../utils/socket";
 import { fetchStudentById, fetchTutorById } from "../../api/adminApi";
 import Notification from "../chat/Notification";
+import { logoutUser } from "../../api/authApi";
 
 interface NavbarProps {
   searchQuery?: string;
@@ -71,14 +72,16 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
   const handleCloseModal = () => {
     setModalOpen(false);
   };
-  useEffect(() => {
-    console.log("Current Redux state:", store.getState());
-  }, []);
+
 
   const handleLogout = async () => {
     try {
       dispatch(logout());
-      console.log("logged out");
+      await persistor.flush();
+      persistor.purge()
+      // console.log("logged out");
+      await logoutUser()
+
       localStorage.setItem("logoutSuccess", "true");
       if (user?.role === "tutor") {
         navigate("/tutors/login");
@@ -86,6 +89,7 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
         navigate("/admin/login");
       } else {
         navigate("/login");
+        console.log('state is',store.getState());
       }
     } catch (error) {
       console.log(error);
@@ -248,8 +252,7 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
                 display: { xs: "none", md: "block" },
               }}
             >
-              {/* <SwapVertOutlinedIcon />
-              <FilterAltOutlinedIcon /> */}
+              
             </Typography>
           ) : null}
 

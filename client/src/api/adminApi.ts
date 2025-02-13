@@ -92,7 +92,7 @@ export const fetchTutorRequests = async () => {
 export const fetchCourseRequests = async () => {
   try {
     const response = await axiosInstance.get("/admin/course-requests");
-    console.log("response issss ", response.data);
+    // console.log("response issss ", response.data);
 
     return response.data.courseRequest;
   } catch (error) {
@@ -104,7 +104,7 @@ export const fetchCourseRequests = async () => {
 export const updateCourseApproval = async(id: string, isApproved: string) => {
     try {
         const response = await axiosInstance.patch(`/admin/course-request/${id}/approval`, {isApproved})
-        console.log('course approvehandle in admin api', response);
+        // console.log('course approvehandle in admin api', response);
         
         return response.data
     } catch (error) {
@@ -130,7 +130,7 @@ export const updateCourseBlock = async (id: string, isApproved: string) => {
 export const fetchAllCourses = async() => {
   try {
     const response = await axiosInstance.get('/admin/courses')
-    console.log('updated courses', response);
+    // console.log('updated courses', response);
     return response.data
   } catch (error) {
     handleAxiosError(error)

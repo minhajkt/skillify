@@ -1,5 +1,4 @@
-import { login } from "../../../common/authService";
-import { generateResetToken, generateToken } from "../../../utils/jwtUtil";
+import { generateRefreshToken, generateResetToken, generateToken } from "../../../utils/jwtUtil";
 import { sendEmail, sendOtpToEmail, storeOtp, validateOtp } from "../../../utils/otpUtil";
 import { comparePassword, hashPassword } from "../../../utils/passwordHashing";
 import { IUser } from "../models/UserModel";
@@ -109,13 +108,12 @@ export class UserService implements IUserService {
     storeOtp(email, otp);
     console.log("otp is ", otp);
 
-    // await this.otpService.sendOtpToEmail(email, otp);
   }
 
   async loginUser(
     email: string,
     password: string
-  ): Promise<{ token: string; user: IUser }> {
+  ): Promise<{ token: string; refreshToken: string; user: IUser }> {
     const user = await this.authenticateUser(email, password);
     if (user.role !== "user") {
       throw new Error("Access denied. Only students can log in here.");
@@ -126,13 +124,15 @@ export class UserService implements IUserService {
       role: user.role,
       isActive: user.isActive,
     });
-    return { token, user };
+
+    const refreshToken = generateRefreshToken({ id: user._id });
+    return { token, refreshToken, user };
   }
 
   async loginTutor(
     email: string,
     password: string
-  ): Promise<{ token: string; user: IUser }> {
+  ): Promise<{ token: string; refreshToken: string; user: IUser }> {
     const user = await this.authenticateUser(email, password);
 
     if (user.role !== "tutor") {
@@ -149,13 +149,15 @@ export class UserService implements IUserService {
       role: user.role,
       isActive: user.isActive,
     });
-    return { token, user };
+    const refreshToken = generateRefreshToken({ id: user._id });
+
+    return { token, refreshToken, user };
   }
 
   async loginAdmin(
     email: string,
     password: string
-  ): Promise<{ token: string; user: IUser }> {
+  ): Promise<{ token: string; refreshToken: string; user: IUser }> {
     const user = await this.authenticateUser(email, password);
 
     if (user.role !== "admin") {
@@ -168,7 +170,8 @@ export class UserService implements IUserService {
       role: user.role,
       isActive: user.isActive,
     });
-    return { token, user };
+    const refreshToken = generateRefreshToken({ id: user._id });
+    return { token, refreshToken, user };
   }
   async getUserById(id: string): Promise<IUser | null> {
     return this.userRepository.getUserById(id);
@@ -210,7 +213,7 @@ export class UserService implements IUserService {
   }
 
   async getTutorCount(): Promise<number> {
-    return this.userRepository.findAllTutors('approved')
+    return this.userRepository.findAllTutors("approved");
   }
   // async getAllCourseForUser(): Promise<ICourse[]> {
   //   return await this.userRepository.getAllCourseForUser();

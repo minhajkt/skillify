@@ -13,7 +13,7 @@ const ChatContainer = styled(Box)({
 });
 
 const ContactsList = styled(Box)(({ theme }) => ({
-  width: "40%",
+  width: "30%",
   backgroundColor: theme.palette.background.paper,
   borderRight: `1px solid ${theme.palette.divider}`,
 }));

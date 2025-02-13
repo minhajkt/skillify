@@ -12,6 +12,6 @@ const reportRouter = express.Router();
 
 reportRouter.post("/reports/submit",authenticateJWT, reportController.reportLecture.bind(reportController));
 
-reportRouter.get("/reports", reportController.getReports.bind(reportController));
+reportRouter.get("/reports", authenticateJWT,reportController.getReports.bind(reportController));
 
 export default reportRouter;

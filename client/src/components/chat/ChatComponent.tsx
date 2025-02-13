@@ -1,4 +1,19 @@
-import { Box, Typography, InputBase, Button, Avatar, Tooltip, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, IconButton, CircularProgress } from "@mui/material";
+import {
+  Box,
+  Typography,
+  InputBase,
+  Button,
+  Avatar,
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  IconButton,
+  CircularProgress,
+  Snackbar,
+} from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -13,11 +28,11 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import NotInterestedIcon from "@mui/icons-material/NotInterested";
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
-import AttachFileIcon from '@mui/icons-material/AttachFile';
+import AttachFileIcon from "@mui/icons-material/AttachFile";
 import CancelIcon from "@mui/icons-material/Cancel";
-import LazyLoad from 'react-lazyload';
+import LazyLoad from "react-lazyload";
 import Notification from "./Notification";
-import Navbar from "../shared/Navbar";
+import VideoCall from "./VideoCall";
 
 interface EmojiClickData {
   native: string;
@@ -31,8 +46,8 @@ const ChatComponent = () => {
       recipientId: string;
       message: string;
       read: boolean;
-      readAt?: string | null
-      timestamp?:string
+      readAt?: string | null;
+      timestamp?: string;
     }>
   >([]);
   const { tutorId, studentId } = useParams<{
@@ -40,23 +55,41 @@ const ChatComponent = () => {
     studentId?: string;
   }>();
   const [recipientName, setRecipientName] = useState("");
-  const [recipientRole, setRecipientRole] = useState('')
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
-  const [openModal, setOpenModal] = useState(false)
-  const [file, setFile] = useState<File | null> (null)
+  const [recipientRole, setRecipientRole] = useState("");
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
-  const [messageToDelete, setMessageToDelete] = useState(null)
+  const [messageToDelete, setMessageToDelete] = useState(null);
   const user = useSelector((state: RootState) => state.auth.user);
   const senderId = user?._id;
   const isTutor = user?.role === "tutor";
   const recipientId = isTutor ? studentId : tutorId;
   const messagesEndRef = useRef(null);
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
-  const [openNotification, setOpenNotification] = useState(false)
-  const [notificationMessage, setNotificationMessage] = useState('')
-  const navigate = useNavigate()
-  const [notificationSenderId, setNotificationSenderId] = useState<string | null>(null);
+  const [openNotification, setOpenNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState("");
+  const navigate = useNavigate();
+  const [notificationSenderId, setNotificationSenderId] = useState<
+    string | null
+  >(null);
+  const [snackbar, setSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+
+  const [isVideoCallActive, setIsVideoCallActive] = useState(false);
+  const [peerConnection, setPeerConnection] = useState<any>(null);
+  const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
+  const [incomingCall, setIncomingCall] = useState(false);
+  const [callOffer, setCallOffer] = useState<{
+    senderId: string;
+    offer: any;
+  } | null>(null);
+  const [callAccepted, setCallAccepted] = useState(false);
+
+  const localVideoRef = useRef<HTMLVideoElement>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -72,11 +105,11 @@ const ChatComponent = () => {
         if (isTutor) {
           data = await fetchStudentById(recipientId);
           // console.log('recipient is', data.role)
-          setRecipientRole('user')
+          setRecipientRole("user");
         } else {
           data = await fetchTutorById(recipientId);
           // console.log('recipient is', data.role)
-          setRecipientRole('tutor')
+          setRecipientRole("tutor");
         }
         setRecipientName(data?.name || "Unknown User");
       } catch (error) {
@@ -89,7 +122,6 @@ const ChatComponent = () => {
 
   useEffect(() => {
     if (!senderId || !recipientId) return;
-
 
     socket.emit("joinRoom", { senderId, recipientId });
 
@@ -107,82 +139,322 @@ const ChatComponent = () => {
 
     fetchMessages();
 
-  socket.on("receive_message", (msg) => {
-    if (
-    msg.senderId !== senderId && 
-    msg.recipientId === user._id && 
-    msg.senderId !== recipientId
-  ) {
-    setNotificationSenderId(msg.senderId)
-    setNotificationMessage(`New message from ${ recipientName || 'Someone'}`);
-    setOpenNotification(true)
-  }
-    if (
-      (msg.senderId === senderId && msg.recipientId === recipientId) ||
-      (msg.senderId === recipientId && msg.recipientId === senderId)
-    ) {
-      setMessages((prevMessages) => [...prevMessages, msg]);
-      if (msg.senderId === recipientId) {
-        socket.emit("message_read", { senderId, recipientId });
+    socket.on("receive_message", (msg) => {
+      if (
+        msg.senderId !== senderId &&
+        msg.recipientId === user._id &&
+        msg.senderId !== recipientId
+      ) {
+        setNotificationSenderId(msg.senderId);
+        setNotificationMessage(
+          `New message from ${recipientName || "Someone"}`
+        );
+        setOpenNotification(true);
       }
-    }
-  });
+      if (
+        (msg.senderId === senderId && msg.recipientId === recipientId) ||
+        (msg.senderId === recipientId && msg.recipientId === senderId)
+      ) {
+        setMessages((prevMessages) => [...prevMessages, msg]);
+        if (msg.senderId === recipientId) {
+          socket.emit("message_read", { senderId, recipientId });
+        }
+      }
+    });
 
-  socket.on(
-    "message_read",
-    ({ senderId: msgSenderId, recipientId: msgRecipientId, readAt }) => {
-        console.log("Message read event received", { msgSenderId, msgRecipientId, readAt });
+    socket.on(
+      "message_read",
+      ({ senderId: msgSenderId, recipientId: msgRecipientId, readAt }) => {
+        console.log("Message read event received", {
+          msgSenderId,
+          msgRecipientId,
+          readAt,
+        });
+        setMessages((prevMessages) =>
+          prevMessages.map((msg) => {
+            if (
+              msg.senderId === senderId &&
+              msg.recipientId === recipientId &&
+              !msg.read
+            ) {
+              return {
+                ...msg,
+                read: true,
+                readAt: readAt,
+              };
+            }
+            return msg;
+          })
+        );
+      }
+    );
+
+    socket.on("message_deleted", ({ messageId }) => {
       setMessages((prevMessages) =>
-        prevMessages.map((msg) => {
-          if (msg.senderId === senderId && msg.recipientId === recipientId && !msg.read) {
-            return {
-              ...msg,
-              read: true,
-              readAt: readAt,
-            };
-          }
-          return msg;
-        })
+        prevMessages.map((msg) =>
+          msg._id === messageId
+            ? { ...msg, message: "This message was deleted" }
+            : msg
+        )
       );
-    }
-  );
-
-  socket.on('message_deleted', ({messageId}) => {
-    setMessages((prevMessages) => 
-      prevMessages.map((msg) => 
-      msg._id === messageId? {...msg, message: "This message was deleted"}: msg
-    ))
-  })
-
+    });
 
     return () => {
       socket.off("receive_message");
       socket.off("message_read");
-      socket.off('message_deleted')
+      socket.off("message_deleted");
     };
   }, [senderId, recipientId]);
 
-    const handleNotificationClose = () => {
-      setOpenNotification(false);
+  const initializeLocalStream = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
+      setLocalStream(stream);
+      return stream;
+    } catch (error) {
+      console.error("Error accessing media devices:", error);
+      throw error;
+    }
+  };
+
+  const createPeerConnection = async (stream) => {
+    const peer = new RTCPeerConnection({
+      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+    });
+
+    stream.getTracks().forEach((track) => {
+      peer.addTrack(track, stream);
+    });
+
+    peer.ontrack = (event) => {
+      console.log("Received remote track");
+      setRemoteStream(event.streams[0]);
     };
 
-    const handleNotificationClick = () => {
-      if(notificationSenderId) {
-          if(recipientRole === 'tutor') {
-            navigate(`/messages/${notificationSenderId}`);
-          }else {
-            navigate(`/tutors/contacts/${notificationSenderId}`)
-          }
-        setOpenNotification(false);
+    peer.onicecandidate = (event) => {
+      if (event.candidate) {
+        socket.emit("ice_candidate", {
+          senderId: user._id,
+          recipientId,
+          candidate: event.candidate,
+        });
       }
     };
 
-const sendMessage = async () => {
-  if ((!message.trim() && !file) || !senderId || !recipientId) return;
-  setLoading(true);
+    return peer;
+  };
+
+  const startVideoCall = async () => {
+    try {
+      const stream = await initializeLocalStream();
+      setIsVideoCallActive(true);
+
+      const peer = await createPeerConnection(stream);
+      setPeerConnection(peer);
+
+      const offer = await peer.createOffer();
+      await peer.setLocalDescription(offer);
+
+      socket.emit("video_call_offer", {
+        senderId: user._id,
+        recipientId,
+        offer,
+      });
+    } catch (error) {
+      console.error("Error starting call:", error);
+      handleCallError();
+    }
+  };
+
+  const acceptCall = async () => {
+    try {
+      const stream = await initializeLocalStream();
+      setIsVideoCallActive(true);
+      setCallAccepted(true);
+
+      const peer = await createPeerConnection(stream);
+      setPeerConnection(peer);
+
+      await peer.setRemoteDescription(
+        new RTCSessionDescription(callOffer.offer)
+      );
+
+      const answer = await peer.createAnswer();
+      await peer.setLocalDescription(answer);
+
+      socket.emit("video_call_answer", {
+        senderId: user._id,
+        recipientId: callOffer.senderId,
+        answer,
+      });
+
+      setIncomingCall(false);
+    } catch (error) {
+      console.error("Error accepting call:", error);
+      handleCallError();
+    }
+  };
+
+  const handleCallError = () => {
+    setIncomingCall(false);
+    setIsVideoCallActive(false);
+    if (localStream) {
+      localStream.getTracks().forEach((track) => track.stop());
+    }
+    setLocalStream(null);
+    setRemoteStream(null);
+  };
+
+  useEffect(() => {
+    if (localVideoRef.current && localStream) {
+      localVideoRef.current.srcObject = localStream;
+    }
+  }, [localStream, localVideoRef]);
+
+  useEffect(() => {
+    if (remoteVideoRef.current && remoteStream) {
+      remoteVideoRef.current.srcObject = remoteStream;
+    }
+  }, [remoteStream, remoteVideoRef]);
+
+  useEffect(() => {
+    socket.on(
+      "video_call_offer",
+      ({ senderId, recipientId: receiverId, offer }) => {
+        if (receiverId === user._id) {
+          setIncomingCall(true);
+          setCallOffer({ senderId, offer });
+        }
+      }
+    );
+
+    socket.on(
+      "video_call_answer",
+      async ({ senderId, recipientId: receiverId, answer }) => {
+        if (receiverId === user._id && peerConnection) {
+          try {
+            await peerConnection.setRemoteDescription(
+              new RTCSessionDescription(answer)
+            );
+          } catch (error) {
+            console.error("Error setting remote description:", error);
+          }
+        }
+      }
+    );
+
+    socket.on(
+      "ice_candidate",
+      async ({ senderId, recipientId: receiverId, candidate }) => {
+        if (receiverId === user._id && peerConnection) {
+          try {
+            await peerConnection.addIceCandidate(
+              new RTCIceCandidate(candidate)
+            );
+          } catch (error) {
+            console.error("Error adding ICE candidate:", error);
+          }
+        }
+      }
+    );
+
+    socket.on("call_ended", ({ senderId, recipientId: receiverId }) => {
+      if (receiverId === user._id) {
+        console.log("Call ended by the other user.");
+        if (peerConnection) peerConnection.close();
+
+        if (localStream) {
+          localStream.getTracks().forEach((track) => track.stop());
+        }
+        setIncomingCall(false);
+        setIsVideoCallActive(false);
+        setLocalStream(null);
+        setRemoteStream(null);
+        setPeerConnection(null);
+        setSnackbar(true);
+        setSnackbarMessage("This call has ended");
+      }
+    });
+
+    socket.on("call_rejected", ({ senderId, recipientId }) => {
+      if (recipientId === user._id) {
+        console.log("The other user rejected the call.");
+        if (localStream) {
+          localStream.getTracks().forEach((track) => track.stop());
+        }
+        setIsVideoCallActive(false);
+        setLocalStream(null);
+        setSnackbar(true);
+        setSnackbarMessage("Your call was rejected");
+      }
+    });
+
+    return () => {
+      socket.off("video_call_offer");
+      socket.off("video_call_answer");
+      socket.off("ice_candidate");
+      socket.off("call_ended");
+      socket.off("call_rejected");
+    };
+  }, [socket, user._id, peerConnection]);
+
+  const endVideoCall = () => {
+    if (peerConnection) {
+      peerConnection.close();
+    }
+    if (localStream) {
+      localStream.getTracks().forEach((track) => track.stop());
+    }
+
+    socket.emit("call_ended", { senderId: user._id, recipientId });
+
+    setIsVideoCallActive(false);
+    setLocalStream(null);
+    setRemoteStream(null);
+    setPeerConnection(null);
+  };
+
+  const rejectCall = () => {
+    setIncomingCall(false);
+    if (peerConnection) {
+      peerConnection.close();
+    }
+
+    if (localStream) {
+      localStream.getTracks().forEach((track) => track.stop());
+    }
+
+    socket.emit("call_rejected", { senderId: user._id, recipientId });
+
+    setIsVideoCallActive(false);
+    setLocalStream(null);
+    setRemoteStream(null);
+    // setSnackbar(true);
+  };
+
+  const handleNotificationClose = () => {
+    setOpenNotification(false);
+  };
+
+  const handleNotificationClick = () => {
+    if (notificationSenderId) {
+      if (recipientRole === "tutor") {
+        navigate(`/messages/${notificationSenderId}`);
+      } else {
+        navigate(`/tutors/contacts/${notificationSenderId}`);
+      }
+      setOpenNotification(false);
+    }
+  };
+
+  const sendMessage = async () => {
+    if ((!message.trim() && !file) || !senderId || !recipientId) return;
+    setLoading(true);
 
     try {
-
       const messageData = {
         senderId,
         recipientId,
@@ -193,63 +465,62 @@ const sendMessage = async () => {
         timestamp: new Date().toISOString(),
       };
 
-      if(file) {
-        const formData = new FormData()
-        formData.append('file', file)
-        
-        
-        const fileType = file.type.startsWith('image')? 'image' : 'video'
-        
-        const data = await postMessageImage(formData, fileType)
-        
-        messageData.fileUrl = data.imageUrl || data.videoUrl
-        messageData.fileType = fileType
+      if (file) {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const fileType = file.type.startsWith("image") ? "image" : "video";
+
+        const data = await postMessageImage(formData, fileType);
+
+        messageData.fileUrl = data.imageUrl || data.videoUrl;
+        messageData.fileType = fileType;
       }
 
       socket.emit("message", messageData);
       setMessage("");
       setFile(null);
-      if(fileInputRef.current) {
-        fileInputRef.current.value = ''
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
       }
       setFilePreview(null);
     } catch (error) {
       console.error("Upload error:", error);
-    }finally {
+    } finally {
       setLoading(false);
     }
-};
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files ? e.target.files[0] : null;
     setFile(file);
     console.log(file);
     if (file) {
-    const previewUrl = URL.createObjectURL(file);
-    setFilePreview(previewUrl);
-  }
+      const previewUrl = URL.createObjectURL(file);
+      setFilePreview(previewUrl);
+    }
   };
 
   const handleDeleteClick = (messageId) => {
-    setMessageToDelete(messageId)
-    setOpenModal(true)
-  }
+    setMessageToDelete(messageId);
+    setOpenModal(true);
+  };
 
   const handleConfirmDelete = () => {
-    if(messageToDelete) {
-      handleDeleteMessage(messageToDelete)
-      setOpenModal(false)
-      setMessageToDelete(null)
+    if (messageToDelete) {
+      handleDeleteMessage(messageToDelete);
+      setOpenModal(false);
+      setMessageToDelete(null);
     }
-  }
+  };
 
   const handleCancelDelete = () => {
-    setOpenModal(false)
-    setMessageToDelete(null)
-  }
+    setOpenModal(false);
+    setMessageToDelete(null);
+  };
   const handleDeleteMessage = (messageId) => {
-    socket.emit('delete_message', {messageId, senderId})
-  }
+    socket.emit("delete_message", { messageId, senderId });
+  };
 
   const handleEmojiSelect = (emojiData: EmojiClickData) => {
     setMessage(message + emojiData.native);
@@ -257,18 +528,25 @@ const sendMessage = async () => {
   };
 
   const toggleEmojiPicker = () => {
-    setShowEmojiPicker(!showEmojiPicker)
-  }
+    setShowEmojiPicker(!showEmojiPicker);
+  };
 
   return (
     <>
-    {/* <Navbar /> */}
       <Notification
         open={openNotification}
         message={notificationMessage}
         onClose={handleNotificationClose}
         onClick={handleNotificationClick}
       />
+      <Snackbar
+        open={snackbar}
+        message={snackbarMessage}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      />
+
       <Box
         sx={{
           bgcolor: "#dbdbdb",
@@ -281,6 +559,20 @@ const sendMessage = async () => {
       >
         <Avatar>{recipientName[0]}</Avatar>
         <Typography sx={{ ml: 2 }}>{recipientName}</Typography>
+        <Box sx={{ ml: "auto" }}>
+          <VideoCall
+            isVideoCallActive={isVideoCallActive}
+            localVideoRef={localVideoRef}
+            remoteVideoRef={remoteVideoRef}
+            localStream={localStream}
+            remoteStream={remoteStream}
+            onStartCall={startVideoCall}
+            onEndCall={endVideoCall}
+            onAcceptCall={acceptCall}
+            onRejectCall={rejectCall}
+            incomingCall={incomingCall}
+          />
+        </Box>
       </Box>
       <Box
         sx={{
@@ -541,8 +833,8 @@ const sendMessage = async () => {
             pr: 1,
           }}
         >
-          <Button onClick={toggleEmojiPicker}  >
-            <img src="/images/em.png" style={{ width: "25px"}} />
+          <Button onClick={toggleEmojiPicker}>
+            <img src="/images/em.png" style={{ width: "25px" }} />
           </Button>
           {showEmojiPicker && (
             <Box
@@ -641,4 +933,3 @@ const sendMessage = async () => {
 };
 
 export default ChatComponent;
-

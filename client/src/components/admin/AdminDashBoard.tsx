@@ -1,9 +1,8 @@
 import { Box, Card, CardContent, IconButton, List, ListItem, ListItemText, MenuItem, Select, TextField, Tooltip, Typography } from "@mui/material"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
-import {
-  FileDownload as ExportIcon,
-} from "@mui/icons-material";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { FileDownload as ExportIcon,} from "@mui/icons-material";
 import { useEffect, useState } from "react";
 import { enrolledStudents, getCourseStrength, getRevenueReport, getTotalRevenue } from "../../api/enrollmentApi";
 import { getCourseCount } from "../../api/courseApi";
@@ -22,6 +21,7 @@ const AdminDashBoard = () => {
   const [timeRange, setTimeRange] = useState("daily");
 const [customDates, setCustomDates] = useState({ startDate: "", endDate: "" });
 const [salesData, setSalesData] = useState<{ date: string; totalRevenue: number }[]>([]);
+
 
   useEffect(() => {
     const fetchTotalStrength = async() => {
@@ -125,12 +125,12 @@ const [salesData, setSalesData] = useState<{ date: string; totalRevenue: number 
             <Typography variant="h6" fontWeight={"bold"}>
               Sales Report
             </Typography>
-            <Box>
+            {/* <Box>
               <IconButton size="small">
                 <ExportIcon />
               </IconButton>
               Export PDF
-            </Box>
+            </Box> */}
           </Box>
           <Typography>Section for sales report</Typography>
           <Box

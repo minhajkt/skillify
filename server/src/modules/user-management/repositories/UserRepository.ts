@@ -1,44 +1,40 @@
 import User, { IUser } from "../models/UserModel";
-import Course, {ICourse} from '../../courses/models/courseModel'
+import Course, { ICourse } from "../../courses/models/courseModel";
 import { IUserRepository } from "./IUserRepository";
-import bcrypt from 'bcryptjs'
+import bcrypt from "bcryptjs";
+import { BaseRepository } from "../../../common/baseRepository";
 
-export class UserRepository implements IUserRepository {
-  async createUser(userData: Partial<IUser>): Promise<IUser> {
-    const user = new User(userData);
-    return await user.save();
+export class UserRepository extends BaseRepository<IUser> implements IUserRepository {
+
+  constructor() {
+    super(User)
   }
 
-  async getUserByEmail(email: String): Promise<IUser | null> {
-    return await User.findOne({ email });
+  async createUser(userData: Partial<IUser>): Promise<IUser> {
+    return await this.create(userData)
+  }
+
+  async getUserByEmail(email: string): Promise<IUser | null> {    
+    return await this.findByEmail(email)
   }
 
   async updateUser(
-    id: String,
+    id: string,
     userData: Partial<IUser>
   ): Promise<IUser | null> {
-    const updatedUser = await User.findByIdAndUpdate(id, userData, {
-      new: true,
-    });
-    console.log("the udpated user is ", updatedUser);
-
+    const updatedUser = await this.update(id, userData)
     return updatedUser;
   }
 
-  async getAllUsers(): Promise<IUser[]> {
-    return await User.find();
-  }
-
-  async findAllStudents(): Promise<IUser[]> {
-    return await User.find({ role: "user" });
-  }
-
   async findAllTutors(approvalStatus: string): Promise<number> {
-    return await User.countDocuments({ role: "tutor", isApproved: approvalStatus })
+    return await User.countDocuments({
+      role: "tutor",
+      isApproved: approvalStatus,
+    });
   }
 
-  async getUserById(id: String): Promise<IUser | null> {
-    return await User.findById(id);
+  async getUserById(id: string): Promise<IUser | null> {    
+    return await this.findById(id)
   }
 
   async updatePassword(
@@ -46,19 +42,10 @@ export class UserRepository implements IUserRepository {
     newPassword: string
   ): Promise<IUser | null> {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    return await User.findByIdAndUpdate(
-      userId,
-      { password: hashedPassword },
-      { new: true }
-    );
+    return await this.update(userId, {password: hashedPassword})
   }
-  
+
   async getCourseById(id: String): Promise<IUser | null> {
     return await Course.findById(id);
   }
-  // async getAllCourseForUser(): Promise<ICourse[]> {
-  //   return await Course.find({ isApproved: "approved" })
-  //     .populate("createdBy", "name")
-  //     .exec();
-  // }
 }

@@ -1,11 +1,13 @@
 import { Box, Button, Grid, Snackbar, TextField, Typography } from "@mui/material"
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { loginTutor } from "../../api/authApi";
 import ForgotPasswordModal from "../shared/ForgotPasswordModal";
 // import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
 import { LoginSchema } from "../../schemas/schemas";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store/store";
 
 
 
@@ -16,6 +18,11 @@ const TutorLogin = () => {
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const handleOpenModal = () => setIsModalOpen(true);
     const handleCloseModal = () => setIsModalOpen(false);
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated
+  );
+
+  
 
     const navigate = useNavigate();
   useEffect(() => {
@@ -24,6 +31,10 @@ const TutorLogin = () => {
       localStorage.removeItem("logoutSuccess");
     }
   }, []);
+
+  if (isAuthenticated) {
+    return <Navigate to={"/tutors/home"} />;
+  }
 
     const handleLogin = async (values: { email: string; password: string }) => {
       try {

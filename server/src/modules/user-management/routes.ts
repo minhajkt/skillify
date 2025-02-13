@@ -24,6 +24,9 @@ const userRepository = new UserRepository();
 const userService = new UserService(userRepository);
 const userController = new UserController(userService);
 
+
+router.post("/users/refresh-token", userController.refreshAccessToken.bind(userController));
+
 router.post(
   "/users/signup",
   validateUserCreation,
@@ -151,5 +154,6 @@ router.post(
 );
 
 router.get('/user/tutor-count',userController.getTutorCount.bind(userController))
+
 
 export default router;

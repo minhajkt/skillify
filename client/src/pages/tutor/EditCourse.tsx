@@ -20,6 +20,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
   fetchCategories,
   fetchCourseDetails,
+  getComplaints,
   updateCourseDetails,
 } from "../../api/courseApi";
 import { useSelector } from "react-redux";
@@ -41,6 +42,18 @@ const EditCourse = () => {
   const tutorId = tutor?._id;
 
   const navigate = useNavigate();
+    useEffect(() => {
+      const getReports = async () => {
+        try {
+          await getComplaints(); 
+        } catch (error) {
+          console.error("Error occurred:", error);
+        }
+      };
+  
+      getReports();
+    }, []);
+  
 
   useEffect(() => {
     const getCategories = async () => {
@@ -50,7 +63,7 @@ const EditCourse = () => {
     const getCourseData = async () => {
       if (courseId) {
         const response = await fetchCourseDetails(courseId);
-        console.log("course det", response);
+        // console.log("course det............................", response);
 
         setCourse(response);
       }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -56,7 +57,7 @@ const UserCourseSection = () => {
         setSelectedLecture(courseDetails.lectures[0]);
 
         const progressDetails = await getProgress(user?._id, courseId)
-        console.log('initial fetched progress', progressDetails);
+        // console.log('initial fetched progress', progressDetails);
         setProgress(progressDetails);
         const allLecturesCompleted = progressDetails?.completedLecturesDetails.length === courseDetails.lectures.length;
         setCourseCompleted(allLecturesCompleted)
@@ -85,11 +86,11 @@ const UserCourseSection = () => {
     if(selectedLecture) {
       try {
         const updatedProgress = await markLectureCompleted(user?._id, courseId, selectedLecture._id)
-        console.log("updated fetched progress", updatedProgress);
+        // console.log("updated fetched progress", updatedProgress);
         setProgress(updatedProgress);
         const allLecturesCompleted =
           updatedProgress?.completedLecturesDetails.length ===
-          course?.lectures.length;
+          course?.lectures?.length;
         setCourseCompleted(allLecturesCompleted);
         if (allLecturesCompleted) {
           setOpenSnackbar(true);

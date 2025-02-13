@@ -25,7 +25,7 @@ const Category = () => {
         icon: icons[cat]
       }))
       setCategories(formattedResponse)
-      console.log('cat is ca', formattedResponse);
+      // console.log('cat is ca', formattedResponse);
       
     }
     getCategories()

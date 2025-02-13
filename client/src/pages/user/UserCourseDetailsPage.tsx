@@ -25,6 +25,8 @@ import CheckoutButton from "../../components/user/CheckoutButton";
 import ReviewComponent from "../../components/user/ReviewComponent";
 import { fetchUserEnrolledCourses } from "../../api/enrollmentApi";
 import { ILectures, ICourse,ITutor } from "../../types/types";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store/store";
 
 const UserCourseDetailsPage = () => {
   const [course, setCourse] = useState<ICourse>();
@@ -38,7 +40,8 @@ const UserCourseDetailsPage = () => {
   const [isEnrolled, setIsEnrolled] = useState(false);
       const location = useLocation();
       const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false);
-
+      const user = useSelector((state: RootState) => state.auth.user)
+      
 
           useEffect(() => {
             if (
@@ -76,23 +79,27 @@ const UserCourseDetailsPage = () => {
         );
         setTotalHours((totalDuration / 60).toFixed(1))
         // console.log("Total Duration:", totalHours);
-        const enrolledCourses = await fetchUserEnrolledCourses();
-        // console.log("Enrolled Courses:", enrolledCourses);
-    if (Array.isArray(enrolledCourses)) {
-      const courseEnrolled = enrolledCourses.some(
-        (enrolledCourse) =>
-          enrolledCourse.courseId && enrolledCourse.courseId._id === courseId
-      );
-      setIsEnrolled(courseEnrolled);
 
-    } else {
-      console.error(
-        "Unexpected response format for enrolled courses:",
-        enrolledCourses
-      );
-      setIsEnrolled(false);
-    }   
-    console.log("Is enrolled:", isEnrolled);
+        if(user) {
+          const enrolledCourses = await fetchUserEnrolledCourses();
+          // console.log("Enrolled Courses:", enrolledCourses);
+      if (Array.isArray(enrolledCourses)) {
+        const courseEnrolled = enrolledCourses.some(
+          (enrolledCourse) =>
+            enrolledCourse.courseId && enrolledCourse.courseId._id === courseId
+        );
+        setIsEnrolled(courseEnrolled);
+  
+      } else {
+        console.error(
+          "Unexpected response format for enrolled courses:",
+          enrolledCourses
+        );
+        setIsEnrolled(false);
+      }   
+      console.log("Is enrolled:", isEnrolled);
+
+        }
       } catch (error) {
         console.error("Error fetching course details:", error);
       }

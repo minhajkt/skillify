@@ -9,15 +9,15 @@ export interface IUserService {
   loginUser(
     email: string,
     password: string
-  ): Promise<{ token: string; user: IUser }>;
+  ): Promise<{ token: string; refreshToken: string; user: IUser }>;
   loginTutor(
     email: string,
     password: string
-  ): Promise<{ token: string; user: IUser }>;
+  ): Promise<{ token: string; refreshToken: string; user: IUser }>;
   loginAdmin(
     email: string,
     password: string
-  ): Promise<{ token: string; user: IUser }>;
+  ): Promise<{ token: string; refreshToken: string; user: IUser }>;
   getUserById(id: string): Promise<IUser | null>;
   updateUser(id: string, userData: Partial<IUser>): Promise<IUser | null>;
   handleForgotPassword(email: string): Promise<string | null>;

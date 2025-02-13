@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import { fetchTutorCourseDetails } from "../../api/tutorApi";
 import Navbar from "../../components/shared/Navbar";
+import { getComplaints } from "../../api/courseApi";
 
 const CourseDetailsPage = () => {
   const { courseId } = useParams();
@@ -25,6 +26,19 @@ const CourseDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const navigate = useNavigate()
+
+
+    useEffect(() => {
+      const getReports = async () => {
+        try {
+          await getComplaints(); 
+        } catch (error) {
+          console.error("Error occurred:", error);
+        }
+      };
+  
+      getReports();
+    }, []);
 
   useEffect(() => {
     const fetchCourseDetails = async () => {

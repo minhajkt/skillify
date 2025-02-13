@@ -5,7 +5,7 @@ import { RootState } from "../../store/store";
 
 const TutorBanner = ({ sx }: { sx?: object }) => {
   const user = useSelector((state: RootState) => state.auth.user);
-  console.log("user from redux", user);
+  // console.log("user from redux", user);
     const navigate = useNavigate()
 
   return (

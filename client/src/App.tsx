@@ -40,7 +40,7 @@ import ProtectedRoutes from "./components/protectedRoutes/ProtectedRoutes";
 import PendingPayments from "./components/admin/PendingPayments";
 import PaymentHistory from "./components/admin/PaymentHistory";
 import TutorPayments from "./components/tutor/TutorPayments";
-import {socket} from "./utils/socket";
+import { socket } from "./utils/socket";
 import { useEffect } from "react";
 import ChatComponent from "./components/chat/ChatComponent";
 import Contacts from "./components/chat/Contacts";
@@ -50,16 +50,15 @@ const stripePromise = loadStripe(
   "pk_test_51QfLoJF574cRRlb7gt4W52ZaKOrTVvdRuxGB5nDgXRQhugeedtvDfqKPFTVryX1uBAnthR40zUGYMeyE7baknYkD00Ar4wRwmH"
 );
 
-
 function App() {
   useEffect(() => {
-    socket.on('connect', () => {
+    socket.on("connect", () => {
       console.log(`Connected to server with ID: ${socket.id}`);
-    })
-    return() => {
-      socket.disconnect()
-    }
-  }, [])
+    });
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   return (
     <>
@@ -75,21 +74,34 @@ function App() {
             <Route path="/tutors/signup" element={<TutorSignupPage />} />
             <Route path="/tutors/login" element={<TutorLoginPage />} />
             <Route path="/tutors/home" element={<TutorHome />} />
+
             <Route
               path="/tutors/payment/:tutorId"
-              element={<TutorPayments />}
+              element={
+                <ProtectedRoutes requiredRole="tutor">
+                  <TutorPayments />
+                </ProtectedRoutes>
+              }
             />
             <Route
               path="/tutor/edit-course/:courseId"
-              element={<EditCourse />}
+              element={
+                <ProtectedRoutes requiredRole="tutor">
+                  <EditCourse />
+                </ProtectedRoutes>
+              }
             />
             <Route
               path="/tutor/:courseId/edit-lecture"
-              element={<EditLecture />}
+              element={
+                <ProtectedRoutes requiredRole="tutor">
+                  <EditLecture />
+                </ProtectedRoutes>
+              }
             />
+
             <Route path="/admin/login" element={<AdminLoginPage />} />
 
-            {/* <Route path="/users/course-details/:courseId" element={<UserCourseDetailsPage />} /> */}
             <Route
               path="/users/course-details/:courseId"
               element={
@@ -98,21 +110,52 @@ function App() {
                 </Elements>
               }
             />
-            <Route path="/users/my-courses" element={<MyCourses />} />
+            <Route
+              path="/users/my-courses"
+              element={
+                <ProtectedRoutes requiredRole="user">
+                  <MyCourses />
+                </ProtectedRoutes>
+              }
+            />
             <Route
               path="/users/course-section/:courseId"
-              element={<UserCourseSection />}
+              element={
+                <ProtectedRoutes requiredRole="user">
+                  <UserCourseSection />
+                </ProtectedRoutes>
+              }
             />
 
-            {/* <Route path="/contacts" element={<Contacts />} />
-            <Route path="/messages/:tutorId" element={<ChatComponent />} /> */}
-            <Route path="/messages" element={<Contacts />}>
+            <Route
+              path="/messages"
+              element={
+                <ProtectedRoutes requiredRole="user">
+                  <Contacts />
+                </ProtectedRoutes>
+              }
+            >
               <Route path=":tutorId" element={<ChatComponent />} />
             </Route>
-            <Route path="/tutors/contacts" element={<TutorContacts />}>
+
+            <Route
+              path="/tutors/contacts"
+              element={
+                <ProtectedRoutes requiredRole="tutor">
+                  <TutorContacts />
+                </ProtectedRoutes>
+              }
+            >
               <Route path=":studentId" element={<ChatComponent />} />
             </Route>
-            <Route path="/wishlist" element={<Wishlist />} />
+            <Route
+              path="/wishlist"
+              element={
+                <ProtectedRoutes requiredRole="user">
+                  <Wishlist />
+                </ProtectedRoutes>
+              }
+            />
 
             <Route
               path="/admin"
@@ -134,21 +177,44 @@ function App() {
               <Route path="payments-history" element={<PaymentHistory />} />
               <Route
                 path="/admin/course-details/:courseId"
-                element={<AdminCourseDetailsPage />}
+                element={
+                  <ProtectedRoutes requiredRole="admin">
+                    <AdminCourseDetailsPage />
+                  </ProtectedRoutes>
+                }
               />
             </Route>
             <Route
               path="/tutors/create-course"
-              element={<CreateCoursePage />}
+              element={
+                <ProtectedRoutes requiredRole="tutor">
+                  <CreateCoursePage />
+                </ProtectedRoutes>
+              }
             />
             <Route
               path="/tutors/add-lecture/:courseId"
-              element={<AddLecturePage />}
+              element={
+                <ProtectedRoutes requiredRole="tutor">
+                  <AddLecturePage />
+                </ProtectedRoutes>
+              }
             />
-            <Route path="/tutors/courses" element={<AllCoursePage />} />
+            <Route
+              path="/tutors/courses"
+              element={
+                <ProtectedRoutes requiredRole="tutor">
+                  <AllCoursePage />
+                </ProtectedRoutes>
+              }
+            />
             <Route
               path="/tutors/courses/:courseId"
-              element={<CourseDetailsPage />}
+              element={
+                <ProtectedRoutes requiredRole="tutor">
+                  <CourseDetailsPage />
+                </ProtectedRoutes>
+              }
             />
           </Routes>
         </Router>

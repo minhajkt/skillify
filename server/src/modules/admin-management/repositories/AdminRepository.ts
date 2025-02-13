@@ -3,26 +3,32 @@ import User, { IUser } from "../../user-management/models/UserModel";
 import { IAdminRepository } from "./IAdminRepository";
 import bcrypt from 'bcryptjs'
 import Course from '../../courses/models/courseModel'
+import { BaseRepository } from "../../../common/baseRepository";
 
-export class AdminRepository implements IAdminRepository {
+export class AdminRepository extends BaseRepository<IUser> implements IAdminRepository {
 
-  async findAllStudents(): Promise<IUser[]> {
+  constructor() {
+    super(User)
+  }
+
+  async findAllStudents(): Promise<IUser[]> {        
     return await User.find({ role: "user" });
   }
 
   async updateUser(
-    id: String,
+    id: string,
     userData: Partial<IUser>
   ): Promise<IUser | null> {
-    return await User.findByIdAndUpdate(id, userData, { new: true });
+    
+    return await this.update(id, userData)
   }
 
-  async findAllTutors(): Promise<IUser[]> {
+  async findAllTutors(): Promise<IUser[]> {        
     return await User.find({ role: "tutor", isApproved: "approved" });
   }
 
-  async getUserById(id: String): Promise<IUser | null> {
-    return await User.findById(id);
+  async getUserById(id: string): Promise<IUser | null> {
+    return await this.findById(id)
   }
 
   async getTutorRequests(): Promise<IUser[]> {
@@ -46,17 +52,17 @@ export class AdminRepository implements IAdminRepository {
 
   async getAllCourse(): Promise<ICourse[]> {
     // return await Course.find({ isApproved: { $in: ["approved", "blocked"] } });
-    return await Course.find({ isApproved: "approved" });
+    return await Course.find({ isApproved: {$in:["approved", "blocked"] }});
 
     // .populate("createdBy", "name").exec();
   }
   
-  async getAllUsers(): Promise<IUser[]> {
-    return await User.find();
+  async getAllUsers(): Promise<IUser[]> {    
+    return await this.findAll()
   }
 
-  async getUserByEmail(email: String): Promise<IUser | null> {
-    return await User.findOne({ email });
+  async getUserByEmail(email: string): Promise<IUser | null> {
+    return await this.findByEmail(email)
   }
 
   async updatePassword(
@@ -64,12 +70,6 @@ export class AdminRepository implements IAdminRepository {
     newPassword: string
   ): Promise<IUser | null> {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    return await User.findByIdAndUpdate(
-      userId,
-      { password: hashedPassword },
-      { new: true }
-    );
+    return await this.update(userId, {password: hashedPassword})
   }
-
-  
 }

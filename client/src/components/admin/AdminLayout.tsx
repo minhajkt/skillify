@@ -29,6 +29,7 @@ const AdminLayout = () => {
 
   const token = useSelector((state: RootState) => state.auth.token);
   const user = useSelector((state: RootState) => state.auth.user);
+  
   const handleLogout = async () => {
     try {
       // await logoutUser();

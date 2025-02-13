@@ -4,7 +4,7 @@ import { RootState } from "../../store/store";
 
 const MainBanner = ({ sx }: { sx?: object }) => {
   const user = useSelector((state: RootState) => state.auth.user);
-  console.log("user from redux", user);
+  // console.log("user from redux", user);
   return (
     <Box
       sx={{

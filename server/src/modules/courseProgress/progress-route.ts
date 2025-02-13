@@ -3,6 +3,7 @@ import { ProgressRepository } from "./repositories/progressRepository";
 import { ProgressService } from "./services/progressService";
 import { ProgressController } from "./controllers/progressController";
 import { cloudinary } from "../../config/cloudinaryConfig";
+import { authenticateJWT } from "../../middlewares/authenticateJWT";
 
 const progressRouter = Router()
 
@@ -10,11 +11,11 @@ const progressRepository = new ProgressRepository()
 const progressService = new ProgressService(progressRepository)
 const progressController = new ProgressController(progressService)
 
-progressRouter.get('/progress/get-progress/:userId/:courseId', progressController.findProgress.bind(progressController))
-progressRouter.put('/progress/update-progress/:userId/:courseId/:lectureId', progressController.markLectureCompleted.bind(progressController))
-progressRouter.post('/progress/generate-certificate', progressController.generateCertificate.bind(progressController))
+progressRouter.get('/progress/get-progress/:userId/:courseId', authenticateJWT,progressController.findProgress.bind(progressController))
+progressRouter.put('/progress/update-progress/:userId/:courseId/:lectureId', authenticateJWT,progressController.markLectureCompleted.bind(progressController))
+progressRouter.post('/progress/generate-certificate', authenticateJWT,progressController.generateCertificate.bind(progressController))
 
-progressRouter.get("/download-certificate", async (req, res) => {
+progressRouter.get("/download-certificate",authenticateJWT ,async (req, res) => {
   const { certificateUrl } = req.query;
 
   if (!certificateUrl) {

@@ -8,10 +8,9 @@ const ChatLayout = () => {
 
   return (
     <Box sx={{ display: "flex", height: "100vh" }}>
-      {/* Left Panel: Contacts */}
       <Box
         sx={{
-          width: "30%", // Adjust width of the left panel
+          width: "30%", 
           borderRight: "1px solid #ddd",
           overflowY: "auto",
           backgroundColor: "#f8f9fa",
@@ -20,16 +19,14 @@ const ChatLayout = () => {
         <Contacts />
       </Box>
 
-      {/* Right Panel: Chat */}
       <Box
         sx={{
-          flex: 1, // Take up remaining space
+          flex: 1, 
           display: "flex",
           flexDirection: "column",
           backgroundColor: "#ffffff",
         }}
       >
-        {/* Display ChatComponent only when tutorId is selected */}
         {tutorId ? (
           <ChatComponent />
         ) : (

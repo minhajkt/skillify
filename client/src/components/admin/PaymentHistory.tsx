@@ -97,16 +97,6 @@ const PaymentHistory: React.FC = () => {
                   >
                     {payment.status}
                   </TableCell>
-
-                  {/* <TableCell>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => handleSettlePayment(payment._id)}
-                    >
-                      Settle Payment
-                    </Button>
-                  </TableCell> */}
                 </TableRow>
               ))}
           </TableBody>

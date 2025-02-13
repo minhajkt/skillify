@@ -24,7 +24,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { fetchAllCourses, fetchTutorById } from "../../api/adminApi";
-import { fetchCategories } from "../../api/courseApi";
+import { fetchCategories, getComplaints } from "../../api/courseApi";
 import { useNavigate } from "react-router-dom";
 import {ICourse } from '../../types/types'
 
@@ -49,6 +49,19 @@ const AdminCourse = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [categories, setCategories] = useState<string[]>([]);
+  
+  useEffect(() => {
+    const getReports = async () => {
+      try {
+        const fetchedReports = await getComplaints(); 
+      } catch (error) {
+        setError("Failed to fetch reports.");
+        console.error("Error occurred:", error);
+      } 
+    };
+
+    getReports();
+  }, []);
 
   useEffect(() => {
     const showCourses = async () => {

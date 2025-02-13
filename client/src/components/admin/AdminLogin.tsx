@@ -1,31 +1,33 @@
 import {  useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { loginAdmin } from "../../api/authApi";
 import { Box, Button, Grid, TextField, Typography } from "@mui/material";
 import ForgotPasswordModal from "../shared/ForgotPasswordModal";
-// import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
 import { LoginSchema } from "../../schemas/schemas";
+import { RootState } from "../../store/store";
+import { useSelector } from "react-redux";
 
-// const LoginSchema = Yup.object().shape({
-//   email: Yup.string()
-//     .email("Invalid email address")
-//     .required("Email is required"),
-//   password: Yup.string()
-//     .min(3, "Password must be at least 3 characters long")
-//     .required("Password is required"),
-// });
+
 
 const AdminLogin = () => {
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated
+  );
+
 
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
 
   const navigate = useNavigate();
 
+
+    if (isAuthenticated) {
+    return <Navigate to={"/admin"} />;
+  }
 
   const handleLogin = async (values: { email: string; password: string }) => {
     setErrorMessage(null);

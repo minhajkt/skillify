@@ -4,7 +4,7 @@ import { axiosInstance } from "./axiosInstance"
 export const fetchUserEnrolledCourses = async() => {
     try {
         const response = await axiosInstance.get('/enrollment/my-courses', {
-            withCredentials: true
+            // withCredentials: true
         })
         return response.data
     } catch (error) {
@@ -17,7 +17,7 @@ export const fetchUserEnrolledCourses = async() => {
       const response = await axiosInstance.get("/enrollment/my-students", {
         withCredentials: true
       });
-      console.log('stttttttttttttttttttttt', response.data);
+      // console.log('stttttttttttttttttttttt', response.data);
       
       return response.data;
     } catch (error) {

@@ -3,7 +3,7 @@ import { UserRepository } from "../repositories/UserRepository";
 import { UserService } from "../services/UserService";
 import { Request, Response } from "express";
 import { sendOtpToEmail, storeOtp } from "../../../utils/otpUtil";
-import { verifyResetToken } from "../../../utils/jwtUtil";
+import { verifyRefreshToken, verifyResetToken } from "../../../utils/jwtUtil";
 import { cloudinary } from "../../../config/cloudinaryConfig";
 import { upload } from "../../../config/cloudinaryConfig";
 import { OAuth2Client } from "google-auth-library";
@@ -12,6 +12,7 @@ import Stripe from "stripe";
 import mongoose from "mongoose";
 import { IUserService } from "../services/IUserService";
 import { IUserController } from "./IUserController";
+import User from '../models/UserModel'
 
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -91,15 +92,25 @@ export class UserController implements IUserController {
   async loginUser(req: Request, res: Response): Promise<void> {
     try {
       const { email, password } = req.body;
-      const { token, user } = await this.userService.loginUser(email, password);
+      const { token, refreshToken, user } = await this.userService.loginUser(
+        email,
+        password
+      );
 
       if (!token) {
         res.status(404).json({ message: "User not found" });
         return;
       }
 
+      res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+      
+
       res.status(200).json({ message: "Login successful", token, user });
-      console.log("for now", user);
 
       return;
     } catch (error) {
@@ -108,10 +119,50 @@ export class UserController implements IUserController {
     }
   }
 
+  async refreshAccessToken(req: Request, res: Response): Promise<void> {
+    try {
+      const refreshToken = req.cookies.refreshToken;
+      console.log('the refresh token in endpint of refreseh is ', refreshToken)
+      if (!refreshToken) {
+        console.error("No refresh token found. Logging out user.");
+        res.clearCookie("refreshToken");
+         res.status(401).json({ message: "No refresh token found" });
+         return;
+      }
+
+      console.log('decoding');
+      
+      const decoded = verifyRefreshToken(refreshToken) as { id: string };
+      console.log('decoded', decoded)
+      const user = await User.findById(decoded.id);
+      console.log('user is ', user)
+      if (!user) {
+        res.clearCookie('refreshToken');
+         res.status(404).json({ message: "User not found" });
+         return;
+      }
+
+      console.log('genereatign new token acescc' )
+      const newAccessToken = generateToken({
+        id: user._id,
+        email: user.email,
+        role: user.role,
+        isActive: user.isActive,
+      });
+      console.log('new generetea access token', newAccessToken)
+
+      res.json({ token: newAccessToken });
+    } catch (error) {
+      console.error("Invalid or expired refresh token:", error);
+      res.clearCookie("refreshToken");
+      res.status(403).json({ message: "Invalid or expired refresh token" });
+    }
+  }
+
   async loginTutor(req: Request, res: Response): Promise<void> {
     try {
       const { email, password } = req.body;
-      const { token, user } = await this.userService.loginTutor(
+      const { token, refreshToken, user } = await this.userService.loginTutor(
         email,
         password
       );
@@ -120,6 +171,13 @@ export class UserController implements IUserController {
         res.status(404).json({ message: "Tutor not found" });
         return;
       }
+
+      res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
 
       res.status(200).json({ message: "Login successful", token, user });
       console.log("for now", user);
@@ -133,7 +191,7 @@ export class UserController implements IUserController {
   async loginAdmin(req: Request, res: Response): Promise<void> {
     try {
       const { email, password } = req.body;
-      const { token, user } = await this.userService.loginAdmin(
+      const { token, refreshToken, user } = await this.userService.loginAdmin(
         email,
         password
       );
@@ -142,6 +200,13 @@ export class UserController implements IUserController {
         res.status(404).json({ message: "Admin not found" });
         return;
       }
+
+      res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
 
       res.status(200).json({ message: "Login successful", token, user });
       console.log("for now", user);
@@ -161,7 +226,6 @@ export class UserController implements IUserController {
         res.status(404).json({ mesage: "User not found" });
         return;
       }
-      // console.log("userrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr", user);
 
       res.status(200).json({ user });
     } catch (error) {
@@ -172,13 +236,9 @@ export class UserController implements IUserController {
   async updateUser(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.params.id;
-      // console.log('id from jwt', userId);
-      // console.log('role from jwt', req.user?.role);
 
       const userData = req.body;
       if (req.file) {
-        // console.log("image file is", req.file.path);
-
         userData.profilePhoto = req.file.path;
       }
       const updatedUser = await this.userService.updateUser(userId, userData);
@@ -187,7 +247,6 @@ export class UserController implements IUserController {
         res.status(404).json("No user found");
         return;
       }
-      // console.log("update user in controller", updatedUser);
 
       res.status(200).json({ user: updatedUser });
     } catch (error) {
@@ -197,7 +256,12 @@ export class UserController implements IUserController {
 
   async logoutUser(req: Request, res: Response): Promise<void> {
     try {
+      
       res.clearCookie("token");
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+      });
       res.status(200).json({ message: "Logout Successful" });
     } catch (error) {
       res.status(500).json({ message: "Error in logging out", error });
@@ -376,26 +440,24 @@ export class UserController implements IUserController {
       res.json({ id: session.id });
     } catch (error) {
       console.error("Stripe payment error:", error);
-      res
-        .status(500)
-        .json({
-          message: "Payment setup failed",
-          error: (error as Error).message,
-        });
+      res.status(500).json({
+        message: "Payment setup failed",
+        error: (error as Error).message,
+      });
     }
   }
 
   async getTutorCount(req: Request, res: Response): Promise<void> {
     try {
-      const tutorCount = await this.userService.getTutorCount()
-      if(!tutorCount) {
-        res.status(404).json("No tutor")
-        return
+      const tutorCount = await this.userService.getTutorCount();
+      if (!tutorCount) {
+        res.status(404).json("No tutor");
+        return;
       }
-      res.status(200).json(tutorCount)
+      res.status(200).json(tutorCount);
     } catch (error) {
       console.log(error);
-      res.status(500).json('An unexpected error occured')
+      res.status(500).json("An unexpected error occured");
     }
   }
 }

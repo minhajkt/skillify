@@ -19,7 +19,7 @@ const wishlistService = new WishlistService(wishlistRepo, courseRepo);
 const wishlistcontroller = new WishlistController(wishlistService);
 
 wishlistRouter.post("/wishlist/add", authenticateJWT, wishlistcontroller.addToWishlist.bind(wishlistcontroller));
-wishlistRouter.get("/wishlist", authenticateJWT , wishlistcontroller.getWishlist.bind(wishlistcontroller));
+wishlistRouter.get("/wishlist" , authenticateJWT,wishlistcontroller.getWishlist.bind(wishlistcontroller));
 wishlistRouter.post("/wishlist/remove", authenticateJWT, wishlistcontroller.removeFromWishlist.bind(wishlistcontroller));
 
 export default wishlistRouter;

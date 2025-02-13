@@ -24,6 +24,7 @@ import Navbar from "../shared/Navbar";
 import { Formik, Form, Field, FormikHelpers } from "formik";
 import { ICreateCourse } from "../../types/types";
 import { CreateCourseSchema } from "../../schemas/schemas";
+import { tutorRecievable } from "../../api/paymentsApi";
 
 interface AuthState {
   user: IUser | null;
@@ -43,10 +44,21 @@ const CreateCourseSection = () => {
   const tutor = useSelector((state: RootState) => state.auth.user);
   const tutorId = tutor?._id;
   const [searchQuery, setSearchQuery] = useState("");
+  const [payments, setPayments] = useState<[]>([])
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
+
+      useEffect(() => {
+          const fecthTutorsPayment = async(tutorId: string) => {
+              const data = await tutorRecievable(tutorId)
+              setPayments(data)
+          }
+              if (tutorId) {
+                  fecthTutorsPayment(tutorId)
+              }
+      }, [])
 
   useEffect(() => {
     const getCategories = async () => {

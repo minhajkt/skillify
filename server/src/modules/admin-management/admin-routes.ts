@@ -32,12 +32,12 @@ adminRouter.patch(
 );
 
 adminRouter.get("/admin/tutors", authenticateJWT, adminController.getTutors.bind(adminController));
-adminRouter.get("/admin/tutor/:id", adminController.getTutorById.bind(adminController));
-adminRouter.get("/admin/user/:id", adminController.getStudentById.bind(adminController));
+adminRouter.get("/admin/tutor/:id",adminController.getTutorById.bind(adminController));
+adminRouter.get("/admin/user/:id", authenticateJWT,adminController.getStudentById.bind(adminController));
 adminRouter.patch("/admin/tutors/:id/status",authenticateJWT,adminController.updateTutorStatus.bind(adminController));
 
 
-adminRouter.get("/admin/tutor-requests", adminController.getTutorRequests.bind(adminController));
+adminRouter.get("/admin/tutor-requests", authenticateJWT,adminController.getTutorRequests.bind(adminController));
 adminRouter.patch(
   "/admin/tutor-request/:id/approval",
   authenticateJWT,
@@ -45,13 +45,16 @@ adminRouter.patch(
   adminController.updateTutorApproval.bind(adminController)
 );
 
-adminRouter.get("/admin/course-requests", adminController.getCourseRequests.bind(adminController));
+adminRouter.get("/admin/course-requests",authenticateJWT ,adminController.getCourseRequests.bind(adminController));
 adminRouter.patch(
-  "/admin/course-request/:id/approval",
+  "/admin/course-request/:id/approval", authenticateJWT,
   adminController.updateCourseApproval.bind(adminController)
 );
 
-adminRouter.get("/admin/courses", adminController.getAllCourse.bind(adminController));
+adminRouter.get(
+  "/admin/courses",
+  adminController.getAllCourse.bind(adminController)
+);
 
 
 export default adminRouter;

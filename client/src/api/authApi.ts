@@ -3,6 +3,7 @@ import { axiosInstance } from "./axiosInstance";
 import Cookies from 'js-cookie';
 import { store } from "../store/store";
 import { loginSuccess } from "../store/authSlice";
+import { handleAxiosError } from "../utils/errorHandler";
 
 export const loginUser = async(email:string, password:string) => {
   try {
@@ -13,11 +14,12 @@ export const loginUser = async(email:string, password:string) => {
       // console.log("user logged in and role", response.data?.user?.bio);
       store.dispatch(loginSuccess({
         token,
-        user: response.data.user
+        user: response.data.user,
+        isAuthenticated: true
       }))
             // console.log('user from auth api', response.data?.user);
             
-            Cookies.set('authToken', token, {expires: 1/24})
+            Cookies.set('authToken', token, {expires: 15/1440})
         }else {
             console.log('user not logged in ');
         }
@@ -73,11 +75,12 @@ export const loginTutor = async (email: string, password: string) => {
           loginSuccess({
             token,
             user: response.data.user,
+            isAuthenticated: true
           })
         );
         // console.log("user from auth api", response.data?.user);
   
-        Cookies.set("authToken", token, { expires: 1 / 24 });
+        Cookies.set("authToken", token, { expires: 15/1440 });
       }else {
         console.log('you are not tutor'); 
       
@@ -166,11 +169,12 @@ export const loginAdmin = async (email: string, password: string) => {
           loginSuccess({
             token,
             user: response.data.user,
+            isAuthenticated: true
           })
         );
         // console.log("user from auth api", response.data?.user);
 
-        Cookies.set("authToken", token, { expires: 1 / 24 });
+        Cookies.set("authToken", token, { expires: 15/1440 });
       } else {
         console.log("you are not tutor");
       }
@@ -210,11 +214,19 @@ export const googleSignIn = async (idToken: string) => {
   const data = await response.json();
   // console.log('google sign in data', data);
   const {token, user} = data;
-  Cookies.set('authToken', token, {expires: 7 })
-  store.dispatch(loginSuccess({token,user}))
+  Cookies.set('authToken', token, {expires: 15/1440 })
+  store.dispatch(loginSuccess({token,user, isAuthenticated:true}))
 
   
   return data;
 };
 
+export const logoutUser = async() => {
+  try {
+    const response = await axiosInstance.post('/users/logout')
+    return response.data
+  } catch (error) {
+    handleAxiosError(error)
+  }
+}
 

@@ -70,10 +70,6 @@ const AdminCourseDetailsPage = () => {
         {}
       );
 
-      // setLectures((prevLectures) => ({
-      //   ...prevLectures,
-      //   ...lectureMap,
-      // }));
       setLectures(lectureMap);
     } catch (error) {
       console.error("Error fetching lecture details:", error);
@@ -271,15 +267,6 @@ const handleBlockToggle = async (courseId: string, newStatus: string) => {
                           </Tooltip>
                         </TableCell>
                         <TableCell>
-                          {/* {lecture.videoUrl ? (
-                            <video
-                              src={lecture.videoUrl}
-                              controls
-                              style={{ maxWidth: "200px" }}
-                            />
-                          ) : (
-                            "No video available"
-                          )} */}
                           {lecture.videoLoaded ? (
                             <video
                               src={lecture.videoUrl}

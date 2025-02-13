@@ -13,7 +13,9 @@ interface RequestWithUser extends Request {
 }
 
 export const authenticateJWT = async(req: RequestWithUser, res: Response, next: NextFunction):Promise<void> => {
-    const token = req.cookies.authToken
+    // const token = req.cookies.authToken
+    const token = req.headers.authorization?.split(" ")[1];
+    console.log('authnecitacting the token')
     // console.log("Cookies: ", req.cookies);  
     if(!token) {
          res.status(401).json({message: 'No token found'})
@@ -23,7 +25,7 @@ export const authenticateJWT = async(req: RequestWithUser, res: Response, next: 
     try {
       const decoded = verifyToken(token) as DecodedToken;
 
-      console.log(decoded);
+      console.log('after auth decoding',decoded);
       const user = await User.findById(decoded.id);
 
       if (!user) {
@@ -42,7 +44,8 @@ export const authenticateJWT = async(req: RequestWithUser, res: Response, next: 
 
       next();
     } catch (error) {
-        res.status(403).json({message: 'Invalid Token'})
+      // console.error("Session expired. Redirecting to login.");
+        res.status(403).json({message: 'Token is expired. Please login again'})
         return; 
     }
 }

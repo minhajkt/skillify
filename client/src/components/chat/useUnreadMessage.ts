@@ -7,10 +7,8 @@ export const useUnreadMessages = (userId: string) => {
   );
 
   useEffect(() => {
-    // Request initial unread counts
     socket.emit("get_unread_count", { userId });
 
-    // Listen for updates to unread counts
     const handleUnreadUpdate = (
       counts: Array<{ _id: string; count: number }>
     ) => {
@@ -23,7 +21,6 @@ export const useUnreadMessages = (userId: string) => {
 
     socket.on("unread_count_update", handleUnreadUpdate);
 
-    // Clean up
     return () => {
       socket.off("unread_count_update", handleUnreadUpdate);
     };

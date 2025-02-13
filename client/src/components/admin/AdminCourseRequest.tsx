@@ -58,34 +58,6 @@ const AdminCourseRequest = () => {
     getCourseRequests();
   }, []);
 
-  // const fetchLectureDetails = async (courseId: string[]) => {
-  //   try {
-  //     const { data } = await axiosInstance.get(`/courses/${courseId}/lectures`);
-  //     let lecturesArray: Lectures[] = [];
-  //     if (Array.isArray(data)) {
-  //       lecturesArray = data;
-  //     } else if (data.lectures) {
-  //       lecturesArray = data.lectures;
-  //     } else {
-  //       console.error("Unexpected data format:", data);
-  //       return;
-  //     }
-  //     const lectureMap = lecturesArray.reduce(
-  //       (acc: { [key: string]: Lectures }, lecture: Lectures) => {
-  //         acc[lecture._id] = lecture;
-  //         return acc;
-  //       },
-  //       {}
-  //     );
-
-  //     setLectures((prevLectures) => ({
-  //       ...prevLectures,
-  //       ...lectureMap,
-  //     }));
-  //   } catch (error) {
-  //     console.error("Error fetching lecture details:", error);
-  //   }
-  // };
 
   const handleOpenModal = (course: ICourse) => {
     navigate(`/admin/course-details/${course._id}`);
