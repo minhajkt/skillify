@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { AdminController } from "./controllers/adminUserAndTutorController";
+import { AdminController } from "./controllers/adminController";
 import {
   handleValidationErrors,
   validateForgotPassword,
@@ -8,39 +8,55 @@ import {
 import { UserController } from "../user-management/controllers/UserController";
 import { checkRole } from "../../middlewares/checkRole";
 import { authenticateJWT } from "../../middlewares/authenticateJWT";
+import { AdminRepository } from "./repositories/AdminRepository";
+import { AdminService } from "./services/adminService";
 
 const adminRouter = Router();
 
-adminRouter.post("/admin/login", validateUserLogin, UserController.loginAdmin);
-adminRouter.post("/admin/forgot-password", UserController.forgotPassword);
-adminRouter.post(
-  "/admin/reset-password",
-  validateForgotPassword,
-  handleValidationErrors,
-  UserController.resetPassword
-);
-adminRouter.post("/admin/logout", UserController.logoutUser);
+const adminRepository = new AdminRepository()
+const adminService = new AdminService(adminRepository)
+const adminController = new AdminController(adminService)
 
-adminRouter.get("/admin/students", AdminController.getStudents);
+
+
+adminRouter.get(
+  "/admin/students",
+  authenticateJWT,
+  adminController.getStudents.bind(adminController)
+);
 adminRouter.patch(
   "/admin/students/:id/status",
   authenticateJWT,
   checkRole(["admin"]),
-  AdminController.updateStudentStatus
+  adminController.updateStudentStatus.bind(adminController)
 );
 
-adminRouter.get("/admin/tutors", AdminController.getTutors);
-adminRouter.patch(
-  "/admin/tutors/:id/status",
-  authenticateJWT,
-  AdminController.updateTutorStatus
-);
+adminRouter.get("/admin/tutors", authenticateJWT, adminController.getTutors.bind(adminController));
+adminRouter.get("/admin/tutor/:id",adminController.getTutorById.bind(adminController));
+adminRouter.get("/admin/user/:id", authenticateJWT,adminController.getStudentById.bind(adminController));
+adminRouter.patch("/admin/tutors/:id/status",authenticateJWT,adminController.updateTutorStatus.bind(adminController));
 
-adminRouter.get("/admin/tutor-requests", AdminController.getTutorRequests)
+
+adminRouter.get("/admin/tutor-requests", authenticateJWT,adminController.getTutorRequests.bind(adminController));
 adminRouter.patch(
   "/admin/tutor-request/:id/approval",
   authenticateJWT,
   checkRole(["admin"]),
-  AdminController.updateTutorApproval
+  adminController.updateTutorApproval.bind(adminController)
 );
+
+adminRouter.get("/admin/course-requests",authenticateJWT ,adminController.getCourseRequests.bind(adminController));
+adminRouter.patch(
+  "/admin/course-request/:id/approval", authenticateJWT,
+  adminController.updateCourseApproval.bind(adminController)
+);
+
+adminRouter.patch('/admin/course-request/:id/edit-approval', authenticateJWT , adminController.updateCourseEditApproval.bind(adminController))
+
+adminRouter.get(
+  "/admin/courses",
+  adminController.getAllCourse.bind(adminController)
+);
+
+
 export default adminRouter;

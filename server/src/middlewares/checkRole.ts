@@ -12,7 +12,6 @@ export const checkRole = (roles: string[]) => {
             return
         }
         const userRole = (req.user) as User & {role : string}
-        // console.log('rple is ', userRole);
         
         if(roles.includes(userRole.role)) {
             return next()
