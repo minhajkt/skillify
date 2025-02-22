@@ -1,6 +1,13 @@
 import { Request, Response } from "express";
 import { IProgressController } from "./IProgressController";
 import { IProgressService } from "../services/IProgressService";
+import Progress from "../models/progressModel"
+import { cloudinary } from "../../../config/cloudinaryConfig";
+import axios from "axios";
+import { Users } from "../../../types/interfaces";
+import { HttpStatus } from "../../../constants/httpStatus";
+import { MESSAGES } from "../../../constants/messages";
+
 
 export class ProgressController implements IProgressController {
   private progressService: IProgressService;
@@ -15,14 +22,14 @@ export class ProgressController implements IProgressController {
         courseId
       );
       if (!progress) {
-        res.status(404).json("Progress not found");
+        res.status(HttpStatus.NOT_FOUND).json({message: MESSAGES.PROGRESS_NOT_FOUND});
         return;
       }
-      res.status(200).json(progress);
+      res.status(HttpStatus.OK).json(progress);
       return;
     } catch (error) {
-      res.status(500).json({
-        message: "An unexpected error occured",
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        message: MESSAGES.UNEXPECTED_ERROR,
         error: (error as Error).message,
       });
     }
@@ -37,13 +44,13 @@ export class ProgressController implements IProgressController {
         lectureId
       );
       if (!progress) {
-        res.status(404).json("Progress not found");
+        res.status(HttpStatus.NOT_FOUND).json({message: MESSAGES.PROGRESS_NOT_FOUND});
       }
 
-      res.status(200).json(progress);
+      res.status(HttpStatus.OK).json(progress);
     } catch (error) {
-      res.status(500).json({
-        message: "An unexpected error occured",
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        message: MESSAGES.UNEXPECTED_ERROR,
         error: (error as Error).message,
       });
     }
@@ -52,20 +59,52 @@ export class ProgressController implements IProgressController {
   async generateCertificate(req: Request, res: Response): Promise<void> {
     try {
       const { userId, courseId, userName, courseName } = req.body;
-      const certificateUrl = await this.progressService.issueCertificate(
+      const certificateId = await this.progressService.issueCertificate(
         userId,
         courseId,
         userName,
         courseName
       );
-      res.status(200).json({ certificateUrl });
+      res.status(HttpStatus.OK).json({ certificateId });
     } catch (error) {
-      res
-        .status(500)
-        .json({
-          message: "Failed to generate certificate",
-          error: (error as Error).message,
-        });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        message: MESSAGES.UNEXPECTED_ERROR,
+        error: (error as Error).message,
+      });
+    }
+  }
+
+  async downloadCertificate(req: Request, res: Response): Promise<void> {
+    const { certificateId } = req.query;
+    const userId = (req?.user as Users)?.id;
+    
+    if (!certificateId || typeof certificateId !== "string") {
+      res.status(HttpStatus.BAD_REQUEST).json({message: MESSAGES.CERTIFICATE_ID_ERROR});
+      return; 
+    }
+
+    try {
+      const signedUrl = await this.progressService.downloadCertificate(
+        certificateId,
+        userId
+      );
+
+      const fileResponse = await axios({
+        url: signedUrl,
+        method: "GET",
+        responseType: "stream",
+      });
+
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${certificateId.split("/").pop()}"`
+      );
+      res.setHeader("Content-Type", "application/pdf");
+
+      fileResponse.data.pipe(res);
+    } catch (error) {
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({message: MESSAGES.CERTIFICATE_DOWNLOAD_FAILED , error: (error as Error).message,});
+      return   
     }
   }
 }

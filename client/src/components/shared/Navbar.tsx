@@ -15,7 +15,7 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import {  persistor, RootState, store } from "../../store/store";
+import { persistor, RootState, store } from "../../store/store";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { logout } from "../../store/authSlice";
@@ -29,6 +29,10 @@ interface NavbarProps {
   searchQuery?: string;
   onSearchChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
+interface Message {
+  senderId: string;
+  recipientId: string;
+}
 
 const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
   const navigate = useNavigate();
@@ -39,18 +43,20 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
   }>();
   const token = useSelector((state: RootState) => state.auth.token);
   const user = useSelector((state: RootState) => state.auth.user);
-  console.log("tokn ies", token);
-  console.log("user irssss ", user);
-  const [openNotification, setOpenNotification] = useState(false)
-  const [notificationMessage, setNotificationMessage] = useState('')
-  const [notificationSenderId, setNotificationSenderId] = useState<string | null>(null);
+
+  const [openNotification, setOpenNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState("");
+  const [notificationSenderId, setNotificationSenderId] = useState<
+    string | null
+  >(null);
   const senderId = user?._id;
   const isTutor = user?.role === "tutor";
   const recipientId = isTutor ? studentId : tutorId;
   const [recipientName, setRecipientName] = useState("");
   const [recipientRole, setRecipientRole] = useState("");
-  const [notificationSenderRole, setNotificationSenderRole] = useState<'tutor' | 'user' | null>(null);
-
+  const [notificationSenderRole, setNotificationSenderRole] = useState<
+    "tutor" | "user" | null
+  >(null);
 
   const dispatch = useDispatch();
   const [anchorE1, setAnchorE1] = useState<null | HTMLElement>(null);
@@ -73,14 +79,12 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
     setModalOpen(false);
   };
 
-
   const handleLogout = async () => {
     try {
       dispatch(logout());
       await persistor.flush();
-      persistor.purge()
-      // console.log("logged out");
-      await logoutUser()
+      persistor.purge();
+      await logoutUser();
 
       localStorage.setItem("logoutSuccess", "true");
       if (user?.role === "tutor") {
@@ -89,34 +93,32 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
         navigate("/admin/login");
       } else {
         navigate("/login");
-        console.log('state is',store.getState());
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     }
   };
 
-     useEffect(() => {
+  useEffect(() => {
     if (!user) return;
 
-    const handleReceiveMessage = async (msg) => {
-      if (
-        msg.senderId !== user._id &&
-        msg.recipientId === user._id
-      ) {
+    const handleReceiveMessage = async (msg: Message) => {
+      if (msg.senderId !== user._id && msg.recipientId === user._id) {
         try {
           let senderData;
-          if (user.role === 'tutor') {
+          if (user.role === "tutor") {
             senderData = await fetchStudentById(msg.senderId);
-            
-            setNotificationSenderRole('user');
+
+            setNotificationSenderRole("user");
           } else {
             senderData = await fetchTutorById(msg.senderId);
-            setNotificationSenderRole('tutor');
+            setNotificationSenderRole("tutor");
           }
 
           setNotificationSenderId(msg.senderId);
-          setNotificationMessage(`New message from ${senderData?.name || 'Someone'}`);
+          setNotificationMessage(
+            `New message from ${senderData?.name || "Someone"}`
+          );
           setOpenNotification(true);
         } catch (error) {
           console.error("Failed to fetch sender details:", error);
@@ -137,7 +139,7 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
 
   const handleNotificationClick = () => {
     if (notificationSenderId) {
-      if (user?.role === 'user') {
+      if (user?.role === "user") {
         navigate(`/messages/${notificationSenderId}`);
       } else {
         navigate(`/tutors/contacts/${notificationSenderId}`);
@@ -145,7 +147,6 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
       setOpenNotification(false);
     }
   };
-  
 
   return (
     <AppBar
@@ -167,8 +168,6 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
       />
       <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
         <Box
-          // display="flex"
-          // alignItems="center"
           component={"img"}
           src="/images/skillify-high-resolution-logo__1_-removebg-preview - Copy.png"
           alt="Skillify Logo"
@@ -181,19 +180,13 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
               navigate("/admin/dashboard");
             }
           }}
-          style={
-            {
-              // height: "26px",
-              // width: "120px",
-              // paddingLeft: "3rem",
-              // marginRight: "8px",
-            }
-          }
           sx={{
-            height: { xs: "20px", md: "26px" },
-            width: { xs: "100px", md: "120px" },
+            height: { xs: "14px", md: "26px" },
+            width: { xs: "70px", md: "120px" },
             paddingLeft: { xs: "0rem", md: "3rem" },
+            ml: { xs: -2, md: 0 },
             cursor: "pointer",
+            mr: { xs: 1, md: 0 },
           }}
         ></Box>
         {user?.role !== "admin" && user?.role !== "tutor" ? (
@@ -206,18 +199,24 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
             sx={{
               borderRadius: "24px",
               backgroundColor: "#f9f9f9",
-              width: "50%",
+              width: { xs: "33%", md: "50%" },
               "& .MuiOutlinedInput-notchedOutline": {
                 borderRadius: "24px",
               },
               "& .MuiInputBase-input::placeholder": {
                 fontSize: { xs: "small", md: "medium" },
               },
+              mr: { xs: 1, md: 0 },
             }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon sx={{ height: { xs: "15px", md: "40px" } }} />
+                  <SearchIcon
+                    sx={{
+                      height: { xs: 0, md: "40px" },
+                      ml: { xs: -2.5, md: 0 },
+                    }}
+                  />
                 </InputAdornment>
               ),
             }}
@@ -233,8 +232,10 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
               color="black"
               sx={{
                 cursor: "pointer",
-                fontWeight: 500,
-                display: { xs: "none", md: "block" },
+                fontWeight: { xs: 400, md: 500 },
+                fontSize: { xs: 10, md: 14 },
+                display: { xs: "block", md: "block" },
+                textAlign: "center",
               }}
               component={Link}
               to="/tutors/home"
@@ -251,9 +252,7 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
                 fontWeight: 500,
                 display: { xs: "none", md: "block" },
               }}
-            >
-              
-            </Typography>
+            ></Typography>
           ) : null}
 
           {token ? (
@@ -278,6 +277,8 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
                 open={Boolean(anchorE1)}
                 onClose={handleCloseMenu}
                 sx={{
+                  mt: 1,
+                  ml: { xs: 1, md: 0 },
                   "& .MuiPaper-root": {
                     borderRadius: "5px",
                   },
@@ -286,15 +287,17 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
                 <Box display="flex" alignItems="center">
                   <IconButton
                     sx={{
-                      height: { xs: "1.5rem", md: "2.5rem" },
-                      width: { xs: "1.5rem", md: "2.5rem" },
+                      height: { xs: "1.8rem", md: "2.5rem" },
+                      width: { xs: "1.8rem", md: "2.5rem" },
                     }}
                   >
                     <Avatar
                       src={user?.profilePhoto || ""}
                       sx={{
-                        height: { xs: "1.5rem", md: "2.5rem" },
-                        width: { xs: "1.5rem", md: "2.5rem" },
+                        height: { xs: "1.8rem", md: "2.5rem" },
+                        width: { xs: "1.8rem", md: "2.5rem" },
+                        mt: { xs: -2, md: 0 },
+                        ml: 1,
                       }}
                     />
                   </IconButton>
@@ -303,7 +306,8 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
                       sx={{
                         fontWeight: { xs: "medium", md: "bold" },
                         fontSize: { xs: "small", md: "medium" },
-                        mb: 0,
+                        mb: { xs: -3, md: 0 },
+                        mt: { xs: -2, md: 0 },
                         pb: 0,
                         pl: 0.5,
                       }}
@@ -313,48 +317,72 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
                     <MenuItem sx={{ pt: 0, pl: 0.5 }}>
                       <Typography
                         variant="body2"
-                        sx={{ mb: 1, fontSize: { xs: "small", md: "medium" } }}
+                        sx={{
+                          mb: { xs: 0, md: 1 },
+                          fontSize: { xs: "small", md: "medium" },
+                        }}
                       >
                         {user?.email}
                       </Typography>
                     </MenuItem>
                   </Box>
                 </Box>
-                <hr style={{ border: "1px solid #ECF2F0," }} />
+                <Box
+                  component="hr"
+                  sx={{ border: "1px solid #ECF2F0,", mt: { xs: 0, md: 0 } }}
+                ></Box>
 
                 <MenuItem
                   onClick={handleOpenModal}
-                  sx={{ fontSize: { xs: "small", md: "medium" } }}
+                  sx={{
+                    fontSize: { xs: "small", md: "medium" },
+                    mt: { xs: -2, md: 0 },
+                  }}
                 >
                   Profile
                 </MenuItem>
                 {user?.role === "user" ? (
                   <MenuItem
                     onClick={() => navigate("/users/my-courses")}
-                    sx={{ fontSize: { xs: "small", md: "medium" } }}
+                    sx={{
+                      fontSize: { xs: "small", md: "medium" },
+                      mt: { xs: -3, md: 0 },
+                    }}
                   >
                     My Learning
                   </MenuItem>
                 ) : user?.role === "tutor" ? (
                   <MenuItem
                     onClick={() => navigate("/tutors/courses")}
-                    sx={{ fontSize: { xs: "small", md: "medium" } }}
+                    sx={{
+                      fontSize: { xs: "small", md: "medium" },
+                      mt: { xs: -3, md: 0 },
+                    }}
                   >
                     My Courses
                   </MenuItem>
                 ) : null}
-                <hr style={{ border: "1px solid #ECF2F0," }} />
+                <Box
+                  component="hr"
+                  sx={{ border: "1px solid #ECF2F0,", mt: { xs: -1, md: 0 } }}
+                ></Box>
                 {user?.role === "user" ? (
                   <>
                     <MenuItem
                       onClick={() => navigate("/messages")}
-                      sx={{ fontSize: { xs: "small", md: "medium" } }}
+                      sx={{
+                        fontSize: { xs: "small", md: "medium" },
+                        mt: { xs: -2, md: 0 },
+                      }}
                     >
                       Messages
                     </MenuItem>
                     <MenuItem
                       onClick={() => navigate("/wishlist")}
-                      sx={{ fontSize: { xs: "small", md: "medium" } }}
+                      sx={{
+                        fontSize: { xs: "small", md: "medium" },
+                        mt: { xs: -3, md: 0 },
+                      }}
                     >
                       Wishlist
                     </MenuItem>
@@ -363,13 +391,19 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
                   <>
                     <MenuItem
                       onClick={() => navigate("/tutors/create-course")}
-                      sx={{ fontSize: { xs: "small", md: "medium" } }}
+                      sx={{
+                        fontSize: { xs: "small", md: "medium" },
+                        mt: { xs: -2, md: 0 },
+                      }}
                     >
                       Create Course
                     </MenuItem>
                     <MenuItem
                       onClick={() => navigate("/tutors/contacts")}
-                      sx={{ fontSize: { xs: "small", md: "medium" } }}
+                      sx={{
+                        fontSize: { xs: "small", md: "medium" },
+                        mt: { xs: -3, md: 0 },
+                      }}
                     >
                       Messages
                     </MenuItem>
@@ -378,15 +412,25 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
                 {user?.role === "tutor" ? (
                   <MenuItem
                     onClick={() => navigate("/tutors/payment/:tutorId")}
-                    sx={{ fontSize: { xs: "small", md: "medium" } }}
+                    sx={{
+                      fontSize: { xs: "small", md: "medium" },
+                      mt: { xs: -3, md: 0 },
+                    }}
                   >
                     Payments
                   </MenuItem>
                 ) : null}
-                <hr style={{ border: "1px solid #ECF2F0," }} />
+                <Box
+                  component="hr"
+                  sx={{ border: "1px solid #ECF2F0,", mt: { xs: -1, md: 0 } }}
+                ></Box>
                 <MenuItem
                   onClick={() => handleLogout()}
-                  sx={{ fontSize: { xs: "small", md: "medium" } }}
+                  sx={{
+                    fontSize: { xs: "small", md: "medium" },
+                    mt: { xs: -2, md: 0 },
+                    mb: { xs: -2, md: 0 },
+                  }}
                 >
                   Logout
                 </MenuItem>
@@ -396,7 +440,14 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
             <Box display={"flex"} justifyContent="center" alignItems="center">
               <Button
                 variant="outlined"
-                sx={{ color: "black", margin: 0, borderColor: "black" }}
+                sx={{
+                  color: "black",
+                  margin: 0,
+                  borderColor: "black",
+                  px: { xs: 0, md: 2 },
+                  fontSize: { xs: 10, md: 14 },
+                  ml: { xs: -1, md: 0 },
+                }}
                 onClick={() => navigate("/login")}
               >
                 Log in
@@ -406,8 +457,12 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
                 color="primary"
                 sx={{
                   backgroundColor: "black",
-                  display: { xs: "none", sm: "block" },
+                  // display: { xs: "block" },
                   "&:hover": { backgroundColor: "#333" },
+                  ml: { xs: 1, md: 2 },
+                  mr: { xs: -2, md: 0 },
+                  px: { xs: 0, md: 2 },
+                  fontSize: { xs: 10, md: 14 },
                 }}
                 onClick={() => navigate("/signup")}
               >
@@ -425,5 +480,3 @@ const Navbar: React.FC<NavbarProps> = ({ searchQuery, onSearchChange }) => {
 };
 
 export default Navbar;
-
-

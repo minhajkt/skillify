@@ -9,11 +9,11 @@ import {
   Grid,
   Alert,
   Snackbar,
+  Skeleton,
 } from "@mui/material";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import LanguageOutlinedIcon from "@mui/icons-material/LanguageOutlined";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
-
 
 import { useEffect, useState } from "react";
 import { fetchCourseDetails } from "../../api/courseApi";
@@ -24,84 +24,69 @@ import { getLecturesByCourseId } from "../../api/lectureApi";
 import CheckoutButton from "../../components/user/CheckoutButton";
 import ReviewComponent from "../../components/user/ReviewComponent";
 import { fetchUserEnrolledCourses } from "../../api/enrollmentApi";
-import { ILectures, ICourse,ITutor } from "../../types/types";
+import { ILectures, ICourse, ITutor } from "../../types/types";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 
 const UserCourseDetailsPage = () => {
   const [course, setCourse] = useState<ICourse>();
   const { courseId } = useParams();
-  const [tutor, setTutor] = useState<ITutor>()
-  const [lectures, setLectures] = useState<ILectures[]>([])
-  const [totalHours, setTotalHours] = useState('')
+  const [tutor, setTutor] = useState<ITutor>();
+  const [lectures, setLectures] = useState<ILectures[]>([]);
+  const [totalHours, setTotalHours] = useState("");
   // const [reviews, setReviews] = useState([])
   const [averageRating, setAverageRating] = useState(0);
   const [totalReviews, setTotalReviews] = useState(0);
   const [isEnrolled, setIsEnrolled] = useState(false);
-      const location = useLocation();
-      const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false);
-      const user = useSelector((state: RootState) => state.auth.user)
-      
+  const location = useLocation();
+  const [error , setError] = useState('')
+  const [showSuccessSnackbar, setShowSuccessSnackbar] = useState(false);
+  const user = useSelector((state: RootState) => state.auth.user);
 
-          useEffect(() => {
-            if (
-              new URLSearchParams(location.search).get("cancelled") === "true"
-            ) {
-              setShowSuccessSnackbar(true);
-              console.log("snacbar set to true", showSuccessSnackbar);
-            }
-          }, [location.search]);
+  useEffect(() => {
+    if (new URLSearchParams(location.search).get("cancelled") === "true") {
+      setShowSuccessSnackbar(true);
+    }
+  }, [location.search]);
 
   useEffect(() => {
     const getCourseDetails = async () => {
       if (!courseId) {
-        console.error("Course ID is undefined");
-        return; 
+        setError("Course ID is undefined");
+        return;
       }
       try {
         const data = await fetchCourseDetails(courseId);
-        console.log(data);
-        
-        // const tutorIds
         setCourse(data);
 
-        const tutorData = await getTutorById(data.createdBy)
-        // console.log(tutorData.user);
-        setTutor(tutorData.user)
+        const tutorData = await getTutorById(data.createdBy);
+        setTutor(tutorData.user);
 
-        const lectureData = await getLecturesByCourseId(courseId)
-        // console.log('lect deatials ', lectures);
-        setLectures(lectureData.lectures)
-        // console.log("lecturedta.lectures", lectureData.lectures);
+        const lectureData = await getLecturesByCourseId(courseId);
+        setLectures(lectureData.lectures);
         const totalDuration = lectureData.lectures.reduce(
-          (sum:number, lecture:ILectures) => sum + lecture.duration,
+          (sum: number, lecture: ILectures) => sum + lecture.duration,
           0
         );
-        setTotalHours((totalDuration / 60).toFixed(1))
-        // console.log("Total Duration:", totalHours);
+        setTotalHours((totalDuration / 60).toFixed(1));
 
-        if(user) {
+        if (user) {
           const enrolledCourses = await fetchUserEnrolledCourses();
-          // console.log("Enrolled Courses:", enrolledCourses);
-      if (Array.isArray(enrolledCourses)) {
-        const courseEnrolled = enrolledCourses.some(
-          (enrolledCourse) =>
-            enrolledCourse.courseId && enrolledCourse.courseId._id === courseId
-        );
-        setIsEnrolled(courseEnrolled);
-  
-      } else {
-        console.error(
-          "Unexpected response format for enrolled courses:",
-          enrolledCourses
-        );
-        setIsEnrolled(false);
-      }   
-      console.log("Is enrolled:", isEnrolled);
-
+          if (Array.isArray(enrolledCourses)) {
+            const courseEnrolled = enrolledCourses.some(
+              (enrolledCourse) =>
+                enrolledCourse.courseId &&
+                enrolledCourse.courseId._id === courseId
+            );
+            setIsEnrolled(courseEnrolled);
+          } else {
+            setError(
+              "Unexpected response format for enrolled courses:");
+            setIsEnrolled(false);
+          }
         }
       } catch (error) {
-        console.error("Error fetching course details:", error);
+        setError("Error fetching course details");
       }
     };
 
@@ -109,9 +94,14 @@ const UserCourseDetailsPage = () => {
   }, [courseId]);
 
   if (!course) {
-    return <Box>Loading...</Box>;
+    return (
+      <Box sx={{ width: "100%", height: "100vh" }}>
+        <Skeleton variant="rectangular" width="100%" height={400} />
+        <Skeleton width="60%" />
+        <Skeleton width="80%" />
+      </Box>
+    );
   }
-
 
   return (
     <Box
@@ -119,7 +109,7 @@ const UserCourseDetailsPage = () => {
         bgcolor: "#f5f5f5",
         minHeight: "100vh",
         width: "100vw",
-        py: 4,
+        py: { xs: 1, md: 4 },
         // pr: 0,
       }}
     >
@@ -129,47 +119,94 @@ const UserCourseDetailsPage = () => {
         sx={{
           bgcolor: "#1a1a1a",
           color: "white",
-          pb: 6,
-          mb: 4,
+          pb: { xs: 2, md: 6 },
+          mb: { xs: 2, md: 4 },
           mt: { xs: "64px", md: "80px" },
+          ml: { xs: -3, md: 0 },
         }}
       >
-        <Grid container spacing={4} maxWidth="lg" mx="auto">
+        <Grid
+          container
+          spacing={4}
+          maxWidth={{ xs: "100%", lg: "lg" }}
+          mx="auto"
+        >
           <Grid item xs={12} md={8}>
             <Typography
               variant="h4"
               component="h1"
               fontWeight={"bold"}
+              sx={{ fontSize: { xs: 20, md: 34 } }}
               gutterBottom
             >
               {course.title}
             </Typography>
-            <Typography variant="subtitle1" gutterBottom>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontSize: { xs: 12, md: 16 },
+              }}
+              gutterBottom
+            >
               {course.description}
             </Typography>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1, my: 2 }}>
-              <Rating value={averageRating} readOnly precision={0.5} />
-              <Typography variant="body2">({totalReviews} ratings)</Typography>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                my: { xs: 1, md: 2 },
+              }}
+            >
+              <Rating
+                value={averageRating}
+                readOnly
+                precision={0.5}
+                sx={{ fontSize: { xs: 18, md: 24 } }}
+              />
+              <Typography variant="body2" sx={{ fontSize: { xs: 12, md: 14 } }}>
+                ({totalReviews} ratings)
+              </Typography>
             </Box>
-            <Typography variant="body2">
+            <Typography variant="body2" sx={{ fontSize: { xs: 12, md: 14 } }}>
               Course Created by: {tutor?.name}
             </Typography>
             <Box sx={{ display: "flex", alignItems: "center", pt: 1 }}>
-              <LanguageOutlinedIcon fontSize="small" />
-              <Typography sx={{ marginLeft: 1 }}>English</Typography>
+              <LanguageOutlinedIcon
+                fontSize="small"
+                sx={{ fontSize: { xs: 16, md: 20 } }}
+              />
+              <Typography sx={{ marginLeft: 1, fontSize: { xs: 14, md: 16 } }}>
+                English
+              </Typography>
             </Box>
           </Grid>
         </Grid>
       </Box>
 
-      <Grid container spacing={4} maxWidth="lg" mx="auto">
+      <Grid
+        container
+        spacing={4}
+        maxWidth={{ xs: "100%", md: "lg" }}
+        mx={{ xs: -2, md: "auto" }}
+      >
         <Grid item xs={12} md={8}>
           <Card sx={{ mb: 4 }}>
             <CardContent>
-              <Typography variant="h5" fontWeight={"medium"} gutterBottom>
+              <Typography
+                variant="h5"
+                fontWeight={"medium"}
+                gutterBottom
+                sx={{ fontSize: { xs: 18, md: 24 } }}
+              >
                 Description
               </Typography>
-              <Typography variant="body1" color="text.secondary" paragraph>
+              <Typography
+                variant="body1"
+                color="text.secondary"
+                paragraph
+                sx={{ fontSize: { xs: 14, md: 16 } }}
+              >
                 {course.description}
               </Typography>
             </CardContent>
@@ -177,7 +214,12 @@ const UserCourseDetailsPage = () => {
 
           <Card>
             <CardContent>
-              <Typography variant="h5" fontWeight={"medium"} gutterBottom>
+              <Typography
+                variant="h5"
+                fontWeight={"medium"}
+                sx={{ fontSize: { xs: 18, md: 24 } }}
+                 gutterBottom
+              >
                 Course Content
               </Typography>
               <Typography variant="body2" color="text.secondary" mb={2}>
@@ -195,7 +237,9 @@ const UserCourseDetailsPage = () => {
                     display="flex"
                     alignItems="center"
                     gap={1}
-                    sx={{ lineHeight: 3 }}
+                    sx={{ lineHeight: {xs:1.6,md:3},
+                   fontSize: { xs: 12, md: 16 } 
+                  }}
                   >
                     <DoneAllIcon />
                     {lecture.title}
@@ -212,10 +256,10 @@ const UserCourseDetailsPage = () => {
               <Box sx={{ width: "100%", height: 200, mb: 2 }}>
                 <img
                   src={
-                      typeof course.thumbnail === "string"
-                        ? course.thumbnail
-                        : undefined
-                    }
+                    typeof course.thumbnail === "string"
+                      ? course.thumbnail
+                      : undefined
+                  }
                   alt={course.title}
                   style={{
                     width: "100%",
@@ -236,8 +280,7 @@ const UserCourseDetailsPage = () => {
                 }}
               >
                 <Typography sx={{ fontWeight: "regular", lineHeight: 2 }}>
-                  {course.rating}
-                  {5}
+                  {course.category}
                 </Typography>
                 <Chip
                   label={course.category}
@@ -287,27 +330,23 @@ const UserCourseDetailsPage = () => {
           </Card>
         </Grid>
       </Grid>
-              <Snackbar
-                open={showSuccessSnackbar}
-                onClose={() => setShowSuccessSnackbar(false)}
-                autoHideDuration={3000}
-                anchorOrigin={{ vertical: "top", horizontal: "center" }}
-              >
-                <Alert severity="warning">
-                  Your Payment was cancelled
-                </Alert>
-              </Snackbar>
-              {courseId && (
-                <ReviewComponent
-                  courseId={courseId}
-                  setAverageRating={setAverageRating}
-                  setTotalReviews={setTotalReviews}
-                />
-              )}
+      <Snackbar
+        open={showSuccessSnackbar}
+        onClose={() => setShowSuccessSnackbar(false)}
+        autoHideDuration={3000}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity="warning">Your Payment was cancelled</Alert>
+      </Snackbar>
+      {courseId && (
+        <ReviewComponent
+          courseId={courseId}
+          setAverageRating={setAverageRating}
+          setTotalReviews={setTotalReviews}
+        />
+      )}
     </Box>
   );
 };
 
 export default UserCourseDetailsPage;
-
-

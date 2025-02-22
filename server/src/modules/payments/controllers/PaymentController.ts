@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { IPaymentService } from "../services/IPaymentService";
 import { IPaymentController } from "./IPaymentController";
+import { HttpStatus } from "../../../constants/httpStatus";
+import { MESSAGES } from "../../../constants/messages";
 
 export class PaymentController implements IPaymentController {
   private paymentService: IPaymentService;
@@ -11,12 +13,11 @@ export class PaymentController implements IPaymentController {
   async getPendingPayments(req: Request, res: Response): Promise<void> {
     try {
       const payments = await this.paymentService.getPendingPayments();
-      //   res.status(200).json({ success: true, data: payments });
-      res.status(200).json(payments);
+      res.status(HttpStatus.OK).json(payments);
     } catch (error) {
       res
-        .status(500)
-        .json({ success: false, message: "Error fetching payments", error });
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ success: false, message: MESSAGES.PAYMENT_FETCHING_ERROR, error });
     }
   }
 
@@ -25,14 +26,14 @@ export class PaymentController implements IPaymentController {
     try {
       const payment = await this.paymentService.completePayment(paymentId);
       if (!payment) {
-        res.status(404).json({ success: false, message: "Payment not found" });
+        res.status(HttpStatus.NOT_FOUND).json({ success: false, message: MESSAGES.PAYMENT_NOT_FOUND });
       }
-      res.status(200).json(payment);
+      res.status(HttpStatus.OK).json(payment);
     } catch (error) {
       res
-        .status(500)
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .json({
-          message: "Error completing payment",
+          message: MESSAGES.PAYMENT_ERROR,
           error: (error as Error).message,
         });
     }
@@ -41,11 +42,11 @@ export class PaymentController implements IPaymentController {
   async getPaymentHistory(req: Request, res: Response): Promise<void> {
     try {
       const payments = await this.paymentService.getPaymentHistory();
-      res.status(200).json(payments);
+      res.status(HttpStatus.OK).json(payments);
     } catch (error) {
       res
-        .status(500)
-        .json({ success: false, message: "Error fetching payments history", error });
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ success: false, message: MESSAGES.PAYMENT_HISTORY_FETCHING_ERROR, error });
     }
   }
 
@@ -54,13 +55,12 @@ export class PaymentController implements IPaymentController {
         const {tutorId} = req.params
         const tutorsRecievable = await this.paymentService.tutorsRecievable(tutorId)
         if(!tutorsRecievable) {
-            res.status(404).json('No tutor recievables found')
+            res.status(HttpStatus.NOT_FOUND).json(MESSAGES.TUTOR_RECIEVABLES_NOT_FOUND)
             return
         }
-        res.status(200).json(tutorsRecievable)
+        res.status(HttpStatus.OK).json(tutorsRecievable)
     } catch (error) {
-        console.log('Error occured', error);
-        res.status(500).json('An unexpected error occured')
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(MESSAGES.UNEXPECTED_ERROR)
     }
   }
 }

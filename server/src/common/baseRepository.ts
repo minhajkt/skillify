@@ -1,4 +1,4 @@
-import mongoose, { Document } from "mongoose";
+import mongoose, { Document, FilterQuery } from "mongoose";
 
 export interface IBaseRepository<T extends Document> {
   create(data: Partial<T>): Promise<T>;
@@ -18,7 +18,6 @@ export class BaseRepository<T extends Document> {
 
   async create(data: Partial<T>): Promise<T> {
     const entity = new this.model(data);
-    console.log("this has worked from base for creation");
 
     return await entity.save();
   }
@@ -31,12 +30,11 @@ export class BaseRepository<T extends Document> {
     return await this.model.findOne({ email });
   }
 
-  async findAll(): Promise<T[]> {
-    return await this.model.find();
+  async findAll(filter:FilterQuery<T> = {}): Promise<T[]> {
+    return await this.model.find(filter);
   }
 
   async update(id: string, data: Partial<T>): Promise<T | null> {
-    console.log('update p from base repo')
     return await this.model.findByIdAndUpdate(id, data, { new: true });
   }
 

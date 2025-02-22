@@ -56,7 +56,6 @@ export class ReviewService implements IReviewService {
     reviewText: string,
     rating: number
   ): Promise<IReview | null> {
-    // console.log('in service ', userId, courseId, reviewText, rating);
 
     const updatedReview = await this.reviewRepo.updateCourseReview(
       userId,

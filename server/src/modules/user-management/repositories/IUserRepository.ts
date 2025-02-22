@@ -9,6 +9,7 @@ export interface IUserRepository {
   // getAllUsers(): Promise<IUser[]>;
   // findAllStudents(): Promise<IUser[]>;
   findAllTutors(approvalStatus: string): Promise<number>;
+  findAllStudents(): Promise<IUser[]>;
   getCourseById(courseId: string): Promise<IUser | null>;
   // getAllCourseForUser(): Promise<ICourse[]>;
 

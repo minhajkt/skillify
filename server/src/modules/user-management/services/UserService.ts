@@ -51,7 +51,6 @@ export class UserService implements IUserService {
       if (!existingUser.verified) {
         const otp = await sendOtpToEmail(userData.email as string);
         storeOtp(userData.email as string, otp);
-        console.log("otp is ", otp);
       } else {
         throw new Error("Email already exists");
       }
@@ -70,7 +69,6 @@ export class UserService implements IUserService {
 
     const otp = await sendOtpToEmail(userData.email as string);
     storeOtp(userData.email as string, otp);
-    console.log("otp is ", otp);
 
     return this.userRepository.createUser(userData);
   }
@@ -106,7 +104,6 @@ export class UserService implements IUserService {
     const otp = await sendOtpToEmail(email);
 
     storeOtp(email, otp);
-    console.log("otp is ", otp);
 
   }
 
@@ -195,7 +192,6 @@ export class UserService implements IUserService {
       return null;
     }
     const resetToken = generateResetToken(user.id.toString());
-    console.log("reset token is", resetToken);
 
     await sendEmail(email, resetToken);
     return resetToken;

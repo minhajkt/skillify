@@ -7,7 +7,7 @@ import styles from "../../myModule.module.css";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { useUnreadMessages } from "./useUnreadMessage";
-// import BadgeComponent from "./BadgeComponent";
+import { IUser, MyStudent } from "../../types/types";
 
 const ChatContainer = styled(Box)({
   display: "flex",
@@ -15,9 +15,13 @@ const ChatContainer = styled(Box)({
 });
 
 const ContactsList = styled(Box)(({ theme }) => ({
-  width: "40%",
+  width: "30%",
   backgroundColor: theme.palette.background.paper,
   borderRight: `1px solid ${theme.palette.divider}`,
+  [theme.breakpoints.down("sm")]: {
+    width: "100%",
+    display: "block",
+  },
 }));
 
 const ContactItem = styled(Box, {
@@ -33,18 +37,25 @@ const ContactItem = styled(Box, {
 }));
 
 const TutorContacts = () => {
-  const [myStudents, setMyStudents] = useState<[]>([]);
+  const [myStudents, setMyStudents] = useState<IUser[]>([]);
   const navigate = useNavigate();
   const { studentId } = useParams();
-  const user = useSelector((state: RootState) => state.auth.user)
-  
-  const unreadCounts = useUnreadMessages(user._id)
+  const user = useSelector((state: RootState) => state.auth.user);
+
+  const unreadCounts = useUnreadMessages(user?._id ?? "");
 
   useEffect(() => {
     const fetchMyStudents = async () => {
       const students = await getMyStudents();
-      setMyStudents(students);
-      // console.log('fffffffffffffffffffffffffffffffff', students)
+      const uniqueStudents = Array.from(
+        new Map(
+          students.map((entry: MyStudent) => [
+            entry?.student?._id,
+            entry.student,
+          ])
+        ).values()
+      ) as IUser[];
+      setMyStudents(uniqueStudents);
     };
     fetchMyStudents();
   }, []);
@@ -55,7 +66,13 @@ const TutorContacts = () => {
 
   return (
     <ChatContainer className={styles.body}>
-      <ContactsList sx={{ bgcolor: "#f2f2f2" }}>
+      <ContactsList
+        sx={{
+          bgcolor: "#f2f2f2",
+          display: { xs: studentId ? "none" : "block", md: "block" },
+        }}
+      >
+        {/* <ContactsList sx={{ bgcolor: "#f2f2f2" }}> */}
         <Box
           sx={{
             p: 2,
@@ -80,7 +97,10 @@ const TutorContacts = () => {
               cursor: "pointer",
             }}
           ></Box>
-          <Typography variant="h6" sx={{ textAlign: "center" }}>
+          <Typography
+            variant="h6"
+            sx={{ textAlign: "center", ml: { xs: 3, md: 0 } }}
+          >
             Your Students
           </Typography>
         </Box>
@@ -88,26 +108,23 @@ const TutorContacts = () => {
           {myStudents.map((student, index) => (
             <ContactItem
               key={index}
-              isSelected={studentId === student.student._id}
-              onClick={() => handleChatClick(student.student._id)}
+              isSelected={studentId === student?._id}
+              onClick={() => student?._id && handleChatClick(student._id)}
             >
               <Box sx={{ display: "flex", alignItems: "center" }}>
-                <Avatar>{student.student.name[0].toUpperCase()}</Avatar>
-                {unreadCounts[student.student._id] > 0 && (
+                <Avatar>{student?.name[0].toUpperCase()}</Avatar>
+                {student?._id && unreadCounts[student._id] > 0 && (
                   <Box>
-                  <Badge
-                    badgeContent={unreadCounts[student.student._id]}
-                    color="primary"
-
-                  />
+                    <Badge
+                      badgeContent={unreadCounts[student._id]}
+                      color="primary"
+                    />
                   </Box>
                 )}
                 <Box sx={{ ml: 2 }}>
-                  <Typography variant="subtitle1">
-                    {student.student.name}
-                  </Typography>
+                  <Typography variant="subtitle1">{student?.name}</Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {student.courseId.title}
+                    {student.courseId?.title}
                   </Typography>
                 </Box>
               </Box>
@@ -123,7 +140,7 @@ const TutorContacts = () => {
           <Box
             sx={{
               flex: 1,
-              display: "flex",
+              display: { xs: "none", md: "flex" },
               alignItems: "center",
               justifyContent: "center",
               backgroundImage: "url('/images/bgbbg.jpg')",
@@ -140,4 +157,3 @@ const TutorContacts = () => {
 };
 
 export default TutorContacts;
-

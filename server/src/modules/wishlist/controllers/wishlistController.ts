@@ -4,6 +4,9 @@ import Course from "../../courses/models/courseModel";
 import User from "../../user-management/models/UserModel";
 import { IWishlistService } from "../services/IWishlistService";
 import { IWishlistController } from "./IWishlistController";
+import { AuthRequest } from "../../../types/custom";
+import { HttpStatus } from "../../../constants/httpStatus";
+import { MESSAGES } from "../../../constants/messages";
 
 export class WishlistController implements IWishlistController {
   private wishlistService: IWishlistService;
@@ -12,13 +15,13 @@ export class WishlistController implements IWishlistController {
     this.wishlistService = wishlistService;
   }
 
-  async addToWishlist(req: Request, res: Response): Promise<void> {
+  async addToWishlist(req: AuthRequest, res: Response): Promise<void> {
     try {
       const { courseId } = req.body;
       const userId = req.user?._id;
 
       if (!userId) {
-        res.status(400).json({ message: "User ID is required" });
+        res.status(HttpStatus.BAD_REQUEST).json({ message: MESSAGES.USERID_NOT_FOUND });
         return;
       }
 
@@ -26,63 +29,62 @@ export class WishlistController implements IWishlistController {
         userId,
         courseId
       );
-      res.status(200).json(wishlist);
+      res.status(HttpStatus.OK).json(wishlist);
     } catch (error) {
       if (error instanceof Error && error.message) {
-        res.status(400).json({ message: error.message });
+        res.status(HttpStatus.BAD_REQUEST).json({ message: error.message });
       } else {
-        res.status(500).json({ message: "Server error" });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: MESSAGES.UNEXPECTED_ERROR });
       }
     }
   }
 
-  async getWishlist(req: Request, res: Response): Promise<void> {
+  async getWishlist(req: AuthRequest, res: Response): Promise<void> {
     try {
       const userId = req.user?._id;
-      // console.log("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii", userId);
 
       if (!userId) {
-        res.status(400).json({ message: "User ID is required" });
+        res.status(HttpStatus.BAD_REQUEST).json({ message: MESSAGES.USERID_NOT_FOUND });
         return;
       }
 
       const wishlist = await this.wishlistService.getWishlist(userId);
 
       if (!wishlist || wishlist.courses.length === 0) {
-        res.status(404).json({ message: "Wishlist not found" });
+        res.status(HttpStatus.NOT_FOUND).json({ message: MESSAGES.WISHLIST_NOT_FOUND });
         return;
       }
 
-      res.status(200).json(wishlist);
+      res.status(HttpStatus.OK).json(wishlist);
     } catch (error) {
-      res.status(500).json({
-        message: "Server error",
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        message: MESSAGES.UNEXPECTED_ERROR,
         error: (error as Error).message,
       });
     }
   }
 
-  async removeFromWishlist(req: Request, res: Response): Promise<void> {
+  async removeFromWishlist(req: AuthRequest, res: Response): Promise<void> {
     try {
       const { courseId } = req.body;
       const userId = req.user?._id;
 
       if (!userId) {
-        res.status(400).json({ message: "User ID is required" });
+        res.status(HttpStatus.BAD_REQUEST).json({ message: MESSAGES.USERID_NOT_FOUND });
         return;
       }
 
       const updatedWishlist = await this.wishlistService.removeFromWishlist(userId,courseId);
 
       if (!updatedWishlist) {
-        res.status(404).json({ message: "Wishlist not found" });
+        res.status(HttpStatus.NOT_FOUND).json({ message: MESSAGES.WISHLIST_NOT_FOUND });
         return;
       }
 
-      res.status(200).json(updatedWishlist);
+      res.status(HttpStatus.OK).json(updatedWishlist);
     } catch (error) {
-      res.status(500).json({
-        message: "Server error",
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        message: MESSAGES.UNEXPECTED_ERROR,
         error: (error as Error).message,
       });
     }

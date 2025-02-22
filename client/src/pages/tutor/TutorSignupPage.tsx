@@ -4,11 +4,11 @@ import Navbar from "../../components/shared/Navbar";
 import { useState } from "react";
 
 const TutorSignupPage = () => {
-      const [searchQuery, setSearchQuery] = useState("");
-  
-      const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchQuery(e.target.value);
-      };
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
   return (
     <Box>
       <Navbar searchQuery={searchQuery} onSearchChange={handleSearchChange} />

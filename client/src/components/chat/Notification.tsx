@@ -1,8 +1,9 @@
 import { Snackbar, Button, SnackbarContent, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import { NotificationProps } from "../../types/types";
 
 
-const Notification = ({ open, message, onClose, onClick }) => {
+const Notification = ({ open, message, onClose, onClick }: NotificationProps) => {
   return (
     <Snackbar
       open={open}

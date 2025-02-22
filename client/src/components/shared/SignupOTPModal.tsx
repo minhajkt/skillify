@@ -43,7 +43,6 @@ useEffect(() => {
   let interval: NodeJS.Timeout;
   if (otpSent && timer > 0) {
     interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
-    // console.log(timer);
   } else if(otpSent && timer < 1){
     setCanResend(true);
   }
@@ -59,11 +58,8 @@ useEffect(() => {
         email,
         otp: OTP,
       });
-      // console.log("data is ", data);
 
-      console.log("Verfication Success");
       const userRole = data.user.role;
-      console.log("user role is ", userRole);
 
       setSuccessMessage("Verfication Success. Redirecting to login...");
       setStatus("idle");
@@ -74,7 +70,6 @@ useEffect(() => {
           navigate("/login");
         } else {
           setOpenSnackbar(true);
-          // navigate('/tutors/login')
         }
       }, 3000);
     } catch (error: unknown) {
@@ -83,7 +78,6 @@ useEffect(() => {
         (error instanceof AxiosError && error.response?.data?.error) ||
         "An unexpected errror occured";
       setErrorMessage(errorMsg);
-      console.log("error is", errorMsg);
 
       setStatus("idle");
     }
@@ -115,7 +109,7 @@ useEffect(() => {
         autoHideDuration={600000}
         onClose={() => setOpenSnackbar(false)}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        sx={{ width: "500px", position: "absolute", top: "50%" }}
+        sx={{ width: {xs:350, md:"500px"}, position: "absolute", top: "50%" }}
         action={
           <IconButton
             size="small"
@@ -140,13 +134,13 @@ useEffect(() => {
         open={open}
         // onClose={handleClose}
         sx={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: 400,
+          position: {md:"absolute"},
+          top: {md:"50%"},
+          left: {md:"50%"},
+          transform: {md:"translate(-50%, -50%)"},
+          width: {xs:350,md:400},
           boxShadow: 24,
-          p: 4,
+          p: {xs:2,md:4},
           borderRadius: 2,
           "& .MuiModal-backdrop": {
             bgcolor: "white",

@@ -13,6 +13,8 @@ import mongoose from "mongoose";
 import { IUserService } from "../services/IUserService";
 import { IUserController } from "./IUserController";
 import User from '../models/UserModel'
+import { HttpStatus } from "../../../constants/httpStatus";
+import { MESSAGES } from "../../../constants/messages";
 
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -44,11 +46,10 @@ export class UserController implements IUserController {
 
       const user = await this.userService.createUser(userData, certificates);
       res
-        .status(201)
-        .json({ message: "User created. OTP is sent to the email" });
+        .status(HttpStatus.CREATED)
+        .json({ message: MESSAGES.OTP_SENT });
     } catch (error) {
-      console.error("Error in createUser:", error);
-      res.status(500).json({ error: (error as Error).message });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: (error as Error).message });
     }
   }
 
@@ -59,14 +60,14 @@ export class UserController implements IUserController {
       const user = await this.userService.verifyOtp(email, otp);
 
       if (user) {
-        res.status(200).json({ user, message: "OTP verified successfully!" });
+        res.status(HttpStatus.OK).json({ user, message: MESSAGES.OTP_VERIFIED });
       } else {
         res
-          .status(400)
-          .json({ error: "User not found or OTP verification failed." });
+          .status(HttpStatus.BAD_REQUEST)
+          .json({ error: MESSAGES.OTP_VERIFICATION_FAILED });
       }
     } catch (error) {
-      res.status(400).json({ error: (error as Error).message });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: (error as Error).message });
     }
   }
 
@@ -75,17 +76,17 @@ export class UserController implements IUserController {
       const { email } = req.body;
 
       if (!email) {
-        res.status(400).json({ error: "Email is required" });
+        res.status(HttpStatus.BAD_REQUEST).json({ error: MESSAGES.EMAIL_NOT_FOUND });
         return;
       }
 
       await this.userService.resendOtp(email);
 
-      res.status(200).json({ message: "OTP resent successfully" });
+      res.status(HttpStatus.OK).json({ message: MESSAGES.OTP_RESENT });
     } catch (error: any) {
       res
-        .status(error.statusCode || 500)
-        .json({ error: error.message || "Failed to resend OTP" });
+        .status(error.statusCode || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ error: error.message || MESSAGES.OTP_RESENT_FAILED });
     }
   }
 
@@ -98,7 +99,7 @@ export class UserController implements IUserController {
       );
 
       if (!token) {
-        res.status(404).json({ message: "User not found" });
+        res.status(HttpStatus.NOT_FOUND).json({ message: MESSAGES.USER_NOT_FOUND });
         return;
       }
 
@@ -110,11 +111,11 @@ export class UserController implements IUserController {
       });
       
 
-      res.status(200).json({ message: "Login successful", token, user });
+      res.status(HttpStatus.OK).json({ message: MESSAGES.LOGIN_SUCCESS_MESSAGE, token, user });
 
       return;
     } catch (error) {
-      res.status(500).json({ error: (error as Error).message });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: (error as Error).message });
       return;
     }
   }
@@ -122,40 +123,32 @@ export class UserController implements IUserController {
   async refreshAccessToken(req: Request, res: Response): Promise<void> {
     try {
       const refreshToken = req.cookies.refreshToken;
-      console.log('the refresh token in endpint of refreseh is ', refreshToken)
       if (!refreshToken) {
-        console.error("No refresh token found. Logging out user.");
         res.clearCookie("refreshToken");
-         res.status(401).json({ message: "No refresh token found" });
+         res.status(HttpStatus.UNAUTHORIZED).json({ message: MESSAGES.NO_REFRESH_TOKEN });
          return;
       }
 
-      console.log('decoding');
       
       const decoded = verifyRefreshToken(refreshToken) as { id: string };
-      console.log('decoded', decoded)
       const user = await User.findById(decoded.id);
-      console.log('user is ', user)
       if (!user) {
         res.clearCookie('refreshToken');
-         res.status(404).json({ message: "User not found" });
+         res.status(HttpStatus.NOT_FOUND).json({ message: MESSAGES.USER_NOT_FOUND });
          return;
       }
 
-      console.log('genereatign new token acescc' )
       const newAccessToken = generateToken({
         id: user._id,
         email: user.email,
         role: user.role,
         isActive: user.isActive,
       });
-      console.log('new generetea access token', newAccessToken)
 
       res.json({ token: newAccessToken });
     } catch (error) {
-      console.error("Invalid or expired refresh token:", error);
       res.clearCookie("refreshToken");
-      res.status(403).json({ message: "Invalid or expired refresh token" });
+      res.status(HttpStatus.FORBIDDEN).json({ message: MESSAGES.INVALID_REFRESH_TOKEN });
     }
   }
 
@@ -168,7 +161,7 @@ export class UserController implements IUserController {
       );
 
       if (!token) {
-        res.status(404).json({ message: "Tutor not found" });
+        res.status(HttpStatus.NOT_FOUND).json({ message: MESSAGES.TUTOR_NOT_FOUND });
         return;
       }
 
@@ -179,12 +172,11 @@ export class UserController implements IUserController {
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
-      res.status(200).json({ message: "Login successful", token, user });
-      console.log("for now", user);
+      res.status(HttpStatus.OK).json({ message: MESSAGES.LOGIN_SUCCESS_MESSAGE, token, user });
 
       return;
     } catch (error) {
-      res.status(500).json({ error: (error as Error).message });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: (error as Error).message });
       return;
     }
   }
@@ -197,7 +189,7 @@ export class UserController implements IUserController {
       );
 
       if (!token) {
-        res.status(404).json({ message: "Admin not found" });
+        res.status(HttpStatus.NOT_FOUND).json({ message: MESSAGES.ADMIN_NOT_FOUND });
         return;
       }
 
@@ -208,12 +200,11 @@ export class UserController implements IUserController {
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
-      res.status(200).json({ message: "Login successful", token, user });
-      console.log("for now", user);
+      res.status(HttpStatus.OK).json({ message: MESSAGES.LOGIN_SUCCESS_MESSAGE, token, user });
 
       return;
     } catch (error) {
-      res.status(500).json({ error: (error as Error).message });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: (error as Error).message });
       return;
     }
   }
@@ -223,13 +214,13 @@ export class UserController implements IUserController {
       const { id } = req.params;
       const user = await this.userService.getUserById(id);
       if (!user) {
-        res.status(404).json({ mesage: "User not found" });
+        res.status(HttpStatus.NOT_FOUND).json({ mesage: MESSAGES.USER_NOT_FOUND });
         return;
       }
 
-      res.status(200).json({ user });
+      res.status(HttpStatus.OK).json({ user });
     } catch (error) {
-      res.status(500).json({ message: "Error fetching user", error });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: MESSAGES.ERROR_FETCHING_USER, error });
     }
   }
 
@@ -244,13 +235,13 @@ export class UserController implements IUserController {
       const updatedUser = await this.userService.updateUser(userId, userData);
 
       if (!updatedUser) {
-        res.status(404).json("No user found");
+        res.status(HttpStatus.NOT_FOUND).json(MESSAGES.USER_NOT_FOUND);
         return;
       }
 
-      res.status(200).json({ user: updatedUser });
+      res.status(HttpStatus.OK).json({ user: updatedUser });
     } catch (error) {
-      res.status(500).json({ error: (error as Error).message });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: (error as Error).message });
     }
   }
 
@@ -262,9 +253,9 @@ export class UserController implements IUserController {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
       });
-      res.status(200).json({ message: "Logout Successful" });
+      res.status(HttpStatus.OK).json({ message: MESSAGES.LOGOUT_SUCCESS_MESSAGE });
     } catch (error) {
-      res.status(500).json({ message: "Error in logging out", error });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error });
     }
   }
 
@@ -276,14 +267,14 @@ export class UserController implements IUserController {
 
       const resetToken = await this.userService.handleForgotPassword(email);
       if (!resetToken) {
-        res.status(404).json({ message: "No user found" });
+        res.status(HttpStatus.NOT_FOUND).json({ message: MESSAGES.USER_NOT_FOUND });
         return;
       }
       res
-        .status(200)
-        .json({ message: "Password reset link sent to the registered email" });
+        .status(HttpStatus.OK)
+        .json({ message: MESSAGES.PASSWORD_RESET_LINK_SENT });
     } catch (error) {
-      res.status(500).json({ message: "Error in sending link", error });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: MESSAGES.PASSWORD_RESET_LINK_SENT_ERROR, error });
     }
   }
 
@@ -293,13 +284,12 @@ export class UserController implements IUserController {
 
       const decoded = verifyResetToken(token);
       if (!decoded) {
-        res.status(400).json({ message: "Invalid or expired token" });
+        res.status(HttpStatus.BAD_REQUEST).json({ message: MESSAGES.INVALID_TOKEN });
         return;
       }
 
       if (newPassword !== confirmNewPassword) {
-        console.log("Error resetting password:", error);
-        res.status(400).json({ error: "Password does not match" });
+        res.status(HttpStatus.BAD_REQUEST).json({ error: MESSAGES.INCORRECT_PASSWORD });
         return;
       }
 
@@ -308,15 +298,13 @@ export class UserController implements IUserController {
         newPassword
       );
       if (!user) {
-        res.status(404).json({ message: "User not found" });
+        res.status(HttpStatus.NOT_FOUND).json({ message: MESSAGES.USER_NOT_FOUND });
         return;
       }
 
-      res.status(200).json({ message: "Password reset successful" });
+      res.status(HttpStatus.OK).json({ message: MESSAGES.PASSWORD_RESET_SUCCESS });
     } catch (error) {
-      // console.log("Inside catch block");
-      console.error("Error resetting password:", error);
-      res.status(500).json({ message: "Error resetting password", error });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: MESSAGES.PASSWORD_RESET_ERROR, error });
     }
   }
 
@@ -325,7 +313,7 @@ export class UserController implements IUserController {
       const { idToken } = req.body;
 
       if (!idToken) {
-        res.status(400).json({ error: "Google ID token is required" });
+        res.status(HttpStatus.BAD_REQUEST).json({ error: MESSAGES.GOOGLE_SIGN_ERROR });
         return;
       }
 
@@ -336,22 +324,21 @@ export class UserController implements IUserController {
 
       const payload = ticket.getPayload();
       if (!payload) {
-        res.status(400).json({ error: "Invalid Google ID token" });
+        res.status(HttpStatus.BAD_REQUEST).json({ error: MESSAGES.INVALID_GOOGLE_TOKEN });
         return;
       }
 
       const { email, name, picture } = payload;
 
       if (!email) {
-        res.status(400).json({ error: "Google account must have an email" });
+        res.status(HttpStatus.BAD_REQUEST).json({ error: MESSAGES.GOOGLE_EMAIL_ERROR });
         return;
       }
 
       let user = await this.userService.getUserByEmail(email);
 
       if (user && user.isActive === false) {
-        res.status(403).json({ error: "You are blocked" });
-        console.log("blocked");
+        res.status(HttpStatus.FORBIDDEN).json({ error: MESSAGES.USER_BLOCKED });
         return;
       }
 
@@ -373,11 +360,10 @@ export class UserController implements IUserController {
       });
 
       res
-        .status(200)
-        .json({ message: "Google Sign-In successful", token, user });
+        .status(HttpStatus.OK)
+        .json({ message: MESSAGES.GOOGLE_SIGN_IN_SUCCESS, token, user });
     } catch (error) {
-      console.error("Error in Google Sign-In:", error);
-      res.status(500).json({ error: (error as Error).message });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: (error as Error).message });
     }
   }
 
@@ -386,29 +372,29 @@ export class UserController implements IUserController {
       const { id } = req.params;
       const course = await this.userService.getCourseById(id);
       if (!course) {
-        res.status(404).json({ message: "Course not found" });
+        res.status(HttpStatus.NOT_FOUND).json({ message: MESSAGES.COURSE_NOT_FOUND });
         return;
       }
-      res.status(200).json(course);
+      res.status(HttpStatus.OK).json(course);
       return;
     } catch (error) {
-      res.status(500).json({ message: "An unexpected error occured", error });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: MESSAGES.UNEXPECTED_ERROR, error });
       return;
     }
   }
 
-  async stripePayment(req: Request, res: Response): Promise<void> {
+  async stripePayment(req: AuthRequest, res: Response): Promise<void> {
     try {
       const { courseId } = req.params;
       const userId = req.user?.id;
 
       if (!mongoose.Types.ObjectId.isValid(courseId)) {
-        res.status(400).json({ message: "Invalid course ID" });
+        res.status(HttpStatus.BAD_REQUEST).json({ message: MESSAGES.INVALID_COURSE_ID });
       }
 
       const course = await this.userService.getCourseById(courseId);
       if (!course) {
-        res.status(404).json({ message: "Course not found" });
+        res.status(HttpStatus.NOT_FOUND).json({ message: MESSAGES.COURSE_NOT_FOUND });
         return;
       }
 
@@ -420,7 +406,6 @@ export class UserController implements IUserController {
               currency: "inr",
               product_data: {
                 name: course.title,
-                // description: course.description,
               },
               unit_amount: Math.round(course.price * 100),
             },
@@ -431,17 +416,15 @@ export class UserController implements IUserController {
         success_url: `${process.env.FRONTEND_URL}/users/my-courses?success=true`,
         cancel_url: `${process.env.FRONTEND_URL}/users/course-details/${courseId}?cancelled=true`,
         metadata: {
-          courseId: courseId,
-          userId: userId,
+          courseId: courseId || 'unkown',
+          userId: userId ?? 'guest',
         },
       });
-      console.log("stripe test success", session);
 
       res.json({ id: session.id });
     } catch (error) {
-      console.error("Stripe payment error:", error);
-      res.status(500).json({
-        message: "Payment setup failed",
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        message: MESSAGES.STRIPE_PAYMENT_FAILED,
         error: (error as Error).message,
       });
     }
@@ -451,13 +434,12 @@ export class UserController implements IUserController {
     try {
       const tutorCount = await this.userService.getTutorCount();
       if (!tutorCount) {
-        res.status(404).json("No tutor");
+        res.status(HttpStatus.NOT_FOUND).json(MESSAGES.TUTOR_NOT_FOUND);
         return;
       }
-      res.status(200).json(tutorCount);
+      res.status(HttpStatus.OK).json(tutorCount);
     } catch (error) {
-      console.log(error);
-      res.status(500).json("An unexpected error occured");
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(MESSAGES.UNEXPECTED_ERROR);
     }
   }
 }

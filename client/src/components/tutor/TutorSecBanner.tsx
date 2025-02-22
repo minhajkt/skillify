@@ -26,7 +26,7 @@ const TutorSecBanner = () => {
       >
         <Typography
           variant="h5"
-          sx={{ fontWeight: "bold", mt: 2, textAlign: "center" }}
+          sx={{ fontWeight: {xs:"medium",md:"bold"}, mt: {xs:1,md:2}, textAlign: "center" }}
         >
           So many reasons to start
         </Typography>
@@ -39,7 +39,7 @@ const TutorSecBanner = () => {
                   flexDirection: { xs: "row", sm: "column" },
                   alignItems: { xs: "start", sm: "center" },
                   justifyContent: "center",
-                  ml: { xs: 4, sm: 0 },
+                  ml: { xs: 2, md: 0 },
                   borderRadius: "8px",
                   height: "auto",
                   width: { xs: "90%", sm: "80%" },
@@ -53,7 +53,6 @@ const TutorSecBanner = () => {
                   },
                   cursor: "pointer",
                 }}
-                onClick={() => console.log("clicked")}
               >
                 <Box
                   sx={{
@@ -62,7 +61,6 @@ const TutorSecBanner = () => {
                     p: 0,
                     m: 0,
                     bgcolor: "white",
-                    //   position:"absolute"
                   }}
                 >
                   <Box
@@ -84,7 +82,6 @@ const TutorSecBanner = () => {
                 </Box>
                 <Box
                   sx={{
-                    // bgcolor: "yellow",
                     height: { xs: "5rem", sm: "10rem" },
                     width: "100%",
                     borderRadius: "8px",
@@ -98,7 +95,6 @@ const TutorSecBanner = () => {
                       padding: { xs: 1, sm: 2 },
                       textAlign: "center",
                     }}
-                    // fontWeight="medium"
                   >
                     {caption?.head || "head"}
                   </Typography>

@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { ICourseRepository } from "../../courses/repositories/ICourseRepository";
 import { IWishlist } from "../models/wishlistModel";
 import { IWishlistRepository } from "../repositories/IWishlistRepository";
@@ -28,11 +29,13 @@ export class WishlistService implements IWishlistService {
       return wishlist;
     }
 
-    if (wishlist.courses.includes(courseId)) {
+    if (
+      wishlist.courses.some((id) => id.equals(new mongoose.Types.ObjectId(courseId)))
+    ) {
       throw new Error("Course is already in the wishlist");
     }
 
-    wishlist.courses.push(courseId);
+    wishlist.courses.push(new mongoose.Types.ObjectId(courseId));
     return this.wishlistRepo.saveWishlist(wishlist);
   }
 

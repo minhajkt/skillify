@@ -21,7 +21,7 @@ export const sendOtpToEmail = async (email: string): Promise<string> => {
   };
 
   await transporter.sendMail(mailOptions);
-
+  // console.log('otp', otp)
   return otp;
 };
 
@@ -35,7 +35,7 @@ export const sendEmail = async(email: string, resetToken: string) => {
   });
 
    const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
-   console.log('reset link is ', resetLink);
+  //  console.log('reset link is ', resetLink);
    
 
     const mailOptions = {

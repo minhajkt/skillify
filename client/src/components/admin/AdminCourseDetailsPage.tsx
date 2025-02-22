@@ -14,9 +14,12 @@ import {
   Paper,
   Tooltip,
   Snackbar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
 } from "@mui/material";
 import { axiosInstance } from "../../api/axiosInstance";
-import { updateCourseApproval, updateCourseBlock } from "../../api/adminApi";
+import { updateCourseApproval, updateCourseBlock, updateCourseEditApproval } from "../../api/adminApi";
 import {ICourse , ILectures} from '../../types/types'
 
 
@@ -26,10 +29,15 @@ const AdminCourseDetailsPage = () => {
   const [lectures, setLectures] = useState<{ [key: string]: ILectures & { videoLoaded: boolean }}>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [blockLoad, setBlockLoad] = useState(false)
+  const [unblockLoad, setUnblockLoad] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
   });
+
+const [open, setOpen] = useState(false);
+
 
   const fetchCourseDetails = async () => {
     if (!courseId) {
@@ -78,37 +86,68 @@ const AdminCourseDetailsPage = () => {
 
   const handleVideoLoad = async (lectureId: string) => {
     try {
-      const { data: lecture } = await axiosInstance.get(
-        `/lectures/${lectureId}`
+      if (!course?.draftVersion?.lectures) {
+        console.error("Draft version lectures not available");
+        return;
+      }
+      // console.log("available", course?.draftVersion?.lectures);
+      const lecture = course.draftVersion.lectures.find(
+        (lec) => lec.order === lecture.order
       );
-      // console.log("Loaded lecture data:", lecture);
+      // console.log("Found lecture:", lecture);
 
-      setLectures((prevLectures) => ({
-        ...prevLectures,
-        [lecture._id]: {
-          ...prevLectures[lecture._id],
-          videoUrl: lecture.videoUrl,
-          videoLoaded: true,
-        },
-      }));
+      if (!lecture || !lecture.videoUrl) {
+        console.error("Video not found for lecture:", lectureId);
+        return;
+      }
+
+      setLectures((prevLectures) => {
+        // console.log("Previous state before update:", prevLectures);
+
+        return {
+          ...prevLectures,
+          [lecture._id]: {
+            ...lecture, 
+            videoLoaded: true,
+          },
+        };
+      });
     } catch (error) {
       console.error("Error loading video:", error);
     }
   };
 
 
+  // const handleVideoLoad = async (lectureId: string) => {
+  //   try {
+  //     const { data: lecture } = await axiosInstance.get(
+  //       `/lectures/${lectureId}`
+  //     );
+  //     // console.log("Loaded lecture data:", lecture);
+
+  //     setLectures((prevLectures) => ({
+  //       ...prevLectures,
+  //       [lecture._id]: {
+  //         ...prevLectures[lecture._id],
+  //         videoUrl: lecture.videoUrl,
+  //         videoLoaded: true,
+  //       },
+  //     }));
+  //   } catch (error) {
+  //     console.error("Error loading video:", error);
+  //   }
+  // };
+
+
 const handleApprove = async (courseId: string) => {
   try {
     const updatedCourse = await updateCourseApproval(courseId, "approved");
-    console.log('updatde is ', updatedCourse);
     setSnackbar({
       open: true,
       message: "Course approved successfully!",
     });
     setCourse((prev) => {
-        console.log("Previous course state:", prev);  
       if (prev && prev._id === courseId) {
-            console.log('Updating course:', { ...prev, isApproved: "approved" });
         return { ...prev, isApproved: "approved" };
       }
       return prev;
@@ -117,9 +156,33 @@ const handleApprove = async (courseId: string) => {
     console.error("Failed to approve course request.", error);
   }
 };
+
+const handleApproveEdit = async (courseId: string) => {
+  try {
+    const updatedCourse = await updateCourseEditApproval(courseId, "approved", "approved");
+    await fetchCourseDetails()
+    setSnackbar({
+      open: true,
+      message: "Course edit request approved successfully!",
+    });
+    setCourse((prev) =>
+      prev && prev._id === courseId
+        ? { ...prev, ...prev.draftVersion, isApproved:"approved",editStatus: "approved", draftVersion: null }
+        : prev
+    );
+  } catch (error) {
+    console.error("Failed to approve course edit request.", error);
+  }
+};
+
 const handleBlockToggle = async (courseId: string, newStatus: string) => {
   try {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    if (newStatus === "blocked") {
+      setBlockLoad(true);
+    } else {
+      setUnblockLoad(true);
+    }
     const updatedCourse = await updateCourseBlock(courseId, newStatus);
     setSnackbar({
       open: true,
@@ -133,6 +196,12 @@ const handleBlockToggle = async (courseId: string, newStatus: string) => {
       `Failed to ${newStatus === "blocked" ? "block" : "unblock"} the course.`,
       error
     );
+  }finally {
+    if (newStatus === "blocked") {
+      setBlockLoad(false);
+    } else {
+      setUnblockLoad(false);
+    }
   }
 };
     const handleReject = async (courseId: string) => {
@@ -156,6 +225,24 @@ const handleBlockToggle = async (courseId: string, newStatus: string) => {
       }
     };
 
+    const handleRejectEdit = async (courseId: string) => {
+  try {
+    const updatedCourse = await updateCourseEditApproval(courseId, "approved", "rejected");
+    // console.log("updatde is ", updatedCourse);
+    setSnackbar({
+      open: true,
+      message: "Course edit request rejected!",
+    });
+    setCourse((prev) =>
+      prev && prev._id === courseId
+        ? { ...prev, isApproved:"approved", editStatus: "rejected", draftVersion: null }
+        : prev
+    );
+  } catch (error) {
+    console.error("Failed to reject course edit request.", error);
+  }
+};
+
   useEffect(() => {
     if (courseId) {
       fetchCourseDetails();
@@ -171,10 +258,19 @@ const handleBlockToggle = async (courseId: string, newStatus: string) => {
   }
 
   return (
-    <Box sx={{ padding: 2 }}>
+    <Box sx={{ padding: { xs: 0, md: 2 }, mx: { xs: -3, md: 0 } }}>
       {course ? (
         <>
-          <Typography variant="h4" gutterBottom>
+          <Typography
+            variant="h4"
+            sx={{
+              mb: { xs: 1, md: 3 },
+              fontSize: { xs: 18, md: 24 },
+              fontWeight: "bold",
+              ml: { xs: 1, md: 0 },
+            }}
+            gutterBottom
+          >
             Course Details
           </Typography>
 
@@ -189,18 +285,27 @@ const handleBlockToggle = async (courseId: string, newStatus: string) => {
               <TableBody>
                 <TableRow>
                   <TableCell>Title</TableCell>
-                  <TableCell>{course.title}</TableCell>
+                  <TableCell>
+                    {course.draftVersion?.title || course.title}
+                  </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell>Category</TableCell>
-                  <TableCell>{course.category}</TableCell>
+                  <TableCell>
+                    {course.draftVersion?.category || course.category}
+                  </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell>Description</TableCell>
                   <TableCell>
-                    <Tooltip title={course.description}>
+                    <Tooltip
+                      title={
+                        course.draftVersion?.description || course.description
+                      }
+                    >
                       <Typography
                         noWrap
+                        onClick={() => setOpen(true)}
                         style={{
                           maxWidth: "150px",
                           overflow: "hidden",
@@ -208,14 +313,16 @@ const handleBlockToggle = async (courseId: string, newStatus: string) => {
                           whiteSpace: "nowrap",
                         }}
                       >
-                        {course.description}
+                        {course.draftVersion?.description || course.description}
                       </Typography>
                     </Tooltip>
                   </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell>Price</TableCell>
-                  <TableCell>₹ {course.price}</TableCell>
+                  <TableCell>
+                    ₹ {course.draftVersion?.price || course.price}
+                  </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell>Status</TableCell>
@@ -226,71 +333,113 @@ const handleBlockToggle = async (courseId: string, newStatus: string) => {
           </TableContainer>
 
           <Box sx={{ marginTop: 4 }}>
-            <Typography variant="h6" gutterBottom>
+            <Typography variant="h6" sx={{ pl: { xs: 1, md: 0 } }} gutterBottom>
               Lectures
             </Typography>
             <TableContainer component={Paper}>
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Order</TableCell>
+                    <TableCell
+                      sx={{ display: { xs: "none", md: "table-cell" } }}
+                    >
+                      Order
+                    </TableCell>
                     <TableCell>Title</TableCell>
-                    <TableCell>Description</TableCell>
+                    <TableCell
+                      sx={{ display: { xs: "none", md: "table-cell" } }}
+                    >
+                      Description
+                    </TableCell>
                     <TableCell>Video</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {Object.keys(lectures).length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={4}>
-                        No lectures found for this course.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    Object.values(lectures).map((lecture, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{lecture.order}</TableCell>
-                        <TableCell>{lecture.title}</TableCell>
-                        <TableCell>
-                          <Tooltip title={lecture.description}>
-                            <Typography
-                              noWrap
-                              style={{
-                                maxWidth: "150px",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
-                              }}
+                  {course.draftVersion?.lectures &&
+                  Object.values(course.draftVersion.lectures).length > 0
+                    ? Object.values(course.draftVersion.lectures).map(
+                        (lecture, index) => (
+                          <TableRow key={`draft-${index}`}>
+                            <TableCell
+                              sx={{ display: { xs: "none", md: "table-cell" } }}
                             >
-                              {lecture.description}
-                            </Typography>
-                          </Tooltip>
-                        </TableCell>
-                        <TableCell>
-                          {lecture.videoLoaded ? (
+                              {lecture.order}
+                            </TableCell>
+                            <TableCell>{lecture.title}</TableCell>
+                            <TableCell
+                              sx={{ display: { xs: "none", md: "table-cell" } }}
+                            >
+                              <Tooltip title={lecture.description}>
+                                <Typography
+                                  noWrap
+                                  style={{
+                                    maxWidth: "150px",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap",
+                                  }}
+                                >
+                                  {lecture.description}
+                                </Typography>
+                              </Tooltip>
+                            </TableCell>
+                            <TableCell>
+                              <video
+                                src={lecture.videoUrl}
+                                controls
+                                style={{ maxWidth: "200px" }}
+                              />
+                            </TableCell>
+                          </TableRow>
+                        )
+                      )
+                    : Object.values(lectures).map((lecture, index) => (
+                        <TableRow key={`final-${index}`}>
+                          <TableCell
+                            sx={{ display: { xs: "none", md: "table-cell" } }}
+                          >
+                            {lecture.order}
+                          </TableCell>
+                          <TableCell>{lecture.title}</TableCell>
+                          <TableCell
+                            sx={{ display: { xs: "none", md: "table-cell" } }}
+                          >
+                            <Tooltip title={lecture.description}>
+                              <Typography
+                                noWrap
+                                style={{
+                                  maxWidth: "150px",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {lecture.description}
+                              </Typography>
+                            </Tooltip>
+                          </TableCell>
+                          <TableCell>
                             <video
                               src={lecture.videoUrl}
                               controls
                               style={{ maxWidth: "200px" }}
                             />
-                          ) : (
-                            <button
-                              onClick={() => handleVideoLoad(lecture._id)}
-                            >
-                              Load Video
-                            </button>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
                 </TableBody>
               </Table>
             </TableContainer>
           </Box>
+          <Dialog open={open} onClose={() => setOpen(false)}>
+            <DialogTitle>Description</DialogTitle>
+            <DialogContent>
+              {course.draftVersion?.description || course.description}
+            </DialogContent>
+          </Dialog>
 
-          <Box sx={{ marginTop: 2 }}>
-            {course.isApproved === "pending" && (
+          <Box sx={{ marginTop: 2, ml: { xs: 2, md: 0 } }}>
+            {course.isApproved == "pending" && course.editStatus === "null" && (
               <>
                 <Button
                   variant="contained"
@@ -311,24 +460,47 @@ const handleBlockToggle = async (courseId: string, newStatus: string) => {
               </>
             )}
           </Box>
+
+          <Box sx={{ mt: 2, ml: { xs: 2, md: 0 } }}>
+            {course.editStatus === "pending" && (
+              <>
+                <Button
+                  variant="contained"
+                  color="success"
+                  sx={{ marginRight: 2 }}
+                  onClick={() => handleApproveEdit(course._id)}
+                >
+                  Approve Edit
+                </Button>
+
+                <Button
+                  variant="contained"
+                  color="error"
+                  onClick={() => handleRejectEdit(course._id)}
+                >
+                  Reject Edit
+                </Button>
+              </>
+            )}
+          </Box>
           {["approved", "blocked"].includes(course.isApproved) && (
-            <Box sx={{ marginTop: 2 }}>
+            <Box sx={{ marginTop: 2, ml: { xs: 2, md: 0 } }}>
               <Button
                 variant="contained"
                 color="error"
                 sx={{ marginRight: 2 }}
                 onClick={() => handleBlockToggle(course._id, "blocked")}
-                disabled={course.isApproved === "blocked"}
+                disabled={blockLoad || course.isApproved === "blocked"}
               >
-                Block
+                {blockLoad ? <CircularProgress size={20} /> : "Block"}
               </Button>
               <Button
                 variant="contained"
                 color="success"
                 onClick={() => handleBlockToggle(course._id, "approved")}
-                disabled={course.isApproved === "approved"}
+                disabled={unblockLoad || course.isApproved === "approved"}
               >
-                Unblock
+                {unblockLoad ? <CircularProgress size={20} /> : "Unblock"}
               </Button>
             </Box>
           )}

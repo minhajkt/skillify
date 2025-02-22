@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -14,6 +15,10 @@ import {
   Paper,
   Tooltip,
   Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  useMediaQuery,
 } from "@mui/material";
 import { fetchTutorCourseDetails } from "../../api/tutorApi";
 import Navbar from "../../components/shared/Navbar";
@@ -25,6 +30,11 @@ const CourseDetailsPage = () => {
   const [lectures, setLectures] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
+
+
+const [open, setOpen] = useState(false);
   const navigate = useNavigate()
 
 
@@ -33,7 +43,7 @@ const CourseDetailsPage = () => {
         try {
           await getComplaints(); 
         } catch (error) {
-          console.error("Error occurred:", error);
+          setError("Error occurred");
         }
       };
   
@@ -49,9 +59,6 @@ const CourseDetailsPage = () => {
       }
       try {
         const response = await fetchTutorCourseDetails(courseId);
-        // console.log("lecture dataa length", response?.data.lectures.length);
-        // console.log('ressssssssssssssssssss', response.data);
-        
 
         if (response?.data) {
           setCourse(response.data);
@@ -82,14 +89,13 @@ const CourseDetailsPage = () => {
     <Box
       sx={{
         mt: { xs: "64px", md: "80px" },
-        px: { xs: 2, md: 46 },
+        px: { xs: 0, md: 46 },
         py: 3,
         backgroundColor: "#f8fafc",
       }}
     >
       <Navbar />
 
-      {/* Course Details Table */}
       <TableContainer
         component={Paper}
         sx={{
@@ -125,13 +131,15 @@ const CourseDetailsPage = () => {
               <TableCell sx={{ fontWeight: 500, width: "200px" }}>
                 Title
               </TableCell>
-              <TableCell>{course.title}</TableCell>
+              <TableCell>
+                {course.draftVersion?.title || course.title}
+              </TableCell>
             </TableRow>
             <TableRow>
               <TableCell sx={{ fontWeight: 500 }}>Thumbnail</TableCell>
               <TableCell>
                 <img
-                  src={course.thumbnail}
+                  src={course.draftVersion?.thumbnail || course.thumbnail}
                   style={{
                     height: "150px",
                     width: "250px",
@@ -155,7 +163,7 @@ const CourseDetailsPage = () => {
                     fontSize: "0.875rem",
                   }}
                 >
-                  {course.category}
+                  {course.draftVersion?.category || course.category}
                 </Typography>
               </TableCell>
             </TableRow>
@@ -165,14 +173,16 @@ const CourseDetailsPage = () => {
                 <Tooltip title={course.description}>
                   <Typography
                     noWrap
+                    onClick={() => setOpen(true)}
                     style={{
                       maxWidth: "150px",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
+                      cursor: "pointer",
                     }}
                   >
-                    {course.description}
+                    {course.draftVersion?.description || course.description}
                   </Typography>
                 </Tooltip>
               </TableCell>
@@ -186,7 +196,7 @@ const CourseDetailsPage = () => {
                     color: "#047857",
                   }}
                 >
-                  ₹ {course.price}
+                  ₹ {course.draftVersion?.price || course.price}
                 </Typography>
               </TableCell>
             </TableRow>
@@ -230,6 +240,12 @@ const CourseDetailsPage = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      <Dialog open={open} onClose={() => setOpen(false)}>
+        <DialogTitle>Description</DialogTitle>
+        <DialogContent>
+          {course.draftVersion?.description || course.description}
+        </DialogContent>
+      </Dialog>
 
       <Box sx={{ marginTop: 4 }}>
         <Typography
@@ -241,6 +257,8 @@ const CourseDetailsPage = () => {
             borderBottom: "2px solid #cbd5e1",
             pb: 1,
             mb: 3,
+            pl:{xs:1,md:0},
+            
           }}
         >
           Lectures:
@@ -261,7 +279,7 @@ const CourseDetailsPage = () => {
                     variant="h6"
                     sx={{ fontWeight: 600, color: "#334155" }}
                   >
-                    Order
+                    {!isSmallScreen? 'Order' : 'S'}
                   </Typography>
                 </TableCell>
                 <TableCell>
@@ -272,6 +290,7 @@ const CourseDetailsPage = () => {
                     Title
                   </Typography>
                 </TableCell>
+                {!isSmallScreen && (
                 <TableCell>
                   <Typography
                     variant="h6"
@@ -280,6 +299,8 @@ const CourseDetailsPage = () => {
                     Description
                   </Typography>
                 </TableCell>
+                )}
+                {!isSmallScreen && (
                 <TableCell>
                   <Typography
                     variant="h6"
@@ -288,6 +309,7 @@ const CourseDetailsPage = () => {
                     Duration
                   </Typography>
                 </TableCell>
+                )}
                 <TableCell>
                   <Typography
                     variant="h6"
@@ -312,8 +334,81 @@ const CourseDetailsPage = () => {
                     No lectures found for this course.
                   </TableCell>
                 </TableRow>
+              ) : course.draftVersion?.lectures &&
+                course.draftVersion.lectures.length > 0 ? (
+                course.draftVersion.lectures.map(
+                  (lecture: any, index: number) => (
+                    <TableRow
+                      key={index}
+                      sx={{
+                        "&:hover": {
+                          backgroundColor: "#f8fafc",
+                        },
+                      }}
+                    >
+                      <TableCell>{lecture.order}</TableCell>
+                      <TableCell sx={{ fontWeight: 500 }}>
+                        {lecture.title}
+                      </TableCell>
+                      {!isSmallScreen && (
+                      <TableCell>
+                        <Tooltip title={lecture.description}>
+                          <Typography
+                            noWrap
+                            style={{
+                              maxWidth: "150px",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {lecture.description}
+                          </Typography>
+                        </Tooltip>
+                      </TableCell>
+                      )}
+                      {!isSmallScreen && (
+                      <TableCell>
+                        <Typography
+                          sx={{
+                            display: "inline-block",
+                            backgroundColor: "#f1f5f9",
+                            px: 2,
+                            py: 0.5,
+                            borderRadius: 1,
+                            fontSize: "0.875rem",
+                          }}
+                        >
+                          {lecture.duration}
+                        </Typography>
+                      </TableCell>
+                      )}
+                      <TableCell>
+                        {lecture.videoUrl ? (
+                          <video
+                            src={lecture.videoUrl}
+                            controls
+                            style={{
+                              maxWidth: "200px",
+                              borderRadius: "8px",
+                            }}
+                          />
+                        ) : (
+                          <Typography
+                            sx={{
+                              color: "#94a3b8",
+                              fontSize: "0.875rem",
+                              fontStyle: "italic",
+                            }}
+                          >
+                            No video available
+                          </Typography>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  )
+                )
               ) : (
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 lectures.map((lecture: any, index: number) => (
                   <TableRow
                     key={index}
@@ -327,6 +422,7 @@ const CourseDetailsPage = () => {
                     <TableCell sx={{ fontWeight: 500 }}>
                       {lecture.title}
                     </TableCell>
+                    {!isSmallScreen && (
                     <TableCell>
                       <Tooltip title={lecture.description}>
                         <Typography
@@ -342,6 +438,8 @@ const CourseDetailsPage = () => {
                         </Typography>
                       </Tooltip>
                     </TableCell>
+                    )} 
+                    {!isSmallScreen && (
                     <TableCell>
                       <Typography
                         sx={{
@@ -356,6 +454,7 @@ const CourseDetailsPage = () => {
                         {lecture.duration}
                       </Typography>
                     </TableCell>
+                    )}
                     <TableCell>
                       {lecture.videoUrl ? (
                         <video
@@ -365,6 +464,7 @@ const CourseDetailsPage = () => {
                             maxWidth: "200px",
                             borderRadius: "8px",
                           }}
+                          
                         />
                       ) : (
                         <Typography
@@ -385,16 +485,19 @@ const CourseDetailsPage = () => {
           </Table>
         </TableContainer>
       </Box>
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={() => navigate(`/tutor/edit-course/${courseId}`)}
-        sx={{
-          marginTop: 1,
-        }}
-      >
-        Edit Course
-      </Button>
+      {course.isApproved !== "pending" && (
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => navigate(`/tutor/edit-course/${courseId}`)}
+          sx={{
+            marginTop: 1,
+            ml:{xs:1,md:0}
+          }}
+        >
+          Edit Course
+        </Button>
+      )}
     </Box>
   );
 };

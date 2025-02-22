@@ -16,8 +16,6 @@ export const fetchTutorCourses = async () => {
 export const fetchTutorCourseDetails = async (courseId: string) => {
   try {
     const response = await axiosInstance.get(`/tutor/courses/${courseId}`);
-    //     console.log('from tutorapi fetch  course of tutor data', response.data);
-    // console.log("from tutorapi fetch course of tutor respnonse only", response);
     return response;
   } catch (error) {
     handleAxiosError(error);

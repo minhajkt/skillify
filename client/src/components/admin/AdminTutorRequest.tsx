@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Table,
   TableBody,
@@ -12,6 +13,7 @@ import {
   IconButton,
   Button,
   Snackbar,
+  useMediaQuery,
 
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -36,6 +38,9 @@ const AdminTutorRequest = () => {
       message: "",
     });
 
+  const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
+
+
   useEffect(() => {
     const getTutorRequests = async () => {
       setLoading(true);
@@ -44,7 +49,6 @@ const AdminTutorRequest = () => {
         setTutors(fetchedTutors);
       } catch (error) {
         setError("Failed to fetch tutor requests.");
-        console.log('error occured',error);
         
       } finally {
         setLoading(false);
@@ -113,20 +117,33 @@ const handleReject = async (tutorId: string) => {
   if (error) return <Typography color="error">{error}</Typography>;
 
   return (
-    <Box sx={{ padding: 2, width: "70vw" }}>
-      <Typography variant="h5" fontWeight="bold" sx={{ mb: 3 }}>
+    <Box sx={{ padding: { xs: 0, md: 2 }, width: { xs: "100%", md: "70vw" } }}>
+      <Typography
+        variant="h5"
+        fontWeight="bold"
+        sx={{
+          mb: { xs: 1, md: 3 },
+          fontSize: { xs: 18, md: 24 },
+          fontWeight: "bold",
+          ml: { xs: -2, md: 0 },
+        }}
+      >
         Tutor Requests
       </Typography>
 
-      <TableContainer component={Paper} sx={{ bgcolor: "#FAFAFA" }}>
+      <TableContainer component={Paper} sx={{ bgcolor: "#FAFAFA", ml:{xs:-2,md:0},width:{xs:'110%', md:'auto'} }}>
         <Table>
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
               <TableCell>Email</TableCell>
-              <TableCell>Status</TableCell>
+              <TableCell sx={{ display: { xs: "none", md: "table-cell" } }}>
+                Status
+              </TableCell>
               <TableCell>Actions</TableCell>
-              <TableCell></TableCell>
+              <TableCell
+                sx={{ display: { xs: "none", md: "table-cell" } }}
+              ></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -138,12 +155,31 @@ const handleReject = async (tutorId: string) => {
               </TableRow>
             ) : (
               tutors
+                .sort(
+                  (a, b) =>
+                    new Date(b.createdAt).getTime() -
+                    new Date(a.createdAt).getTime()
+                )
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((tutor) => (
                   <TableRow key={tutor._id}>
-                    <TableCell>{tutor.name}</TableCell>
-                    <TableCell>{tutor.email}</TableCell>
-                    <TableCell>
+                    <TableCell
+                      onClick={
+                        isSmallScreen ? () => handleOpenModal(tutor) : undefined
+                      }
+                    >
+                      {tutor.name}
+                    </TableCell>
+                    <TableCell
+                      onClick={
+                        isSmallScreen ? () => handleOpenModal(tutor) : undefined
+                      }
+                    >
+                      {tutor.email}
+                    </TableCell>
+                    <TableCell
+                      sx={{ display: { xs: "none", md: "table-cell" } }}
+                    >
                       <span
                         style={{
                           color:
@@ -179,7 +215,9 @@ const handleReject = async (tutorId: string) => {
                         </>
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell
+                      sx={{ display: { xs: "none", md: "table-cell" } }}
+                    >
                       <Button
                         variant="outlined"
                         onClick={() => handleOpenModal(tutor)}
@@ -208,6 +246,18 @@ const handleReject = async (tutorId: string) => {
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleChangeRowsPerPage}
         rowsPerPageOptions={[5, 10, 20]}
+        sx={{
+          ".MuiTablePagination-root": {
+            fontSize: { xs: "0.75rem", md: ".8rem" },
+            padding: { xs: "4px", md: "16px" },
+          },
+          ".MuiTablePagination-selectLabel, .MuiTablePagination-input": {
+            fontSize: { xs: "0.75rem", md: ".85rem" },
+          },
+          ".MuiTablePagination-actions": {
+            transform: { xs: "scale(0.8)", md: "scale(1)" },
+          },
+        }}
       />
       <TutorDetailsModal
         open={modalOpen}

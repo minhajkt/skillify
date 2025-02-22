@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { googleSignIn, signupUser } from "../../api/authApi";
@@ -32,7 +33,6 @@ const Signup = () => {
         }
       } catch (error) {
         setErrorMessage("Your account is temporarily suspended");
-        console.log("Google sign in error", error);
       }
     };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -48,7 +48,6 @@ const Signup = () => {
       }
       setStatus("idle");
     } catch (error) {
-      console.error("Error in signing up:", error);
       setStatus("error");
       if(error instanceof Error) {
         setErrorMessage(error.message)
@@ -110,7 +109,7 @@ const Signup = () => {
             justifyContent: "center",
             alignItems: "center",
             padding: 4,
-            marginLeft: { xs: 7, sm: 0 },
+            // marginLeft: { xs: 7, sm: 0 },
           }}
         >
           <Typography

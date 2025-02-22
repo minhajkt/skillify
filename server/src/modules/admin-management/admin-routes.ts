@@ -51,6 +51,8 @@ adminRouter.patch(
   adminController.updateCourseApproval.bind(adminController)
 );
 
+adminRouter.patch('/admin/course-request/:id/edit-approval', authenticateJWT , adminController.updateCourseEditApproval.bind(adminController))
+
 adminRouter.get(
   "/admin/courses",
   adminController.getAllCourse.bind(adminController)

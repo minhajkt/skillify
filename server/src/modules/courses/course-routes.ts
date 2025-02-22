@@ -26,6 +26,7 @@ courseRouter.post(
 );
 
 courseRouter.put('/course/:courseId', authenticateJWT,upload.single('thumbnail'), validateCourseUpdate, handleValidationErrors, coursecontroller.editCourse.bind(coursecontroller))
+courseRouter.get('/course/our-courses',coursecontroller.getAllCourses.bind(coursecontroller))
 courseRouter.get('/course/categories',coursecontroller.getCategories.bind(coursecontroller))
 courseRouter.get('/users/course-section/:courseId', authenticateJWT,coursecontroller.getUserCourse.bind(coursecontroller))
 courseRouter.patch("/course-request/:id/approval", coursecontroller.blockCourse.bind(coursecontroller));

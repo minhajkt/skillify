@@ -8,11 +8,11 @@ export class CourseRepository
   implements ICourseRepository
 {
   constructor() {
-    super(Course)
+    super(Course);
   }
 
   async createCourse(courseData: Partial<ICourse>): Promise<ICourse> {
-    return await this.create(courseData)
+    return await this.create(courseData);
   }
 
   async updateCourse(
@@ -23,13 +23,14 @@ export class CourseRepository
   ): Promise<ICourse | null> {
     return await Course.findByIdAndUpdate(
       courseId,
-      { ...updatedData, isApproved, editStatus },
+      { draftVersion : updatedData, isApproved, editStatus },
       { new: true }
     );
   }
 
   async getAllCourses(): Promise<ICourse[]> {
-    return await this.findAll()
+    // return await Course.find({ isApproved: "approved" });
+    return await this.findAll({isApproved: 'approved'})
   }
 
   async getCategories(): Promise<string[]> {
@@ -38,7 +39,9 @@ export class CourseRepository
   }
 
   async getUserCourse(courseId: string): Promise<ICourse | null> {
-    return await Course.findById(courseId).populate("lectures");
+    // return await Course.findById(courseId).populate("lectures");
+    const course = await this.findById(courseId)
+    return course ? course.populate('lectures'): null
   }
 
   async addLecture(
@@ -51,11 +54,8 @@ export class CourseRepository
       { new: true }
     );
     if (!updatedCourse) {
-      console.log(`Course with ID ${courseId} not found.`);
       throw new Error(`Course with ID ${courseId} not found.`);
-    } else {
-      console.log(`Updated Course: `, updatedCourse);
-    }
+    } 
   }
 
   async findCourseById(courseId: string): Promise<ICourse | null> {
@@ -65,7 +65,7 @@ export class CourseRepository
   async updateBlockStatus(
     courseId: string,
     status: string
-  ): Promise<ICourse | null> {    
+  ): Promise<ICourse | null> {
     return await Course.findByIdAndUpdate(
       courseId,
       { isApproved: status },
@@ -75,7 +75,6 @@ export class CourseRepository
 
   async countCourses(): Promise<number> {
     const count = await Course.countDocuments();
-    // console.log(`Course count: ${count}`);
     return count;
   }
 }

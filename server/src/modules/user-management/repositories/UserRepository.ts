@@ -32,6 +32,10 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
       isApproved: approvalStatus,
     });
   }
+  
+  async findAllStudents():  Promise<IUser[]> {
+    return await User.find({role: 'user'})
+  }
 
   async getUserById(id: string): Promise<IUser | null> {    
     return await this.findById(id)

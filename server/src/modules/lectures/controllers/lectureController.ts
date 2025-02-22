@@ -8,6 +8,8 @@ import { cloudinary, uploadVideo } from "../../../config/cloudinaryConfig";
 import { ILectureService } from "../services/ILectureService";
 import { ILectureController } from "./ILectureController";
 import { ICourseService } from "../../courses/services/ICourseService";
+import { HttpStatus } from "../../../constants/httpStatus";
+import { MESSAGES } from "../../../constants/messages";
 
 
 interface LectureData {
@@ -30,22 +32,22 @@ export class LectureController implements ILectureController {
     try {
       if (!req.files || !Array.isArray(req.files)) {
         res
-          .status(400)
-          .json({ message: "Video files are required for all lectures" });
+          .status(HttpStatus.BAD_REQUEST)
+          .json({ message: MESSAGES.VIDEO_REQUIRED_FOR_LECTURES });
         return;
       }
 
       const lecturesData = JSON.parse(req.body.lectures) as LectureData[];
 
       if (!mongoose.Types.ObjectId.isValid(lecturesData[0].courseId)) {
-        res.status(400).json({ message: "Invalid courseId format" });
+        res.status(HttpStatus.BAD_REQUEST).json({ message: MESSAGES.INVALID_COURSE_FORMAT });
         return;
       }
 
       const videos = req.files as Express.Multer.File[];
       if (videos.length !== lecturesData.length) {
-        res.status(400).json({
-          message: "Each lecture must have a corresponding video file",
+        res.status(HttpStatus.BAD_REQUEST).json({
+          message: MESSAGES.VIDEO_REQUIRED_FOR_LECTURES,
         });
         return;
       }
@@ -68,8 +70,8 @@ export class LectureController implements ILectureController {
           courseId
         );
         if (!newLecture) {
-          res.status(400).json({
-            message: `Failed to create lecture: ${lectureData.title}`,
+          res.status(HttpStatus.BAD_REQUEST).json({
+            message: MESSAGES.FAILED_LECTURE_CREATION,
           });
           return;
         }
@@ -84,13 +86,12 @@ export class LectureController implements ILectureController {
         createdLectures.push(newLecture);
       }
 
-      res.status(201).json({
-        message: "Lectures created successfully",
+      res.status(HttpStatus.CREATED).json({
+        message: MESSAGES.LECTURES_CREATED,
         lectures: createdLectures,
       });
     } catch (error) {
-      res.status(500).json({ message: (error as Error).message });
-      console.error(error);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: (error as Error).message });
     }
   }
 
@@ -100,70 +101,60 @@ export class LectureController implements ILectureController {
       const updatedData = req.body;
 
       if (Array.isArray(req.files) && req.files.length > 0) {
-        updatedData.videoUrls = req.files.map((file) => file.path);
+        updatedData.videoUrl = req.files[0].path;
       } else if (
         req.files &&
         Object.values(req.files).some((files) => files.length > 0)
       ) {
         const videoFiles = Object.values(req.files).flat();
-        updatedData.videoUrls = videoFiles.map((file) => file.path);
+        updatedData.videoUrl = videoFiles[0].path;
       }
 
       const updatedLecture = await this.lectureService.editLecture(
         lectureId,
         updatedData,
-        req.file
       );
 
       if (!updatedLecture) {
-        res.status(404).json({ message: "Lecture not found" });
+        res.status(HttpStatus.NOT_FOUND).json({ message: MESSAGES.LECTURE_NOT_FOUND });
         return;
       }
 
-      res.status(200).json({
-        message: "Lecture updated successfully",
+      res.status(HttpStatus.OK).json({
+        message: MESSAGES.LECTURE_UPDATE_SUCCESS,
         lecture: updatedLecture,
       });
     } catch (error) {
-      res.status(500).json({ message: (error as Error).message });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: (error as Error).message });
     }
   }
 
   async getLecturesByCourse(req: Request, res: Response): Promise<void> {
     try {
       const { courseId } = req.params;
-      console.log("id", courseId);
       const lectures = await this.lectureService.getLecturesByCourse(courseId);
-      console.log("back with vid", lectures);
 
-      const lecturesMetadata = lectures.map((lecture) => {
-        const { videoUrl, ...rest } = lecture.toObject();
-        // console.log("back without vid", rest);
-
-        return rest;
-      });
-      res.status(200).json({ lectures: lecturesMetadata });
+      res.status(HttpStatus.OK).json({ lectures });
+    
     } catch (error) {
-      res.status(500).json({ message: (error as Error).message });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: (error as Error).message });
     }
   }
 
   async getLectureById(req: Request, res: Response): Promise<void> {
     try {
       const { lectureId } = req.params;
-      // console.log("Fetching lecture by ID:", lectureId);
 
       const lecture = await this.lectureService.getLectureById(lectureId);
 
       if (!lecture) {
-        res.status(404).json({ message: "Lecture not found" });
+        res.status(HttpStatus.NOT_FOUND).json({ message: MESSAGES.LECTURE_NOT_FOUND });
         return;
       }
 
-      res.status(200).json(lecture);
+      res.status(HttpStatus.OK).json(lecture);
     } catch (error) {
-      console.error("Error fetching lecture by ID:", error);
-      res.status(500).json({ message: (error as Error).message });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: (error as Error).message });
     }
   }
 }

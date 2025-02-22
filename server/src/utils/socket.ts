@@ -13,7 +13,7 @@ export const initializeSocket = (server: http.Server) => {
   });
 
   io.on("connection", (socket) => {
-    console.log(`User connected: ${socket.id}`);
+    // console.log(`User connected: ${socket.id}`);
 
     const getOrCreateRoom = async (senderId: string, recipientId: string) => {
       let room = await MessageRoom.findOne({
@@ -29,7 +29,7 @@ export const initializeSocket = (server: http.Server) => {
     socket.on("joinRoom", async ({ senderId, recipientId }) => {
       const roomId = await getOrCreateRoom(senderId, recipientId);
       socket.join(roomId.toString());
-      console.log(`${socket.id} joined room: ${roomId}`);
+      // console.log(`${socket.id} joined room: ${roomId}`);
     });
 
     socket.on(
@@ -85,8 +85,8 @@ export const initializeSocket = (server: http.Server) => {
         { $set: { read: true, readAt: currentTime } }
       );
 
-      console.log(`Messages marked as read in room: ${roomId}`);
-      console.log(`senderId ${senderId} and recieverId: ${recipientId}`);
+      // console.log(`Messages marked as read in room: ${roomId}`);
+      // console.log(`senderId ${senderId} and recieverId: ${recipientId}`);
 
       const unreadCounts = await Message.aggregate([
         {
@@ -115,7 +115,7 @@ export const initializeSocket = (server: http.Server) => {
       try {
         const message = await Message.findById(messageId);
         if (!message) {
-          console.log("No message found");
+          // console.log("No message found");
           return;
         }
 
@@ -125,7 +125,7 @@ export const initializeSocket = (server: http.Server) => {
 
         io.to(message.roomId.toString()).emit("message_deleted", { messageId });
       } catch (error) {
-        console.error("Failed to delete message");
+        // console.error("Failed to delete message");
       }
     });
 
@@ -149,14 +149,14 @@ export const initializeSocket = (server: http.Server) => {
     });
 
      socket.on("video_call_offer", async({ senderId, recipientId, offer }) => {
-      console.log(`Received video call offer from ${senderId} to ${recipientId}`);
+      // console.log(`Received video call offer from ${senderId} to ${recipientId}`);
       const roomId = await getOrCreateRoom(senderId, recipientId);
        io.to(roomId.toString()).emit("video_call_offer", {
          senderId,
          recipientId,
          offer,
        });
-        console.log(`emitted video call to reciver ${recipientId}`);
+        // console.log(`emitted video call to reciver ${recipientId}`);
      });
 
      socket.on("video_call_answer", async({ senderId, recipientId, answer }) => {
@@ -186,11 +186,11 @@ export const initializeSocket = (server: http.Server) => {
       const roomId = await getOrCreateRoom(senderId, recipientId);
       io.to(roomId.toString()).emit("call_rejected", { senderId, recipientId });
 
-       console.log(`Call from ${senderId} to ${recipientId} was rejected.`);
+      //  console.log(`Call from ${senderId} to ${recipientId} was rejected.`);
      });
 
     socket.on("disconnect", () => {
-      console.log(`User disconnected: ${socket.id}`);
+      // console.log(`User disconnected: ${socket.id}`);
     });
   });
 

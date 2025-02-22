@@ -38,15 +38,14 @@ const ReportLectureModal: React.FC<ReportLectureModalProps> = ({
     };
 
     try {
-      console.log("Submitting report data:", reportData);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const data = await postReport(reportData);
-      console.log('data report is ', data);
       
       setSuccessMessage("Report submitted successfully!");
       setReportDescription("");
       onClose();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      console.error("Report submission error:", error);
       setErrorMessage("Failed to submit the report.");
     }
   };

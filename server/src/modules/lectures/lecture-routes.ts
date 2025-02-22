@@ -15,7 +15,7 @@ const lectureController = new LectureController(lectureService)
 
 lectureRouter.post("/lectures", authenticateJWT,uploadVideo.array('videoFiles'), lectureController.createLecture.bind(lectureController));
 lectureRouter.put("/lecture/:lectureId",uploadVideo.array('videoFiles'), lectureController.editLecture.bind(lectureController));
-lectureRouter.get("/courses/:courseId/lectures",authenticateJWT,lectureController.getLecturesByCourse.bind(lectureController));
+lectureRouter.get("/courses/:courseId/lectures",lectureController.getLecturesByCourse.bind(lectureController));
 lectureRouter.get("/lectures/:lectureId",authenticateJWT, lectureController.getLectureById.bind(lectureController));
 
 

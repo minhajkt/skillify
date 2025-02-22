@@ -10,6 +10,7 @@ export interface IProgress extends Document {
     completed: boolean,
     completionDate: Date,
     certificateUrl?: string
+    certificateId?: string
 }
 
 const progressSchema: Schema = new Schema({
@@ -21,7 +22,8 @@ const progressSchema: Schema = new Schema({
   progressPercentage: { type: Number, default: 0 },
   completed: { type: Boolean, default: false },
   completionDate: { type: Date, default:null },
-  certificateUrl: {type: String, default: null}
+  certificateUrl: {type: String, default: null},
+  certificateId: { type: String, default: null }
 }, 
 {timestamps: true}
 );

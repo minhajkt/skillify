@@ -4,10 +4,12 @@ import Message from '../messages/messageModel'
 import MessageRoom from '../messages/messageRoomModel'
 import { upload, uploadVideo } from "../../config/cloudinaryConfig";
 import { authenticateJWT } from "../../middlewares/authenticateJWT";
+import { HttpStatus } from "../../constants/httpStatus";
+import { MESSAGES } from "../../constants/messages";
 // import { cloudinary } from "../../config/cloudinaryConfig";
 const messageRouter = Router()
 
-messageRouter.get("/messages/:senderId/:recipientId",authenticateJWT, async (req, res) => {
+messageRouter.get("/messages/:senderId/:recipientId",authenticateJWT, async (req, res):Promise<void> => {
   const { senderId, recipientId } = req.params;
 
   const room = await MessageRoom.findOne({
@@ -15,7 +17,8 @@ messageRouter.get("/messages/:senderId/:recipientId",authenticateJWT, async (req
   });
 
   if (!room) {
-    return res.json([]);
+     res.json([]);
+     return;
   }
 
   const messages = await Message.find({ roomId: room._id })
@@ -24,22 +27,31 @@ messageRouter.get("/messages/:senderId/:recipientId",authenticateJWT, async (req
   res.json(messages);
 });
 
-messageRouter.post("/uploadImage", upload.single("file"), (req, res) => {
+messageRouter.post("/uploadImage", upload.single("file"), async(req, res):Promise<void> => {
   if (!req.file) {
-    return res.status(400).send("No file uploaded.");
+     res.status(HttpStatus.BAD_REQUEST).send("No file uploaded.");
+     return;
   }
-  // console.log("File uploaded:", req.file);
   const imageUrl = req.file.path;
-  return res.status(200).json({ imageUrl });
+  res.status(HttpStatus.OK).json({ imageUrl });
+  return;
 });
 
 
-messageRouter.post("/uploadVideo", uploadVideo.single('file'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: "No file uploaded." });
+messageRouter.post(
+  "/uploadVideo",
+  uploadVideo.single("file"),
+  async(req, res): Promise<void> => {
+    if (!req.file) {
+       res
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ error: MESSAGES.NO_FILE_UPLOADED });
+        return;
+    }
+    const videoUrl = req.file.path;
+     res.status(HttpStatus.OK).json({ videoUrl });
+     return;
+     
   }
-  console.log("Video uploaded:", req.file);
-  const videoUrl = req.file.path;
-  return res.status(200).json({ videoUrl });
-});
+);
 export default messageRouter;

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Box,
@@ -24,7 +25,6 @@ import {
   updateCourseDetails,
 } from "../../api/courseApi";
 import { useSelector } from "react-redux";
-// import { User } from "../../types/types";
 
 import { Formik, Form, Field, FormikHelpers } from "formik";
 import Navbar from "../../components/shared/Navbar";
@@ -47,7 +47,7 @@ const EditCourse = () => {
         try {
           await getComplaints(); 
         } catch (error) {
-          console.error("Error occurred:", error);
+          setErrorMessage("Error occurred");
         }
       };
   
@@ -63,8 +63,6 @@ const EditCourse = () => {
     const getCourseData = async () => {
       if (courseId) {
         const response = await fetchCourseDetails(courseId);
-        // console.log("course det............................", response);
-
         setCourse(response);
       }
     };
@@ -105,11 +103,9 @@ const EditCourse = () => {
       setStatus("loading");
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const response = await updateCourseDetails(courseId, formData);
-      //   navigate(`/courses/${courseId}`);
       navigate(`/tutor/${courseId}/edit-lecture`);
     } catch (error) {
       setErrorMessage((error as Error).message);
-      console.log(error);
     } finally {
       setStatus("");
       setSubmitting(false);
@@ -117,10 +113,10 @@ const EditCourse = () => {
   };
 
   return (
-    <Box sx={{ minWidth: "100vw", bgcolor: "#f1f5f9", py: 6 }}>
+    <Box sx={{ minWidth: "100vw", bgcolor: "#f1f5f9", py: { xs: 3, md: 6 } }}>
       <Navbar />
 
-      <Box sx={{ maxWidth: "900px", mx: "auto", mt: 6, px: { xs: 3, md: 0 } }}>
+      <Box sx={{ maxWidth: "900px", mx: "auto", mt: 6, px: { xs: 1, md: 0 } }}>
         <Card
           sx={{
             bgcolor: "white",
@@ -133,10 +129,11 @@ const EditCourse = () => {
             <Typography
               variant="h4"
               sx={{
-                mb: 2,
+                mb: { xs: 1, md: 2 },
                 fontWeight: "bold",
                 color: "#1e293b",
                 textAlign: "center",
+                fontSize: { xs: 20, md: 32 },
               }}
             >
               Edit Course

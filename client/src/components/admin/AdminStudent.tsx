@@ -54,11 +54,10 @@ const AdminStudent = () => {
         const fetchedStudents = await fetchStudents(); 
         setStudents(fetchedStudents);  
         setFilteredStudents(fetchedStudents); 
-        console.log('fetched', fetchedStudents);
         
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         setError("Failed to fetch students. Please try again.");
-        console.log("error fetching students", error);
         
       } finally {
         setLoading(false);
@@ -146,8 +145,17 @@ const handleStatusToggle = async (studentIndex: number) => {
 
 
   return (
-    <Box sx={{ padding: 2, width: "70vw" }}>
-      <Typography variant="h5" fontWeight="bold" sx={{ mb: 3 }}>
+    <Box sx={{ padding: { xs: 0, md: 2 }, width: { xs: "100%", md: "70vw" } }}>
+      <Typography
+        variant="h5"
+        fontWeight="bold"
+        sx={{
+          mb: { xs: 1, md: 3 },
+          fontSize: { xs: 18, md: 24 },
+          fontWeight: "bold",
+          ml: { xs: 1, md: 0 },
+        }}
+      >
         Students
       </Typography>
       {error && (
@@ -204,12 +212,19 @@ const handleStatusToggle = async (studentIndex: number) => {
                   Status
                 </TableSortLabel>
               </TableCell>
-              <TableCell>Email</TableCell>
+              <TableCell sx={{ display: { xs: "none", md: "table-cell" } }}>
+                Email
+              </TableCell>
               <TableCell>Action</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {filteredStudents
+              .sort(
+                (a, b) =>
+                  new Date(b.createdAt).getTime() -
+                  new Date(a.createdAt).getTime()
+              )
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((student, index) => (
                 <TableRow key={index}>
@@ -221,7 +236,9 @@ const handleStatusToggle = async (studentIndex: number) => {
                       <Typography color="red">Blocked</Typography>
                     )}
                   </TableCell>
-                  <TableCell>{student.email}</TableCell>
+                  <TableCell sx={{ display: { xs: "none", md: "table-cell" } }} >
+                    {student.email}
+                  </TableCell>
                   <TableCell>
                     <IconButton
                       color={student.isActive ? "error" : "success"}
@@ -251,6 +268,18 @@ const handleStatusToggle = async (studentIndex: number) => {
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleChangeRowsPerPage}
         rowsPerPageOptions={[5, 10, 20]}
+        sx={{
+          ".MuiTablePagination-root": {
+            fontSize: { xs: "0.75rem", md: ".8rem" },
+            padding: { xs: "4px", md: "16px" },
+          },
+          ".MuiTablePagination-selectLabel, .MuiTablePagination-input": {
+            fontSize: { xs: "0.75rem", md: ".85rem" },
+          },
+          ".MuiTablePagination-actions": {
+            transform: { xs: "scale(0.8)", md: "scale(1)" },
+          },
+        }}
       />
     </Box>
   );

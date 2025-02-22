@@ -21,7 +21,6 @@ const ForgotPasswordModal = ({
     try {
       setStatus("loading");
       await axiosInstance.post("/users/forgot-password", { email });
-      console.log("Reset link sent to email");
       setSuccessMessage("Reset link sent to your email");
       setStatus("idle");
       setErrorMessage("");
@@ -33,7 +32,6 @@ const ForgotPasswordModal = ({
         (error instanceof AxiosError && error.response?.data?.message) ||
         "An unexpected errror occured";
       setErrorMessage(errorMsg);
-      console.log("error is", errorMsg);
       setStatus("idle");
     }
   };
@@ -48,9 +46,9 @@ const ForgotPasswordModal = ({
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          width: 400,
+          width: { xs: 350, md: 400 },
           boxShadow: 24,
-          p: 4,
+          p: { xs: 2, md: 4 },
           borderRadius: 2,
           "& .MuiModal-backdrop": {
             bgcolor: "white",

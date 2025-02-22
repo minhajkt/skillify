@@ -10,25 +10,20 @@ export const loginUser = async(email:string, password:string) => {
     const response = await axiosInstance.post('/users/login', {email, password})
     const {token} = response.data
     if(token) {
-      console.log("user logged in and role", response.data?.user?.role);
-      // console.log("user logged in and role", response.data?.user?.bio);
       store.dispatch(loginSuccess({
         token,
         user: response.data.user,
         isAuthenticated: true
       }))
-            // console.log('user from auth api', response.data?.user);
             
-            Cookies.set('authToken', token, {expires: 15/1440})
+            Cookies.set('authToken', token, {expires: 1/24})
         }else {
-            console.log('user not logged in ');
+            // console.log('user not logged in ');
         }
         return response.data
       } catch (error) {
-        console.error("Error object:", error);
         if(error instanceof AxiosError) {
             if(error.response) {
-                console.log("Error response data:", error.response.data);
                 const errorMessage = error.response.data.error || error.response.data.message || 'Somethning wrong'
                 throw new Error(errorMessage)
               }else {
@@ -44,8 +39,6 @@ export const signupUser = async(name: string, email: string, password: string, c
       const response = await axiosInstance.post('/users/signup', {name, email, password, confirmPassword})
         return response.data
     } catch (error) {
-      console.log('error is ', error);
-        
       if (error instanceof AxiosError) {
             const errors = error.response?.data.errors
             const errorMessage = error.response?.data.error
@@ -70,7 +63,6 @@ export const loginTutor = async (email: string, password: string) => {
     
     if (token) {
       if(response.data?.user?.role === 'tutor') {
-        // console.log("user logged in", response.data?.user?.role);
         store.dispatch(
           loginSuccess({
             token,
@@ -78,22 +70,19 @@ export const loginTutor = async (email: string, password: string) => {
             isAuthenticated: true
           })
         );
-        // console.log("user from auth api", response.data?.user);
   
-        Cookies.set("authToken", token, { expires: 15/1440 });
+        Cookies.set("authToken", token, { expires: 1/24 });
       }else {
-        console.log('you are not tutor'); 
+        // console.log('you are not tutor'); 
       
       }
     } else {
-      console.log("user not logged in ");
+      // console.log("user not logged in ");
     }
     return response.data;
   } catch (error) {
-    console.error("Error object:", error);
     if (error instanceof AxiosError) {
       if (error.response) {
-        console.log("Error response data:", error.response.data);
         const errorMessage =
           error.response.data.error ||
           error.response.data.message ||
@@ -140,8 +129,6 @@ export const signupTutor = async (
 
     return response.data;
   } catch (error) {
-    console.log("error is ", error);
-
     if (error instanceof AxiosError) {
       const errors = error.response?.data.errors;
       const errorMessage = error.response?.data.error;
@@ -164,7 +151,6 @@ export const loginAdmin = async (email: string, password: string) => {
 
     if (token) {
       if (response.data?.user?.role === "admin") {
-        // console.log("user logged in", response.data?.user?.role);
         store.dispatch(
           loginSuccess({
             token,
@@ -172,21 +158,18 @@ export const loginAdmin = async (email: string, password: string) => {
             isAuthenticated: true
           })
         );
-        // console.log("user from auth api", response.data?.user);
 
-        Cookies.set("authToken", token, { expires: 15/1440 });
+        Cookies.set("authToken", token, { expires: 1/24 });
       } else {
-        console.log("you are not tutor");
+        // console.log("you are not tutor");
       }
     } else {
-      console.log("user not logged in ");
+      // console.log("user not logged in ");
     }
     return response.data;
   } catch (error) {
-    console.error("Error object:", error);
     if (error instanceof AxiosError) {
       if (error.response) {
-        console.log("Error response data:", error.response.data);
         const errorMessage =
           error.response.data.error ||
           error.response.data.message ||
@@ -212,9 +195,8 @@ export const googleSignIn = async (idToken: string) => {
   }
 
   const data = await response.json();
-  // console.log('google sign in data', data);
   const {token, user} = data;
-  Cookies.set('authToken', token, {expires: 15/1440 })
+  Cookies.set('authToken', token, {expires: 1/24 })
   store.dispatch(loginSuccess({token,user, isAuthenticated:true}))
 
   

@@ -1,25 +1,29 @@
 import { handleAxiosError } from "../utils/errorHandler";
-import { axiosInstance } from "./axiosInstance"
+import { axiosInstance } from "./axiosInstance";
 
-export const createCourse = async(formData :FormData) => {
-    try {
-        const response = await axiosInstance.post("/course/create-course", formData, {
-      headers: { "Content-Type": "multipart/form-data" }
-    });
-        return response.data;
-    } catch (error) {
-        throw handleAxiosError(error)
-    }
-}
+export const createCourse = async (formData: FormData) => {
+  try {
+    const response = await axiosInstance.post(
+      "/course/create-course",
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw handleAxiosError(error);
+  }
+};
 
-export const fetchCourseDetails = async(courseId: string) => {
-    try {
-        const response = await axiosInstance.get(`/courses/${courseId}`)
-        return response.data
-    } catch (error) {
-        throw handleAxiosError(error)
-    }
-}
+export const fetchCourseDetails = async (courseId: string) => {
+  try {
+    const response = await axiosInstance.get(`/courses/${courseId}`);
+    return response.data;
+  } catch (error) {
+    throw handleAxiosError(error);
+  }
+};
 
 export const updateCourseDetails = async (
   courseId: string,
@@ -27,20 +31,29 @@ export const updateCourseDetails = async (
 ) => {
   try {
     const response = await axiosInstance.put(`/course/${courseId}`, formData);
-    return response.data; 
+    return response.data;
   } catch (error) {
-    throw handleAxiosError(error); 
+    throw handleAxiosError(error);
   }
 };
 
-export const fetchCategories = async() => {
-    try {
-        const response = await axiosInstance.get('/course/categories')
-        return response.data
-    } catch (error) {
-        throw handleAxiosError(error)
-    }
-}
+export const getOurCourses = async () => {
+  try {
+    const response = await axiosInstance.get("/course/our-courses");
+    return response.data;
+  } catch (error) {
+    throw handleAxiosError(error);
+  }
+};
+
+export const fetchCategories = async () => {
+  try {
+    const response = await axiosInstance.get("/course/categories");
+    return response.data;
+  } catch (error) {
+    throw handleAxiosError(error);
+  }
+};
 
 interface ReportData {
   courseId: string;
@@ -51,7 +64,6 @@ interface ReportData {
 export const postReport = async (reportData: ReportData) => {
   try {
     const response = await axiosInstance.post("/reports/submit", reportData);
-    console.log("resssss", response.data);
 
     return response.data;
   } catch (error) {
@@ -62,28 +74,19 @@ export const postReport = async (reportData: ReportData) => {
 export const getComplaints = async () => {
   try {
     const response = await axiosInstance.get("/reports");
-    console.log('reports fetched data ', response.data);
-    
-    return response.data; 
+
+    return response.data;
   } catch (error) {
-    console.error("Error fetching reports:", error);
     handleAxiosError(error);
   }
 };
 
-export const getCourseCount = async() => {
+export const getCourseCount = async () => {
   try {
-    
     const response = await axiosInstance.get("/total");
-    
-    // console.log('course counnnnntttttttttttttt', response.data);
-    
+
     return response.data;
-  } catch (error) { 
-    console.log("Error fetching course count", error);
-    handleAxiosError(error)
+  } catch (error) {
+    handleAxiosError(error);
   }
-}
-
-
-
+};

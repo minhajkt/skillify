@@ -11,12 +11,10 @@ export interface IAdminRepository {
   updateCourseApproval(id: string, status: string): Promise<ICourse | null>;
   getUserByEmail(email: String): Promise<IUser | null>;
   getAllUsers(): Promise<IUser[]>;
-
+  updateCourseEditApproval(id: string,editStatus: string): Promise<ICourse | null>;
 
   getAllCourse(): Promise<ICourse[]>;
-  // getAllCourseForFrontend(): Promise<ICourse[]>;
   getCourseRequests(): Promise<ICourse[]>;
 
   updatePassword(userId: string, newPassword: string): Promise<IUser | null>;
-  
 }

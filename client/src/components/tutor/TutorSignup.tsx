@@ -1,24 +1,17 @@
-
 import { Box, Button, Grid, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import { signupTutor } from "../../api/authApi";
 import { Link } from "react-router-dom";
 import SignupOTPModal from "../shared/SignupOTPModal";
 import { Formik, Form, Field, FormikHelpers } from "formik";
-// import * as Yup from "yup";
 import { ITutorSignupValues } from "../../types/types";
 import { TutorSignupSchema } from "../../schemas/schemas";
-
-
-
 
 const TutorSignup = () => {
   const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
   const [emailForOtp, setEmailForOtp] = useState("");
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [otpSent, setOtpSent] = useState(false);
-
-
 
   const handleSignup = async (
     values: ITutorSignupValues,
@@ -45,13 +38,12 @@ const TutorSignup = () => {
       }
     } catch (error) {
       if (error instanceof Error) {
-        setGeneralError( error.message );
+        setGeneralError(error.message);
       }
     } finally {
       setSubmitting(false);
     }
   };
-
 
   return (
     <Box>
@@ -109,7 +101,7 @@ const TutorSignup = () => {
             justifyContent: "center",
             alignItems: "center",
             padding: 4,
-            marginLeft: { xs: 7, sm: 0 },
+            // marginLeft: { xs: 7, sm: 0 },
           }}
         >
           <Typography
@@ -118,7 +110,7 @@ const TutorSignup = () => {
               textAlign: "start",
               display: "block",
               fontSize: { xs: "1.6rem", sm: "2rem" },
-              marginTop: { xs: 5, sm: 0, md: 7 },
+              pt: 4,
             }}
             gutterBottom
           >
@@ -281,4 +273,3 @@ const TutorSignup = () => {
 };
 
 export default TutorSignup;
-

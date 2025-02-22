@@ -28,10 +28,8 @@ const CheckoutButton: React.FC<CheckoutButtonProps> = ({disabled}) => {
         throw new Error("Course ID is missing");
       }
 
-      console.log("courseId", courseId);
 
       const response = await axiosInstance.post(`/course/checkout/${courseId}`);
-      console.log("response of payment is ", response);
 
       const { id: sessionId } = response.data;
 
@@ -40,10 +38,9 @@ const CheckoutButton: React.FC<CheckoutButtonProps> = ({disabled}) => {
       });
 
       if (error) {
-        console.log("Error redirecting to checkout page", error);
+        setError("Error redirecting to checkout page");
       }
     } catch (error) {
-      console.error("checkout failed", error);
       setError((error as Error).message);
       throw handleAxiosError(error);
     } finally {

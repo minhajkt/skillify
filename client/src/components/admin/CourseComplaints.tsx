@@ -104,7 +104,7 @@ const CourseComplaints = () => {
                             textOverflow: "ellipsis",
                           }}
                         >
-                          {report.lectureId?.title || "N/A"}
+                          {report.courseId?.title || "N/A"}
                         </Typography>
                       </Tooltip>
                     </TableCell>
@@ -139,7 +139,7 @@ const CourseComplaints = () => {
                             textOverflow: "ellipsis",
                           }}
                         >
-                          {report.lectureId?.title || "N/A"}
+                          {report.reportDescription || "N/A"}
                         </Typography>
                       </Tooltip>
                     </TableCell>

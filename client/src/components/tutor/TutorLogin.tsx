@@ -1,30 +1,31 @@
-import { Box, Button, Grid, Snackbar, TextField, Typography } from "@mui/material"
+import {
+  Box,
+  Button,
+  Grid,
+  Snackbar,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { loginTutor } from "../../api/authApi";
 import ForgotPasswordModal from "../shared/ForgotPasswordModal";
-// import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
 import { LoginSchema } from "../../schemas/schemas";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 
-
-
 const TutorLogin = () => {
-
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [openSnackbar, setOpenSnackbar] = useState(false);
-    const handleOpenModal = () => setIsModalOpen(true);
-    const handleCloseModal = () => setIsModalOpen(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated
   );
 
-  
-
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   useEffect(() => {
     if (localStorage.getItem("logoutSuccess") === "true") {
       setOpenSnackbar(true);
@@ -36,23 +37,22 @@ const TutorLogin = () => {
     return <Navigate to={"/tutors/home"} />;
   }
 
-    const handleLogin = async (values: { email: string; password: string }) => {
-      try {
-        const {email, password} = values
-        const userData = await loginTutor(email, password);
-        if (userData) {
-          navigate("/tutors/home");
-        }
-        // console.log("userData is ", userData);
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          console.error("Error in logging in", error);
-          setErrorMessage(error.message);
-        } else {
-          setErrorMessage("An unexpected error occured");
-        }
+  const handleLogin = async (values: { email: string; password: string }) => {
+    try {
+      const { email, password } = values;
+      const userData = await loginTutor(email, password);
+      if (userData) {
+        navigate("/tutors/home");
       }
-    };
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage("An unexpected error occured");
+      }
+    }
+  };
+
   return (
     <Grid container sx={{ height: "100vh", width: "100%" }}>
       <Snackbar
@@ -114,17 +114,18 @@ const TutorLogin = () => {
           justifyContent: "center",
           alignItems: "center",
           padding: 4,
-          marginLeft: { xs: 7, sm: 0 },
+          mt:{xs:-10, md:0}
+          // marginLeft: { xs: 7, sm: 0 },
         }}
       >
         <Typography
           variant="h3"
-          sx={{
-            textAlign: "start",
-            display: "block",
-            fontSize: { xs: "1.6rem", sm: "2rem" },
-          }}
-          gutterBottom
+          // sx={{
+          //   textAlign: "start",
+          //   display: "block",
+          //   fontSize: { xs: "1.6rem", sm: "2rem" },
+          // }}
+          // gutterBottom
         >
           Skillify Login
         </Typography>
@@ -232,7 +233,6 @@ const TutorLogin = () => {
       </Grid>
     </Grid>
   );
-}
+};
 
-export default TutorLogin
-
+export default TutorLogin;

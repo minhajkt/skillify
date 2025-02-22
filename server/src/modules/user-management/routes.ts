@@ -134,15 +134,14 @@ router.post(
 );
 router.post("/admin/logout", userController.logoutUser.bind(userController));
 
-router.get("/validate-session", authenticateJWT, (req, res) => {
-  if (req.user && req.user.isActive) {
-    console.log("blocked//////////////////////////////////////////////////");
+// router.get("/validate-session", authenticateJWT, (req, res) => {
+//   if (req.user && req.user.isActive) {
 
-    res.status(200).json({ message: "Session is valid" });
-  } else {
-    res.status(403).json({ message: "Your account is blocked" });
-  }
-});
+//     res.status(200).json({ message: "Session is valid" });
+//   } else {
+//     res.status(403).json({ message: "Your account is blocked" });
+//   }
+// });
 
 router.get("/courses/:id", userController.getCourseById.bind(userController));
 

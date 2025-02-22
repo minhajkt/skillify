@@ -4,7 +4,6 @@ import { axiosInstance } from "./axiosInstance"
 export const fetchUserEnrolledCourses = async() => {
     try {
         const response = await axiosInstance.get('/enrollment/my-courses', {
-            // withCredentials: true
         })
         return response.data
     } catch (error) {
@@ -17,7 +16,6 @@ export const fetchUserEnrolledCourses = async() => {
       const response = await axiosInstance.get("/enrollment/my-students", {
         withCredentials: true
       });
-      // console.log('stttttttttttttttttttttt', response.data);
       
       return response.data;
     } catch (error) {
@@ -37,7 +35,6 @@ export  const enrolledStudents = async () => {
 export const getTotalRevenue = async() => {
     try {
         const response = await axiosInstance.get('/enrollment/total-revenue')
-        console.log('ressssss', response.data);
         return response.data
     } catch (error) {
         throw handleAxiosError(error)
@@ -47,7 +44,6 @@ export const getTotalRevenue = async() => {
 export const getCourseStrength = async () => {
     try {
         const response = await axiosInstance.get('/enrollment/strength')
-        console.log('strength', response.data);
         return response.data
     } catch (error) {
         throw handleAxiosError(error)

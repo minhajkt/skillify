@@ -53,11 +53,10 @@ const AdminTutor = () => {
           const fetchedTutors = await fetchTutors(); 
           setTutors(fetchedTutors);  
           setFilteredTutors(fetchedTutors); 
-          // console.log("fetched", fetchedTutors);
           
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
           setError("Failed to fetch tutors. Please try again.");
-          console.log("error fetching tutors", error);
           
         } finally {
           setLoading(false);
@@ -136,15 +135,24 @@ const AdminTutor = () => {
     }    
   };
   return (
-    <Box sx={{ padding: 2, width: "70vw" }}>
-      <Typography variant="h5" fontWeight="bold" sx={{ mb: 3 }}>
+    <Box sx={{ padding: { xs: 0, md: 2 }, width: { xs: "100%", md: "70vw" } }}>
+      <Typography
+        variant="h5"
+        fontWeight="bold"
+        sx={{
+          mb: { xs: 1, md: 3 },
+          fontSize: { xs: 18, md: 24 },
+          fontWeight: "bold",
+          ml: { xs: 1, md: 0 },
+        }}
+      >
         Tutors
       </Typography>
 
       <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
         <TextField
           fullWidth
-          placeholder="Search by tutor name or email..."
+          placeholder="Search"
           variant="outlined"
           value={searchQuery}
           onChange={handleSearch}
@@ -164,7 +172,10 @@ const AdminTutor = () => {
         </FormControl>
       </Box>
 
-      <TableContainer component={Paper} sx={{ bgcolor: "#FAFAFA" }}>
+      <TableContainer
+        component={Paper}
+        sx={{ bgcolor: "#FAFAFA", ml: { xs: 0, md: 0 } }}
+      >
         <Table>
           <TableHead>
             <TableRow>
@@ -190,12 +201,19 @@ const AdminTutor = () => {
                   Status
                 </TableSortLabel>
               </TableCell>
-              <TableCell>Email</TableCell>
+              <TableCell sx={{ display: { xs: "none", md: "table-cell" } }}>
+                Email
+              </TableCell>
               <TableCell>Action</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {filteredTutors
+              .sort(
+                (a, b) =>
+                  new Date(b.createdAt).getTime() -
+                  new Date(a.createdAt).getTime()
+              )
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((tutor, index) => (
                 <TableRow key={index}>
@@ -207,7 +225,9 @@ const AdminTutor = () => {
                       <Typography color="red">Blocked</Typography>
                     )}
                   </TableCell>
-                  <TableCell>{tutor.email}</TableCell>
+                  <TableCell sx={{ display: { xs: "none", md: "table-cell" } }}>
+                    {tutor.email}
+                  </TableCell>
                   <TableCell>
                     <IconButton
                       color={tutor.isActive ? "error" : "success"}
@@ -236,6 +256,18 @@ const AdminTutor = () => {
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleChangeRowsPerPage}
         rowsPerPageOptions={[5, 10, 20]}
+        sx={{
+          ".MuiTablePagination-root": {
+            fontSize: { xs: "0.75rem", md: ".8rem" },
+            padding: { xs: "4px", md: "16px" },
+          },
+          ".MuiTablePagination-selectLabel, .MuiTablePagination-input": {
+            fontSize: { xs: "0.75rem", md: ".85rem" },
+          },
+          ".MuiTablePagination-actions": {
+            transform: { xs: "scale(0.8)", md: "scale(1)" },
+          },
+        }}
       />
     </Box>
   );

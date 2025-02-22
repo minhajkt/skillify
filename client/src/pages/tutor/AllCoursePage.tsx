@@ -11,6 +11,8 @@ import {
   TableRow,
   Button,
   CircularProgress,
+  TablePagination,
+  useMediaQuery,
 
 } from "@mui/material";
 import { fetchTutorCourses } from "../../api/tutorApi";
@@ -22,7 +24,10 @@ const AllCoursePage = () => {
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   
+  const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
 
   const navigate = useNavigate()
 
@@ -30,7 +35,6 @@ const AllCoursePage = () => {
     const fetchCourses = async () => {
       try {
         const response = await fetchTutorCourses()
-        console.log('response iss ', response);
         
     if (Array.isArray(response) || response.length > 0) {
       setCourses(Object.values(response));
@@ -52,6 +56,17 @@ const AllCoursePage = () => {
     navigate(`/tutors/courses/${courseId}`)
   }
 
+    const handleChangePage = (_event: unknown, newPage: number) => {
+      setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (
+      event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+      setRowsPerPage(parseInt(event.target.value, 10));
+      setPage(0);
+    };
+
   return (
     <Box
       sx={{
@@ -61,7 +76,7 @@ const AllCoursePage = () => {
         display: "flex",
         justifyContent: "center",
         alignItems: "flex-start",
-        py: 4,
+        py: { xs: 0, md: 4 },
       }}
     >
       <Box
@@ -81,11 +96,12 @@ const AllCoursePage = () => {
           variant="h4"
           gutterBottom
           sx={{
-            fontWeight: 600,
+            fontWeight: { xs: 500, md: 600 },
+            fontSize: { xs: 20, md: 30 },
             color: "#1a237e",
-            mb: 4,
+            mb: { xs: 2, md: 4 },
             borderBottom: "3px solid #1a237e",
-            pb: 1,
+            pb: { xs: 0, md: 1 },
             display: "inline-block",
           }}
         >
@@ -146,7 +162,7 @@ const AllCoursePage = () => {
                 py: 1.5,
               }}
             >
-              Browse Courses
+              Create Course
             </Button>
           </Box>
         ) : (
@@ -164,6 +180,7 @@ const AllCoursePage = () => {
                   <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>
                     Name
                   </TableCell>
+                  {!isSmallScreen && (
                   <TableCell
                     sx={{
                       fontWeight: 600,
@@ -173,6 +190,7 @@ const AllCoursePage = () => {
                   >
                     Category
                   </TableCell>
+                  )}
                   <TableCell
                     sx={{
                       fontWeight: 600,
@@ -182,6 +200,7 @@ const AllCoursePage = () => {
                   >
                     Status
                   </TableCell>
+                  {!isSmallScreen && (
                   <TableCell
                     sx={{
                       fontWeight: 600,
@@ -191,74 +210,112 @@ const AllCoursePage = () => {
                   >
                     Actions
                   </TableCell>
+                  )}
                 </TableRow>
               </TableHead>
               <TableBody>
-                {courses.map((course) => (
-                  <TableRow
-                    key={course._id}
-                    sx={{
-                      "&:hover": {
-                        bgcolor: "#f8f9fa",
-                        transition: "background-color 0.2s",
-                      },
-                    }}
-                  >
-                    <TableCell sx={{ fontWeight: 500 }}>
-                      {course.title}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      <Typography
-                        sx={{
-                          display: "inline-block",
-                          color: "#1976d2",
-                          px: 2,
-                          py: 0.5,
-                          borderRadius: 1,
-                          fontSize: "0.875rem",
+                {courses
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((course) => (
+                    <TableRow
+                      key={course._id}
+                      sx={{
+                        "&:hover": {
+                          bgcolor: "#f8f9fa",
+                          transition: "background-color 0.2s",
+                        },
+                      }}
+                    >
+                      <TableCell
+                        sx={{ fontWeight: 500 }}
+                        onClick={() => {
+                          if (isSmallScreen) {
+                            handleViewCourse(course._id)
+                          }
                         }}
                       >
-                        {course.category}
-                      </Typography>
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      <Typography
-                        sx={{
-                          display: "inline-block",
-                          color:
-                            course.isApproved === "approved"
-                              ? "#2e7d32"
-                              : "#ed6c02",
-                          px: 2,
-                          py: 0.5,
-                          borderRadius: 1,
-                          fontSize: "0.875rem",
-                        }}
-                      >
-                        {course.isApproved}
-                      </Typography>
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() => handleViewCourse(course._id)}
-                        sx={{
-                          textTransform: "none",
-                          boxShadow: "none",
-                          "&:hover": {
-                            boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-                          },
-                        }}
-                      >
-                        View Course
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                        {course.draftVersion?.title || course.title}
+                      </TableCell>
+                      {!isSmallScreen && (
+                      <TableCell sx={{ textAlign: "center" }}>
+                        <Typography
+                          sx={{
+                            display: "inline-block",
+                            color: "#1976d2",
+                            px: 2,
+                            py: 0.5,
+                            borderRadius: 1,
+                            fontSize: "0.875rem",
+                          }}
+                        >
+                          {course.draftVersion?.category || course.category}
+                        </Typography>
+                      </TableCell>
+                      )}
+                      <TableCell sx={{ textAlign: "center" }}>
+                        <Typography
+                          sx={{
+                            display: "inline-block",
+                            color:
+                              course.isApproved === "approved"
+                                ? "#2e7d32"
+                                : "#ed6c02",
+                            px: 2,
+                            py: 0.5,
+                            borderRadius: 1,
+                            fontSize: "0.875rem",
+                          }}
+                        >
+                          {course.isApproved}
+                        </Typography>
+                      </TableCell>
+                      {!isSmallScreen && (
+                      <TableCell sx={{ textAlign: "center" }}>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => handleViewCourse(course._id)}
+                          sx={{
+                            textTransform: "none",
+                            boxShadow: "none",
+                            "&:hover": {
+                              boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                            },
+                          }}
+                        >
+                          View Course
+                        </Button>
+                      </TableCell>
+                      )}
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           </TableContainer>
+        )}
+        {courses.length > 0 && (
+
+          <TablePagination
+            component="div"
+            count={courses.length}
+            page={page}
+            onPageChange={handleChangePage}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            rowsPerPageOptions={[5, 10, 20]}
+            sx={{
+                  ".MuiTablePagination-root": {
+                    fontSize: { xs: "0.75rem", md: ".8rem" }, 
+                    padding: { xs: "4px", md: "16px" }, 
+                  },
+                  ".MuiTablePagination-selectLabel, .MuiTablePagination-input": {
+                    fontSize: { xs: "0.75rem", md: ".85rem" }, 
+                  },
+                  ".MuiTablePagination-actions": {
+                    transform: { xs: "scale(0.8)", md: "scale(1)" }, 
+                  },
+                }}
+          />
         )}
       </Box>
     </Box>

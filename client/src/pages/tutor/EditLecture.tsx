@@ -11,12 +11,13 @@ import {
   Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { addLecture } from "../../api/lectureApi";
+import { addLecture, getLecturesByCourseId, updateLecture } from "../../api/lectureApi";
 import { useNavigate, useParams } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
 import { Formik, Form, Field, FormikHelpers, FieldArray } from "formik";
-import { formSchema } from "../../schemas/schemas";
-import { FormValues } from "../../types/types";
+import { editFormSchema, formSchema } from "../../schemas/schemas";
+import { FormValues, ILectures } from "../../types/types";
+import Navbar from "../../components/shared/Navbar";
 
 
 
@@ -26,16 +27,39 @@ const EditLecture = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [currentLectureError, setCurrentLectureError] = useState("");
+  const [lectures, setLectures] = useState<ILectures[]>([])
 
   const { courseId } = useParams();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchLectures = async () => {
+      if(!courseId) {
+        return setErrorMessage('No course ID')
+      }
+      try {
+        const response = await getLecturesByCourseId(courseId);
+        const lectures = response.lectures;
+
+        if (!Array.isArray(lectures)) {
+          throw new Error("Lectures data is not an array");
+        }
+
+        setLectures(lectures);
+      } catch (error) {
+        setErrorMessage("Failed to load course ssslectures");
+      }
+    };
+    if (courseId) fetchLectures();
+  
+  }, [courseId])
   const validateCurrentLecture = (lecture: any) => {
     if (
       !lecture.title ||
       !lecture.description ||
       !lecture.duration ||
       !lecture.order ||
-      !lecture.videoFile
+      (!lecture.videoFile && !lecture.videoUrl)
     ) {
       return "Please fill all the fields before adding a new lecture.";
     }
@@ -54,34 +78,41 @@ const EditLecture = () => {
       values.lectures[values.lectures.length - 1]
     );
     if (currentLectureError) {
+      
       setCurrentLectureError(currentLectureError);
       return;
     }
     try {
       setStatus("loading");
 
-      const formData = new FormData();
+      for (const lecture of values.lectures) {
+        if (!lecture.id) {
+          setErrorMessage("Lecture ID is missing.");
+          return;
+        }
+        const currentLectureError = validateCurrentLecture(lecture);
+        if (currentLectureError) {
 
-      const lecturesData = values.lectures.map((lecture: any) => ({
-        title: lecture.title,
-        description: lecture.description,
-        duration: Number(lecture.duration),
-        order: Number(lecture.order),
-        courseId: courseId,
-      }));
+          setCurrentLectureError(currentLectureError);
+          setIsSubmitting(false);
+          return;
+        }
 
-      formData.append("lectures", JSON.stringify(lecturesData));
+        const formData = new FormData();
+        formData.append("title", lecture.title);
+        formData.append("description", lecture.description);
+        formData.append("duration", lecture.duration);
+        formData.append("order", lecture.order);
 
-      values.lectures.forEach((lecture: any) => {
-        formData.append("videoFiles", lecture.videoFile);
-      });
+        if (lecture.videoFile instanceof File) {
+          formData.append("videoFiles", lecture.videoFile);
+        }
 
-      const response = await addLecture(formData);
-      // console.log("Lectures added successfully:", response);
+        await updateLecture(lecture.id, formData);
+      }
       setOpenSnackbar(true);
     } catch (error) {
       setErrorMessage((error as Error).message);
-      console.error(error);
     } finally {
       setStatus("idle");
       setIsSubmitting(false);
@@ -91,21 +122,20 @@ const EditLecture = () => {
   return (
     <Box
       sx={{
-        // minHeight: "100vh",
         minWidth: "100vw",
         bgcolor: "#f8fafc",
-        p: { xs: 4, sm: 6 },
-        // mx: 45,
+        py: { xs: 1, sm: 4 },
       }}
     >
+      <Navbar />
       <Snackbar
         open={openSnackbar}
         message="Your Course Request is under Review. We will get back to you within 24 hours"
-        autoHideDuration={600000}
+        autoHideDuration={60000}
         onClose={() => setOpenSnackbar(false)}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
         sx={{
-          width: "500px",
+          width: {xs:"95%",md:"500px"},
           position: "absolute",
           top: "10%",
           zIndex: 9999,
@@ -131,20 +161,21 @@ const EditLecture = () => {
         }
       />
 
-      <Box>
+      <Box sx={{ mt: "64px" }}>
         <Formik<FormValues>
           initialValues={{
-            lectures: [
-              {
-                title: "",
-                description: "",
-                duration: "",
-                order: "",
-                videoFile: null,
-              },
-            ],
+            lectures: lectures.map((lecture) => ({
+              id: lecture._id || "",
+              title: lecture.title,
+              description: lecture.description,
+              duration: lecture.duration,
+              order: lecture.order,
+              videoUrl: lecture.videoUrl ?? "",
+              videoFile: null,
+            })),
           }}
-          validationSchema={formSchema}
+          enableReinitialize
+          validationSchema={editFormSchema}
           onSubmit={handleEditLectures}
         >
           {({
@@ -165,7 +196,7 @@ const EditLecture = () => {
                   backgroundColor: "#ffffff",
                   borderRadius: 2,
                   boxShadow: 3,
-                  padding: 4,
+                  padding: { xs: 0, md: 4 },
                 }}
                 // onSubmit={handleAddLectures}
               >
@@ -173,8 +204,8 @@ const EditLecture = () => {
                   variant="h3"
                   sx={{
                     fontWeight: "bold",
-                    fontSize: { xs: "1.8rem", sm: "2rem" },
-                    mb: 2,
+                    fontSize: { xs: 20, md: 32 },
+                    mb: { xs: 1, md: 2 },
                     color: "#1e293b",
                     textAlign: "center",
                   }}
@@ -184,7 +215,12 @@ const EditLecture = () => {
 
                 <Typography
                   variant="body1"
-                  sx={{ color: "#6b7280", mb: 3, textAlign: "center" }}
+                  sx={{
+                    color: "#6b7280",
+                    mb: { xs: 1, md: 2 },
+                    fontSize: { xs: 12, md: 16 },
+                    textAlign: "center",
+                  }}
                 >
                   Please fill all the fields to add a lecture to your course.
                 </Typography>
@@ -223,13 +259,14 @@ const EditLecture = () => {
                                 {...field}
                                 error={
                                   touched.lectures?.[index]?.title &&
-                                  typeof errors.lectures?.[index] === "object" &&
-
+                                  typeof errors.lectures?.[index] ===
+                                    "object" &&
                                   Boolean(errors.lectures?.[index]?.title)
                                 }
                                 helperText={
                                   touched.lectures?.[index]?.title &&
-                                  typeof errors.lectures?.[index] === "object" &&
+                                  typeof errors.lectures?.[index] ===
+                                    "object" &&
                                   errors.lectures?.[index]?.title
                                     ? errors.lectures?.[index]?.title
                                     : " "
@@ -251,12 +288,14 @@ const EditLecture = () => {
                                 {...field}
                                 error={
                                   touched.lectures?.[index]?.description &&
-                                  typeof errors.lectures?.[index] === "object" &&
+                                  typeof errors.lectures?.[index] ===
+                                    "object" &&
                                   Boolean(errors.lectures?.[index]?.description)
                                 }
                                 helperText={
                                   touched.lectures?.[index]?.description &&
-                                  typeof errors.lectures?.[index] === "object" &&
+                                  typeof errors.lectures?.[index] ===
+                                    "object" &&
                                   errors.lectures?.[index]?.description
                                     ? errors.lectures?.[index]?.description
                                     : " "
@@ -278,12 +317,14 @@ const EditLecture = () => {
                                 {...field}
                                 error={
                                   touched.lectures?.[index]?.duration &&
-                                  typeof errors.lectures?.[index] === "object" &&
+                                  typeof errors.lectures?.[index] ===
+                                    "object" &&
                                   Boolean(errors.lectures?.[index]?.duration)
                                 }
                                 helperText={
                                   touched.lectures?.[index]?.duration &&
-                                  typeof errors.lectures?.[index] === "object" &&
+                                  typeof errors.lectures?.[index] ===
+                                    "object" &&
                                   errors.lectures?.[index]?.duration
                                     ? errors.lectures?.[index]?.duration
                                     : " "
@@ -301,16 +342,20 @@ const EditLecture = () => {
                                 sx={{
                                   marginTop: 0,
                                   marginBottom: 0,
+                                  display: "none",
                                 }}
                                 {...field}
+                                disabled
                                 error={
                                   touched.lectures?.[index]?.order &&
-                                  typeof errors.lectures?.[index] === "object" &&
+                                  typeof errors.lectures?.[index] ===
+                                    "object" &&
                                   Boolean(errors.lectures?.[index]?.order)
                                 }
                                 helperText={
                                   touched.lectures?.[index]?.order &&
-                                  typeof errors.lectures?.[index] === "object" &&
+                                  typeof errors.lectures?.[index] ===
+                                    "object" &&
                                   errors.lectures?.[index]?.order
                                     ? errors.lectures?.[index]?.order
                                     : " "
@@ -318,19 +363,36 @@ const EditLecture = () => {
                               />
                             )}
                           />
+                          {values.lectures[index].videoUrl && (
+                            <Box mt={2}>
+                              <Typography variant="subtitle1">
+                                Current Video:
+                              </Typography>
+                              <video
+                                src={values.lectures[index].videoUrl}
+                                controls
+                                width="40%"
+                                style={{
+                                  borderRadius: "8px",
+                                  marginBottom: "10px",
+                                }}
+                              />
+                            </Box>
+                          )}
                           <input
                             type="file"
                             accept="video/*"
-                            onChange={(e) =>
+                            onChange={(e) => {
                               setFieldValue(
                                 `lectures[${index}].videoFile`,
                                 e.target.files?.[0]
-                              )
-                            }
+                              );
+                              setFieldValue(`lectures[${index}].videoUrl`, "");
+                            }}
                             style={{ marginTop: "8px", width: "100%" }}
                           />
                           {touched.lectures?.[index]?.videoFile &&
-                                  typeof errors.lectures?.[index] === "object" &&
+                            typeof errors.lectures?.[index] === "object" &&
                             errors.lectures?.[index]?.videoFile && (
                               <Typography variant="caption" color="error">
                                 {errors.lectures[index].videoFile
@@ -338,42 +400,9 @@ const EditLecture = () => {
                                   : " "}
                               </Typography>
                             )}
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={() => remove(index)}
-                            sx={{
-                              marginTop: 0,
-                            }}
-                          >
-                            Remove Lecture
-                          </Button>{" "}
                         </Box>
                       ))}
                       <br />
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() => {
-                          const currentLectureError = validateCurrentLecture(
-                            values.lectures[values.lectures.length - 1]
-                          );
-                          if (currentLectureError) {
-                            setCurrentLectureError(currentLectureError);
-                          } else {
-                            push({
-                              title: "",
-                              description: "",
-                              duration: "",
-                              order: "",
-                              videoFile: null,
-                            });
-                          }
-                        }}
-                        sx={{ marginTop: 2 }}
-                      >
-                        Add Lecture
-                      </Button>
                     </Box>
                   )}
                 </FieldArray>
@@ -383,10 +412,17 @@ const EditLecture = () => {
                     variant="contained"
                     color="primary"
                     sx={{
-                      width: "30%",
-                      borderRadius: 2,
-                      padding: "12px 24px",
+                      px: { xs: 2, md: 5 },
+                      py: { xs: 1, md: 1.5 },
+                      borderRadius: 4,
+                      bgcolor: "#2563eb",
+                      mt:{xs:-6,md:0},
+                      mb:{xs:1, md:0},
+                      fontSize: { xs: 12, md: 14 },
                       fontWeight: "bold",
+                      "&:hover": {
+                        bgcolor: "#1e40af",
+                      },
                     }}
                     // onClick={handleAddLectures}
                     type="submit"

@@ -21,6 +21,7 @@ import {
   FormControl,
   SelectChangeEvent,
   Button,
+  useMediaQuery,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { fetchAllCourses, fetchTutorById } from "../../api/adminApi";
@@ -50,6 +51,9 @@ const AdminCourse = () => {
   const [categoryFilter, setCategoryFilter] = useState("");
   const [categories, setCategories] = useState<string[]>([]);
   
+  const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
+
+
   useEffect(() => {
     const getReports = async () => {
       try {
@@ -149,12 +153,23 @@ const AdminCourse = () => {
   };
 
   return (
-    <Box sx={{ padding: 2, width: "70vw" }}>
-      <Typography variant="h5" fontWeight="bold" sx={{ mb: 3 }}>
+    <Box sx={{ padding: { xs: 0, md: 2 }, width: { xs: "100%", md: "70vw" } }}>
+      <Typography
+        variant="h5"
+        fontWeight="bold"
+        sx={{ mb: { xs: 1, md: 3 }, fontSize: { xs: 18, md: 24 } }}
+      >
         Courses
       </Typography>
 
-      <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          gap: 2,
+          mb: 3,
+        }}
+      >
         <TextField
           fullWidth
           placeholder="Search by course name, category, or tutor..."
@@ -195,12 +210,10 @@ const AdminCourse = () => {
                   Course Name
                 </TableSortLabel>
               </TableCell>
-              <TableCell>
+              <TableCell sx={{ display: { xs: "none", md: "table-cell" } }}>
                 <TableSortLabel
                   active={sortConfig.key === "category"}
-                  direction={
-                    sortConfig.direction
-                  }
+                  direction={sortConfig.direction}
                   onClick={() => handleSort("category")}
                 >
                   Category
@@ -218,16 +231,30 @@ const AdminCourse = () => {
                 </TableSortLabel>
               </TableCell>
               <TableCell>Status</TableCell>
-              <TableCell></TableCell>
+              <TableCell
+                sx={{ display: { xs: "none", md: "table-cell" } }}
+              ></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {filteredCourses
+              .sort(
+                (a, b) =>
+                  new Date(b.createdAt).getTime() -
+                  new Date(a.createdAt).getTime()
+              )
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((course, index) => (
-                <TableRow key={index}>
+                <TableRow
+                  key={index}
+                  onClick={
+                    isSmallScreen ? () => handleOpenModal(course) : undefined
+                  }
+                >
                   <TableCell>{course.title}</TableCell>
-                  <TableCell>{course.category}</TableCell>
+                  <TableCell sx={{ display: { xs: "none", md: "table-cell" } }}>
+                    {course.category}
+                  </TableCell>
                   <TableCell>{course.tutor}</TableCell>
                   <TableCell>
                     <Typography
@@ -244,7 +271,7 @@ const AdminCourse = () => {
                       {course.isApproved}
                     </Typography>
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ display: { xs: "none", md: "table-cell" } }}>
                     <Button
                       variant="outlined"
                       onClick={() => handleOpenModal(course)}

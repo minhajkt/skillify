@@ -1,41 +1,48 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Box, Button, CircularProgress, IconButton, Paper, Snackbar, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  IconButton,
+  Paper,
+  Snackbar,
+  TextField,
+  Typography,
+} from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { addLecture } from "../../api/lectureApi";
 import { useNavigate, useParams } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
 import { Formik, Form, Field, FormikHelpers, FieldArray } from "formik";
 import { Lecture, FormValues } from "../../types/types";
-import {lectureSchema ,formSchema } from "../../schemas/schemas";
-
-
+import { lectureSchema, formSchema } from "../../schemas/schemas";
+import Navbar from "../shared/Navbar";
 
 const AddLecture = () => {
-
   const [errorMessage, setErrorMessage] = useState("");
   const [status, setStatus] = useState<"loading" | "idle">("idle");
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [openSnackbar, setOpenSnackbar] = useState(false);  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
   const [currentLectureError, setCurrentLectureError] = useState("");
 
   const { courseId } = useParams();
   const navigate = useNavigate();
-const validateCurrentLecture = (lecture: any) => {
-  if (
-    !lecture.title ||
-    !lecture.description ||
-    !lecture.duration ||
-    !lecture.order ||
-    !lecture.videoFile
-  ) {
-    return "Please fill all the fields before adding a new lecture.";
-  }
-  return "";
-};
+  const validateCurrentLecture = (lecture: any) => {
+    if (
+      !lecture.title ||
+      !lecture.description ||
+      !lecture.duration ||
+      !lecture.order ||
+      !lecture.videoFile
+    ) {
+      return "Please fill all the fields before adding a new lecture.";
+    }
+    return "";
+  };
 
   const handleAddLectures = async (values: any) => {
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     setErrorMessage("");
     setCurrentLectureError("");
     if (!courseId) {
@@ -47,14 +54,14 @@ const validateCurrentLecture = (lecture: any) => {
     );
     if (currentLectureError) {
       setCurrentLectureError(currentLectureError);
-      return; 
+      return;
     }
     try {
       setStatus("loading");
 
-    const formData = new FormData();
+      const formData = new FormData();
 
-      const lecturesData = values.lectures.map((lecture:any) => ({
+      const lecturesData = values.lectures.map((lecture: any) => ({
         title: lecture.title,
         description: lecture.description,
         duration: Number(lecture.duration),
@@ -62,35 +69,31 @@ const validateCurrentLecture = (lecture: any) => {
         courseId: courseId,
       }));
 
-      formData.append("lectures", JSON.stringify(lecturesData));    
-      
-      values.lectures.forEach((lecture:any) => {
-        formData.append("videoFiles", lecture.videoFile);
-      });       
-      
-    const response = await addLecture(formData); 
-      // console.log("Lectures added successfully:", response);
-      setOpenSnackbar(true);
+      formData.append("lectures", JSON.stringify(lecturesData));
 
+      values.lectures.forEach((lecture: any) => {
+        formData.append("videoFiles", lecture.videoFile);
+      });
+
+      const response = await addLecture(formData);
+      setOpenSnackbar(true);
     } catch (error) {
       setErrorMessage((error as Error).message);
-      console.error(error);
     } finally {
       setStatus("idle");
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
   };
 
   return (
     <Box
       sx={{
-        // minHeight: "100vh",
         minWidth: "100vw",
         bgcolor: "#f8fafc",
-        p: { xs: 4, sm: 6 },
-        // mx: 45,
+        py: { xs: 1, sm: 4 },
       }}
     >
+      <Navbar />
       <Snackbar
         open={openSnackbar}
         message="Your Course Request is under Review. We will get back to you within 24 hours"
@@ -98,7 +101,7 @@ const validateCurrentLecture = (lecture: any) => {
         onClose={() => setOpenSnackbar(false)}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
         sx={{
-          width: "500px",
+          width: { xs: "95%", md: "500px" },
           position: "absolute",
           top: "10%",
           zIndex: 9999,
@@ -124,7 +127,7 @@ const validateCurrentLecture = (lecture: any) => {
         }
       />
 
-      <Box>
+      <Box sx={{ mt: "64px" }}>
         <Formik<FormValues>
           initialValues={{
             lectures: [
@@ -132,7 +135,7 @@ const validateCurrentLecture = (lecture: any) => {
                 title: "",
                 description: "",
                 duration: "",
-                order: "",
+                order: "1",
                 videoFile: null,
               },
             ],
@@ -158,7 +161,7 @@ const validateCurrentLecture = (lecture: any) => {
                   backgroundColor: "#ffffff",
                   borderRadius: 2,
                   boxShadow: 3,
-                  padding: 4,
+                  padding: { xs: 0, md: 4 },
                 }}
                 // onSubmit={handleAddLectures}
               >
@@ -166,8 +169,8 @@ const validateCurrentLecture = (lecture: any) => {
                   variant="h3"
                   sx={{
                     fontWeight: "bold",
-                    fontSize: { xs: "1.8rem", sm: "2rem" },
-                    mb: 2,
+                    fontSize: { xs: 20, md: 32 },
+                    mb: { xs: 1, md: 2 },
                     color: "#1e293b",
                     textAlign: "center",
                   }}
@@ -177,7 +180,12 @@ const validateCurrentLecture = (lecture: any) => {
 
                 <Typography
                   variant="body1"
-                  sx={{ color: "#6b7280", mb: 3, textAlign: "center" }}
+                  sx={{
+                    color: "#6b7280",
+                    mb: { xs: 2, md: 4 },
+                    textAlign: "center",
+                    fontSize: { xs: 12, md: 16 },
+                  }}
                 >
                   Please fill all the fields to add a lecture to your course.
                 </Typography>
@@ -216,12 +224,14 @@ const validateCurrentLecture = (lecture: any) => {
                                 {...field}
                                 error={
                                   touched.lectures?.[index]?.title &&
-                                  typeof errors.lectures?.[index] === "object" &&
+                                  typeof errors.lectures?.[index] ===
+                                    "object" &&
                                   Boolean(errors.lectures?.[index]?.title)
                                 }
                                 helperText={
                                   touched.lectures?.[index]?.title &&
-                                  typeof errors.lectures?.[index] === "object" &&
+                                  typeof errors.lectures?.[index] ===
+                                    "object" &&
                                   errors.lectures?.[index]?.title
                                     ? errors.lectures?.[index]?.title
                                     : " "
@@ -243,12 +253,14 @@ const validateCurrentLecture = (lecture: any) => {
                                 {...field}
                                 error={
                                   touched.lectures?.[index]?.description &&
-                                  typeof errors.lectures?.[index] === "object" &&
+                                  typeof errors.lectures?.[index] ===
+                                    "object" &&
                                   Boolean(errors.lectures?.[index]?.description)
                                 }
                                 helperText={
                                   touched.lectures?.[index]?.description &&
-                                  typeof errors.lectures?.[index] === "object" &&
+                                  typeof errors.lectures?.[index] ===
+                                    "object" &&
                                   errors.lectures?.[index]?.description
                                     ? errors.lectures?.[index]?.description
                                     : " "
@@ -262,6 +274,7 @@ const validateCurrentLecture = (lecture: any) => {
                               <TextField
                                 label="Duration"
                                 variant="outlined"
+                                type="number"
                                 fullWidth
                                 sx={{
                                   marginTop: 1,
@@ -270,12 +283,14 @@ const validateCurrentLecture = (lecture: any) => {
                                 {...field}
                                 error={
                                   touched.lectures?.[index]?.duration &&
-                                  typeof errors.lectures?.[index] === "object" &&
+                                  typeof errors.lectures?.[index] ===
+                                    "object" &&
                                   Boolean(errors.lectures?.[index]?.duration)
                                 }
                                 helperText={
                                   touched.lectures?.[index]?.duration &&
-                                  typeof errors.lectures?.[index] === "object" &&
+                                  typeof errors.lectures?.[index] ===
+                                    "object" &&
                                   errors.lectures?.[index]?.duration
                                     ? errors.lectures?.[index]?.duration
                                     : " "
@@ -293,16 +308,20 @@ const validateCurrentLecture = (lecture: any) => {
                                 sx={{
                                   marginTop: 0,
                                   marginBottom: 0,
+                                  display: "none",
                                 }}
                                 {...field}
+                                disabled
                                 error={
                                   touched.lectures?.[index]?.order &&
-                                  typeof errors.lectures?.[index] === "object" &&
+                                  typeof errors.lectures?.[index] ===
+                                    "object" &&
                                   Boolean(errors.lectures?.[index]?.order)
                                 }
                                 helperText={
                                   touched.lectures?.[index]?.order &&
-                                  typeof errors.lectures?.[index] === "object" &&
+                                  typeof errors.lectures?.[index] ===
+                                    "object" &&
                                   errors.lectures?.[index]?.order
                                     ? errors.lectures?.[index]?.order
                                     : " "
@@ -322,7 +341,7 @@ const validateCurrentLecture = (lecture: any) => {
                             style={{ marginTop: "8px", width: "100%" }}
                           />
                           {touched.lectures?.[index]?.videoFile &&
-                          typeof errors.lectures?.[index] === "object" &&
+                            typeof errors.lectures?.[index] === "object" &&
                             errors.lectures?.[index]?.videoFile && (
                               <Typography variant="caption" color="error">
                                 {errors.lectures[index].videoFile
@@ -335,7 +354,11 @@ const validateCurrentLecture = (lecture: any) => {
                             color="primary"
                             onClick={() => remove(index)}
                             sx={{
-                              marginTop: 0,
+                              marginTop: 2,
+                              px: { xs: 1, md: 3 },
+                              py: { xs: 0.5, md: 1 },
+                              bgcolor: "#2563eb",
+                              fontSize: { xs: 10, md: 12 },
                             }}
                           >
                             Remove Lecture
@@ -357,12 +380,18 @@ const validateCurrentLecture = (lecture: any) => {
                               title: "",
                               description: "",
                               duration: "",
-                              order: "",
+                              order: values.lectures.length + 1,
                               videoFile: null,
                             });
                           }
                         }}
-                        sx={{ marginTop: 2 }}
+                        sx={{
+                          marginTop: -4,
+                          px: { xs: 1, md: 3 },
+                          py: { xs: 0.5, md: 1 },
+                          bgcolor: "#2563eb",
+                          fontSize: { xs: 10, md: 12 },
+                        }}
                       >
                         Add Lecture
                       </Button>
@@ -370,15 +399,20 @@ const validateCurrentLecture = (lecture: any) => {
                   )}
                 </FieldArray>
 
-                <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
+                <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
                   <Button
                     variant="contained"
                     color="primary"
                     sx={{
-                      width: "30%",
-                      borderRadius: 2,
-                      padding: "12px 24px",
+                      px: { xs: 2, md: 5 },
+                      py: { xs: 1, md: 1.5 },
+                      borderRadius: 4,
+                      bgcolor: "#2563eb",
+                      fontSize: { xs: 12, md: 14 },
                       fontWeight: "bold",
+                      "&:hover": {
+                        bgcolor: "#1e40af",
+                      },
                     }}
                     // onClick={handleAddLectures}
                     type="submit"
@@ -415,4 +449,3 @@ const validateCurrentLecture = (lecture: any) => {
 };
 
 export default AddLecture;
-

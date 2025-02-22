@@ -46,7 +46,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 400,
+            width: {xs:300,md:400},
             bgcolor: "background.paper",
             boxShadow: 24,
             p: 4,
@@ -54,7 +54,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
           }}
         >
           <Stack direction="row" justifyContent="space-between" mb={2}>
-            <Typography variant="h6">Add Review for {courseTitle}</Typography>
+            <Typography variant="h6" sx={{fontSize:{xs:16,md:20},mb:-1}}>Add Review for {courseTitle}</Typography>
             <IconButton onClick={onClose}>
               <CloseIcon />
             </IconButton>
@@ -63,7 +63,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
             name="course-rating"
             value={rating}
             onChange={(event, newValue) => setRating(newValue)}
-            size="large"
+            size="medium"
           />
           <TextField
             label="Write your review"

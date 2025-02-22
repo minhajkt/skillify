@@ -35,7 +35,7 @@ import UserCourseSection from "./pages/user/UserCourseSection";
 import Wishlist from "./components/user/Wishlist";
 import EditCourse from "./pages/tutor/EditCourse";
 import EditLecture from "./pages/tutor/EditLecture";
-import CourseComplaints from "./components/admin/CourseComplaints";
+// import CourseComplaints from "./components/admin/CourseComplaints";
 import ProtectedRoutes from "./components/protectedRoutes/ProtectedRoutes";
 import PendingPayments from "./components/admin/PendingPayments";
 import PaymentHistory from "./components/admin/PaymentHistory";
@@ -45,6 +45,7 @@ import { useEffect } from "react";
 import ChatComponent from "./components/chat/ChatComponent";
 import Contacts from "./components/chat/Contacts";
 import TutorContacts from "./components/chat/TutorContacts";
+import NotFoundPage from "./components/shared/NotFoundPage";
 
 const stripePromise = loadStripe(
   "pk_test_51QfLoJF574cRRlb7gt4W52ZaKOrTVvdRuxGB5nDgXRQhugeedtvDfqKPFTVryX1uBAnthR40zUGYMeyE7baknYkD00Ar4wRwmH"
@@ -53,7 +54,7 @@ const stripePromise = loadStripe(
 function App() {
   useEffect(() => {
     socket.on("connect", () => {
-      console.log(`Connected to server with ID: ${socket.id}`);
+      // console.log(`Connected to server with ID: ${socket.id}`);
     });
     return () => {
       socket.disconnect();
@@ -70,7 +71,8 @@ function App() {
             <Route path="/home" element={<Home />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
-            <Route path="*" element={<Navigate to="/login" replace />} />
+            {/* <Route path="*" element={<Navigate to="/login" replace />} /> */}
+            <Route path="*" element={<NotFoundPage />} />
             <Route path="/tutors/signup" element={<TutorSignupPage />} />
             <Route path="/tutors/login" element={<TutorLoginPage />} />
             <Route path="/tutors/home" element={<TutorHome />} />
@@ -172,7 +174,7 @@ function App() {
               <Route path="students" element={<AdminStudent />} />
               <Route path="tutor-requests" element={<AdminTutorRequest />} />
               <Route path="course-requests" element={<AdminCourseRequest />} />
-              <Route path="course-complaints" element={<CourseComplaints />} />
+              {/* <Route path="course-complaints" element={<CourseComplaints />} /> */}
               <Route path="pending-payments" element={<PendingPayments />} />
               <Route path="payments-history" element={<PaymentHistory />} />
               <Route

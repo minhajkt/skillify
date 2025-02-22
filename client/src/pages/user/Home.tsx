@@ -10,16 +10,19 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { Snackbar } from "@mui/material";
 import { useEffect, useState } from "react";
+import { Navigate } from "react-router-dom";
 
 const Home = () => {
   const token = useSelector((state: RootState) => state.auth.token);
+  const user = useSelector((state: RootState) => state.auth.user);
   const [openSnackbar, setOpenSnackbar] = useState(false);
 
-    const [searchQuery, setSearchQuery] = useState("");
 
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setSearchQuery(e.target.value);
-    };
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
 
   useEffect(() => {
     if (localStorage.getItem("loginSuccess") === "true") {
@@ -27,6 +30,14 @@ const Home = () => {
       localStorage.removeItem("loginSuccess");
     }
   }, []);
+
+    if(token) {
+      if (user?.role === "admin") {
+        return <Navigate to="/admin/dashboard" replace />;
+      } else if (user?.role === "tutor") {
+        return <Navigate to="/tutors/home" replace />;
+      } 
+    }
 
   return (
     <Box>

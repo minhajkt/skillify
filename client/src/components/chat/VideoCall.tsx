@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import { Phone, PhoneOff, Video, MicOff, Mic, X, VideoOff } from "lucide-react";
 import { keyframes } from "@mui/system";
+import { VideoCallProps } from "../../types/types";
 
 const pulseAnimation = keyframes`
   0% {
@@ -27,7 +28,7 @@ const pulseAnimation = keyframes`
   }
 `;
 
-const VideoCall = ({
+const VideoCall: React.FC<VideoCallProps> = ({
   isVideoCallActive,
   localVideoRef,
   remoteVideoRef,
@@ -153,10 +154,11 @@ const VideoCall = ({
               elevation={4}
               sx={{
                 position: "absolute",
-                top: 16,
-                right: 16,
-                width: 250,
-                height: 150,
+
+                top: { xs: 20, md: 40 }, 
+                right: { xs: 16, md: 16 }, 
+                width: { xs: 120, md: 250 },
+                height: { xs: 90, md: 150 },
                 overflow: "hidden",
                 borderRadius: 2,
               }}

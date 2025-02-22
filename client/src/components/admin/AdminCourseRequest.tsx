@@ -10,6 +10,7 @@ import {
   Box,
   TablePagination,
   Button,
+  useMediaQuery,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { fetchCourseRequests, fetchTutors } from "../../api/adminApi";
@@ -29,6 +30,8 @@ const AdminCourseRequest = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const navigate = useNavigate(); 
+  const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
+
 
   useEffect(() => {
     const getCourseRequests = async () => {
@@ -49,7 +52,6 @@ const AdminCourseRequest = () => {
         setTutors(tutorsById);
       } catch (error) {
         setError("Failed to fetch tutor requests.");
-        console.log("error occured", error);
       } finally {
         setLoading(false);
       }
@@ -78,12 +80,24 @@ const AdminCourseRequest = () => {
   if (error) return <Typography color="error">{error}</Typography>;
 
   return (
-    <Box sx={{ padding: 2, width: "70vw" }}>
-      <Typography variant="h5" fontWeight="bold" sx={{ mb: 3 }}>
+    <Box sx={{ padding: { xs: 0, md: 2 }, width: { xs: "108%", md: "70vw" } }}>
+      <Typography
+        variant="h5"
+        fontWeight="bold"
+        sx={{
+          mb: { xs: 1, md: 3 },
+          fontSize: { xs: 18, md: 24 },
+          fontWeight: "bold",
+          ml: { xs: -2.2, md: 0 },
+        }}
+      >
         Course Requests
       </Typography>
 
-      <TableContainer component={Paper} sx={{ bgcolor: "#FAFAFA" }}>
+      <TableContainer
+        component={Paper}
+        sx={{ bgcolor: "#FAFAFA", ml: { xs: -2.2, md: 0 } }}
+      >
         <Table>
           <TableHead>
             <TableRow>
@@ -91,62 +105,87 @@ const AdminCourseRequest = () => {
               <TableCell>Category</TableCell>
               <TableCell>Price</TableCell>
               <TableCell>Tutor</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Total Lectures</TableCell>
+              <TableCell sx={{ display: { xs: "none", md: "table-cell" } }}>
+                Status
+              </TableCell>
+              <TableCell sx={{ display: { xs: "none", md: "table-cell" } }}>
+                Total Lectures
+              </TableCell>
               {/* <TableCell>Actions</TableCell> */}
-              <TableCell></TableCell>
+              <TableCell
+                sx={{ display: { xs: "none", md: "table-cell" } }}
+              ></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {courses.length === 0 ? (
-    <TableRow>
-      <TableCell colSpan={7} align="center">
-        No course requests Pending
-      </TableCell>
-    </TableRow>
-  ) :
-            (courses
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((course) => (
-                <TableRow key={course._id}>
-                  <TableCell>{course.title}</TableCell>
-                  <TableCell>{course.category}</TableCell>
-                  <TableCell>{course.price}</TableCell>
-                  <TableCell>
-                    {tutors[course.createdBy]
-                      ? tutors[course.createdBy].name
-                      : "Loading..."}
-                  </TableCell>
-                  <TableCell>
-                    <span
-                      style={{
-                        color:
-                          course.isApproved === "approved"
-                            ? "green"
-                            : course.isApproved === "rejected"
-                            ? "red"
-                            : "orange",
-                      }}
+              <TableRow>
+                <TableCell colSpan={7} align="center">
+                  No course requests Pending
+                </TableCell>
+              </TableRow>
+            ) : (
+              courses
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((course) => (
+                  <TableRow
+                    key={course._id}
+                    onClick={
+                      isSmallScreen ? () => handleOpenModal(course) : undefined
+                    }
+                  >
+                    <TableCell>
+                      {course.draftVersion?.title || course.title}
+                    </TableCell>
+                    <TableCell>
+                      {course.draftVersion?.category || course.category}
+                    </TableCell>
+                    <TableCell>
+                      {course.draftVersion?.price || course.price}
+                    </TableCell>
+                    <TableCell>
+                      {tutors[course.createdBy]
+                        ? tutors[course.createdBy].name
+                        : "Loading..."}
+                    </TableCell>
+                    <TableCell
+                      sx={{ display: { xs: "none", md: "table-cell" } }}
                     >
-                      {course.isApproved === "approved"
-                        ? "Approved"
-                        : course.isApproved === "rejected"
-                        ? "Rejected"
-                        : "Pending"}
-                    </span>
-                  </TableCell>
-                  <TableCell sx={{pl:8}}>{course.lectures?.length}</TableCell>
+                      <span
+                        style={{
+                          color:
+                            course.isApproved === "approved"
+                              ? "green"
+                              : course.isApproved === "rejected"
+                              ? "red"
+                              : "orange",
+                        }}
+                      >
+                        {course.isApproved === "approved"
+                          ? "Approved"
+                          : course.isApproved === "rejected"
+                          ? "Rejected"
+                          : "Pending"}
+                      </span>
+                    </TableCell>
+                    <TableCell
+                      sx={{ pl: 8, display: { xs: "none", md: "table-cell" } }}
+                    >
+                      {course.lectures?.length}
+                    </TableCell>
 
-                  <TableCell>
-                    <Button
-                      variant="outlined"
-                      onClick={() => handleOpenModal(course)}
+                    <TableCell
+                      sx={{ display: { xs: "none", md: "table-cell" } }}
                     >
-                      View
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
+                      <Button
+                        variant="outlined"
+                        onClick={() => handleOpenModal(course)}
+                      >
+                        View
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
             )}
           </TableBody>
         </Table>
@@ -160,6 +199,18 @@ const AdminCourseRequest = () => {
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleChangeRowsPerPage}
         rowsPerPageOptions={[5, 10, 20]}
+        sx={{
+          ".MuiTablePagination-root": {
+            fontSize: { xs: "0.75rem", md: ".8rem" },
+            padding: { xs: "4px", md: "16px" },
+          },
+          ".MuiTablePagination-selectLabel, .MuiTablePagination-input": {
+            fontSize: { xs: "0.75rem", md: ".85rem" },
+          },
+          ".MuiTablePagination-actions": {
+            transform: { xs: "scale(0.8)", md: "scale(1)" },
+          },
+        }}
       />
     </Box>
   );

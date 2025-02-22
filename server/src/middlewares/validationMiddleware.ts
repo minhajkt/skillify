@@ -30,11 +30,7 @@ export const validateUserCreation = [
     // .matches(/[a-zAZ]/).withMessage('Password must contain a letter')
     .trim(),
 
-  // body("bio")
-  // .isLength({ min: 3 })
-  // .withMessage("Please provide a short description")
-  // // .matches(/[a-zAZ]/).withMessage('Password must contain a letter')
-  // .trim(),
+
 ];
 
 export const validateTutorCreation = [
@@ -167,9 +163,7 @@ export const validateCourseUpdate = [
 export const handleValidationErrors = async(req: Request, res: Response, next: NextFunction): Promise<void> => {
     const errors = validationResult(req)
     if(!errors.isEmpty()) {
-         res.status(400).json({errors: errors.array()})
-         console.log('is',errors.array());
-         
+         res.status(400).json({errors: errors.array()})         
     return;
         }
     next()  

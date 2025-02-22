@@ -3,7 +3,7 @@ import { IUser } from "../../user-management/models/UserModel";
 import { ICourse } from "../../courses/models/courseModel";
 import { IAdminService } from "./IAdminService";
 import { IUserRepository } from "../../user-management/repositories/IUserRepository";
-import { sendCourseApprovalEmail } from "../../../utils/approveEmail";
+import { sendCourseApprovalEmail, sendCourseEditApprovalEmail } from "../../../utils/approveEmail";
 
 
 export class AdminService implements IAdminService {
@@ -104,9 +104,32 @@ export class AdminService implements IAdminService {
     if (!tutor) {
       throw new Error("Tutor not found");
     }
-    console.log("tutor name from updatecourseapproval of the admin", tutor);
 
     await sendCourseApprovalEmail(tutor.email, tutor.name, status);
+    return updatedCourse;
+  }
+
+  async updateCourseEditApproval(
+    id: string,
+    editStatus: string
+  ): Promise<ICourse | null> {
+    const updatedCourse = await this.adminRepository.updateCourseEditApproval(
+      id,
+      editStatus
+    );
+    if (!updatedCourse) {
+      throw new Error("No updated course found");
+    }
+    const tutor = await this.adminRepository.getUserById(
+      updatedCourse.createdBy.toString()
+    );
+    if (!tutor) {
+      throw new Error("Tutor not found");
+    }
+
+
+    await sendCourseEditApprovalEmail(tutor.email, tutor.name, editStatus);
+
     return updatedCourse;
   }
 
@@ -117,5 +140,4 @@ export class AdminService implements IAdminService {
     }
     return allCourses;
   }
-  
 }

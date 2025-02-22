@@ -2,10 +2,11 @@ import { Box, Typography, Avatar, styled, Badge } from "@mui/material";
 import { useEffect, useState } from "react";
 import { fetchUserEnrolledCourses } from "../../api/enrollmentApi";
 import { useNavigate, useParams } from "react-router-dom";
-import ChatComponent from "./ChatComponent"; 
+import ChatComponent from "./ChatComponent";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { useUnreadMessages } from "./useUnreadMessage";
+import { ITutor, MyTutor } from "../../types/types";
 
 const ChatContainer = styled(Box)({
   display: "flex",
@@ -16,6 +17,10 @@ const ContactsList = styled(Box)(({ theme }) => ({
   width: "30%",
   backgroundColor: theme.palette.background.paper,
   borderRight: `1px solid ${theme.palette.divider}`,
+  [theme.breakpoints.down("sm")]: {
+    width: "100%",
+    display: "block",
+  },
 }));
 
 const ContactItem = styled(Box, {
@@ -31,16 +36,24 @@ const ContactItem = styled(Box, {
 }));
 
 const Contacts = () => {
-  const [myTutors, setMyTutors] = useState<[]>([]);
+  const [myTutors, setMyTutors] = useState<ITutor[]>([]);
   const navigate = useNavigate();
   const { tutorId } = useParams();
-  const user = useSelector((state: RootState) => state.auth.user)
-  const unreadCounts = useUnreadMessages(user?._id)
+  const user = useSelector((state: RootState) => state.auth.user);
+  const unreadCounts = useUnreadMessages(user?._id ?? "");
 
   useEffect(() => {
     const getMyTutors = async () => {
       const tutorsName = await fetchUserEnrolledCourses();
-      setMyTutors(tutorsName);
+      const uniqueTutors = Array.from(
+        new Map(
+          tutorsName.map((entry: MyTutor) => [
+            entry?.courseId?.createdBy?._id,
+            entry.courseId.createdBy,
+          ])
+        ).values()
+      ) as ITutor[];
+      setMyTutors(uniqueTutors);
     };
     getMyTutors();
   }, []);
@@ -52,7 +65,9 @@ const Contacts = () => {
   return (
     <Box>
       <ChatContainer>
-        <ContactsList sx={{ bgcolor: "#f2f2f2" }}>
+        <ContactsList sx={{ bgcolor: "#f2f2f2", display: { xs: tutorId ? "none" : "block", md: "block" } }}>
+
+        {/* <ContactsList sx={{ bgcolor: "#f2f2f2" }}> */}
           <Box
             sx={{
               p: 2,
@@ -77,36 +92,30 @@ const Contacts = () => {
                 cursor: "pointer",
               }}
             ></Box>
-            <Typography variant="h6">Your Tutors</Typography>
+            <Typography variant="h6" sx={{ml:{xs:3, md:0}}}>Your Tutors</Typography>
           </Box>
           <Box sx={{ overflow: "auto", height: "calc(100vh - 70px)" }}>
             {myTutors.map((tutor, index) => (
               <ContactItem
                 key={index}
-                isSelected={tutorId === tutor.courseId.createdBy._id}
-                onClick={() => handleChatClick(tutor.courseId.createdBy._id)}
+                isSelected={tutorId === tutor._id}
+                onClick={() => tutor._id && handleChatClick(tutor._id)}
               >
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <Avatar>
-                    {tutor.courseId.createdBy.name[0].toUpperCase()}
+                    {tutor.name ? tutor.name[0].toUpperCase() : "Tutor"}
                   </Avatar>
-                  {unreadCounts[tutor.courseId.createdBy._id] > 0 && (
+
+                  {tutor._id && unreadCounts[tutor._id] > 0 && (
                     <Badge
-                      badgeContent={unreadCounts[tutor.courseId.createdBy._id]}
+                      badgeContent={unreadCounts[tutor._id]}
                       color="primary"
-                      // sx={{
-                      //   position: "absolute",
-                      //   top: -5,
-                      //   right: -5,
-                      // }}
                     />
                   )}
                   <Box sx={{ ml: 2 }}>
-                    <Typography variant="subtitle1">
-                      {tutor.courseId.createdBy.name}
-                    </Typography>
+                    <Typography variant="subtitle1">{tutor.name}</Typography>
                     <Typography variant="body2" color="text.secondary">
-                      {tutor.courseId.title}
+                      {tutor.courseId?.title}
                     </Typography>
                   </Box>
                 </Box>
@@ -122,7 +131,7 @@ const Contacts = () => {
             <Box
               sx={{
                 flex: 1,
-                display: "flex",
+                display: {xs:'none',md:"flex"},
                 alignItems: "center",
                 justifyContent: "center",
                 backgroundImage: "url('/images/bgbbg.jpg')",
@@ -140,6 +149,3 @@ const Contacts = () => {
 };
 
 export default Contacts;
-
-
-

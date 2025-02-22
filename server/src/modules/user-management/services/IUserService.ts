@@ -26,4 +26,5 @@ export interface IUserService {
   getUserByEmail(email: string): Promise<IUser | null>;
   getCourseById(id: string): Promise<IUser | null>;
   getTutorCount(): Promise<number>;
+  resendOtp(email: string): Promise<void>;
 }

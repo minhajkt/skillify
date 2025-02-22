@@ -26,7 +26,7 @@ const AdminLogin = () => {
 
 
     if (isAuthenticated) {
-    return <Navigate to={"/admin"} />;
+    return <Navigate to={"/admin/dashboard"} />;
   }
 
   const handleLogin = async (values: { email: string; password: string }) => {
@@ -37,7 +37,6 @@ const AdminLogin = () => {
       if (userData) {
         navigate("/admin");
       }
-      // console.log("userData is ", userData);
     } catch (error: unknown) {
       if (error instanceof Error) {
         console.error("Error in logging in", error);
@@ -103,7 +102,7 @@ const AdminLogin = () => {
           justifyContent: "center",
           alignItems: "center",
           padding: 4,
-          marginLeft: { xs: 7, sm: 0 },
+          marginLeft: { xs: 0, sm: 0 },
         }}
       >
         <Typography

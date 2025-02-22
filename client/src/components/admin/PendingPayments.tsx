@@ -13,21 +13,12 @@ import {
   TablePagination,
   Modal,
   Snackbar,
+  useMediaQuery,
 } from "@mui/material";
 import { getPendingPayments, updatePaymentStatus } from "../../api/paymentsApi";
+import { PaymentPending } from "../../types/types";
 
-interface PaymentPending {
-  _id: string,
-  tutorId: {
-    name: string;
-  };
-  courseId: {
-    title: string;
-    price: number
-  };
-  newEnrollments: number;
-  amount: number;
-}
+
 
 const PendingPayments: React.FC = () => {
   const [paymentsPending, setPaymentsPending] = useState<PaymentPending[]>([]);
@@ -37,6 +28,7 @@ const PendingPayments: React.FC = () => {
   const [snackbar, setSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>('')
   const [selectedPayment, setSelectedPayment] = useState<string | null> (null)
+  const isSmallScreen  = useMediaQuery((theme) => theme.breakpoints.down('sm'))
 
   useEffect(() => {
     const fetchPaymentsPending = async () => {
@@ -71,8 +63,9 @@ const PendingPayments: React.FC = () => {
         setPaymentsPending((prev) => prev.filter((payment) => selectedPayment !== payment._id))
         setSnackbarMessage("Payment Success")
         setSnackbar(true)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
-        console.log('Error settling payment', error);
+        // console.log('Error settling payment', error);
       }
     }
   }
@@ -84,7 +77,7 @@ const PendingPayments: React.FC = () => {
   }
 
   return (
-    <Box>
+    <Box >
       <Snackbar
         open={snackbar}
         message={snackbarMessage}
@@ -92,34 +85,73 @@ const PendingPayments: React.FC = () => {
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
         onClose={() => setSnackbar(false)}
       />
-      <Typography variant="h4" gutterBottom>
+      <Typography
+        variant="h4"
+        sx={{
+          mb: { xs: 1, md: 3 },
+          fontSize: { xs: 18, md: 24 },
+          fontWeight: "bold",
+          ml: { xs: -2, md: 0 },
+        }}
+        gutterBottom
+      >
         Payments Pending
       </Typography>
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper}  sx={{ml:{xs:-2, md:0}, width:{xs:'110%', md:'auto'}}}>
         <Table>
           <TableHead>
             <TableRow>
               <TableCell>Name of Tutor</TableCell>
               <TableCell>Course Name</TableCell>
-              <TableCell>New Enrollments</TableCell>
-              <TableCell>Price</TableCell>
+              <TableCell sx={{ display: { xs: "none", md: "table-cell" } }}>
+                New Enrollments
+              </TableCell>
+              <TableCell sx={{ display: { xs: "none", md: "table-cell" } }}>
+                Price
+              </TableCell>
               <TableCell>Payable</TableCell>
-              <TableCell sx={{ textAlign: "center" }}>Actions</TableCell>
+              <TableCell
+                sx={{
+                  textAlign: "center",
+                  display: { xs: "none", md: "table-cell" },
+                }}
+              >
+                Actions
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {paymentsPending
+              .sort(
+                (a, b) =>
+                  new Date(b.updatedAt).getTime() -
+                  new Date(a.updatedAt).getTime()
+              )
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((payment, index) => (
-                <TableRow key={index}>
+                <TableRow
+                  key={index}
+                  onClick={
+                    isSmallScreen
+                      ? () => handleSettlePayment(payment._id)
+                      : undefined
+                  }
+                >
                   <TableCell>{payment.tutorId.name}</TableCell>
                   <TableCell>{payment.courseId.title}</TableCell>
-                  <TableCell sx={{ textAlign: "center" }}>
+                  <TableCell
+                    sx={{
+                      textAlign: "center",
+                      display: { xs: "none", md: "table-cell" },
+                    }}
+                  >
                     {payment.newEnrollments}
                   </TableCell>
-                  <TableCell>₹ {payment.courseId.price}</TableCell>
+                  <TableCell sx={{ display: { xs: "none", md: "table-cell" } }}>
+                    ₹ {payment.courseId.price}
+                  </TableCell>
                   <TableCell>₹ {payment.amount}</TableCell>
-                  <TableCell>
+                  <TableCell sx={{ display: { xs: "none", md: "table-cell" } }}>
                     <Button
                       variant="contained"
                       color="primary"
@@ -141,6 +173,18 @@ const PendingPayments: React.FC = () => {
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleChangeRowsPerPage}
         rowsPerPageOptions={[5, 10, 20]}
+        sx={{
+          ".MuiTablePagination-root": {
+            fontSize: { xs: "0.75rem", md: ".8rem" },
+            padding: { xs: "4px", md: "16px" },
+          },
+          ".MuiTablePagination-selectLabel, .MuiTablePagination-input": {
+            fontSize: { xs: "0.75rem", md: ".85rem" },
+          },
+          ".MuiTablePagination-actions": {
+            transform: { xs: "scale(0.8)", md: "scale(1)" },
+          },
+        }}
       />
 
       <Modal
@@ -151,8 +195,8 @@ const PendingPayments: React.FC = () => {
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          width: 400,
-          height:270,
+          width: { xs: 300, md: 400 },
+          height: 270,
           boxShadow: 24,
           "& .MuiModal-backdrop": {
             bgcolor: "white",
@@ -165,7 +209,11 @@ const PendingPayments: React.FC = () => {
           <Typography
             variant="h5"
             textAlign={"center"}
-            sx={{ mt: 3, mb: 5, fontWeight: "bold" }}
+            sx={{
+              mt: { xs: 0, md: 3 },
+              mb: { xs: 2, md: 5 },
+              fontWeight: "bold",
+            }}
             gutterBottom
           >
             Confirm Payment Settlement

@@ -19,11 +19,22 @@ import paymentRouter from './modules/payments/payment-route'
 import { initializeSocket } from './utils/socket'
 import messageRouter from './modules/messages/message-route'
 import progressRouter from './modules/courseProgress/progress-route'
-
+import morgan from 'morgan'
+import fs from 'fs'
+import path from 'path'
 
 const app = express()
 
 connectDB()
+
+// const accessLogStream = fs.createWriteStream(
+//   path.join(__dirname, "logs/access.log"),
+//   { flags: "a" }
+// );
+
+// app.use(morgan("combined"));
+
+// app.use(morgan('combined', { stream: accessLogStream }));
 
 app.use(
   cors({
@@ -42,6 +53,10 @@ initializeSocket(server)
 
 const port = process.env.PORT || 5000;
 app.use(cookieParser());
+
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error("Stripe secret key is missing from environment variables.");
+}
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion:"2024-12-18.acacia"

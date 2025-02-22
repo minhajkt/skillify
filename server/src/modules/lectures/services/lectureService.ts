@@ -44,18 +44,8 @@ export class LectureService implements ILectureService {
   async editLecture(
     lectureId: string,
     updatedData: Partial<ILecture>,
-    file?: Express.Multer.File
   ): Promise<ILecture | null> {
     try {
-      if (file) {
-        const result = await cloudinary.v2.uploader.upload(file.path, {
-          folder: "lecture_videos",
-          resource_type: "auto",
-        });
-        updatedData.videoUrl = result.secure_url;
-        // console.log('updated videos', updatedData.videoUrl);
-      }
-
       return await this.lectureRepo.updateLecture(lectureId, updatedData);
     } catch (error) {
       throw new Error(`Error editing lecture: ${(error as Error).message}`);

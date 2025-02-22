@@ -20,7 +20,6 @@ reviewRouter.get("/api/reviews/ratings", async (req, res) => {
   const ratings = await Review.aggregate([
     { $group: { _id: "$courseId", averageRating: { $avg: "$rating" } } },
   ]);
-  console.log('ratingns,', ratings);
   
   res.json(ratings);
 });

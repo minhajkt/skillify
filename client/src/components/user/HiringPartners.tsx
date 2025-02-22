@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material"
+import { Box, Typography } from "@mui/material";
 
 const partners = [
   {
@@ -34,12 +34,11 @@ const partners = [
 ];
 
 const HiringPartners = () => {
-    
   return (
     <Box>
       <Box
         sx={{
-          mt: 3,
+          mt: { xs: 1, md: 3 },
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -50,15 +49,16 @@ const HiringPartners = () => {
         <Box>
           <Box
             sx={{
-              mt: 3,
+              mt: { xs: 1, md: 3 },
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
+              mb:{xs:2, md:0}
             }}
           >
             <Typography
               variant="h5"
-              sx={{ fontSize: { xs: "1.2rem", md: "1.8rem" }, mb: 3 }}
+              sx={{ fontSize: { xs: "1.2rem", md: "1.8rem" }, mb: {xs:1,md:3} }}
               fontWeight={"bold"}
             >
               Our Hiring Partners
@@ -115,6 +115,6 @@ const HiringPartners = () => {
       </Box>
     </Box>
   );
-}
+};
 
-export default HiringPartners
+export default HiringPartners;

@@ -15,25 +15,22 @@ const ResetPassword = () => {
 
    const handleSubmit = async() => {
         try {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const response = await axiosInstance.post('/users/reset-password',
                 {token : token,
                 newPassword : newPassword,
                 confirmNewPassword: confirmNewPassword
                 })
-                console.log('Password reset successful', response);
                 setSuccessMessage('Password reset Successful. Redirecting to login ...')
                 setTimeout(() =>{
                     navigate('/login')
                 }, 2000)
         } catch (error) {
-            console.log('big', error);
-            
             if(error instanceof AxiosError) {
                 const errorMsg =
                   error.response?.data?.message ||
                   error.response?.data?.error ||
                   error.response?.data?.errors[0].msg || error
-                console.log("error iss ", errorMsg);
                 setErrorMessage(errorMsg)
             }else {
                 console.log("An unexpected error occured",error);
@@ -47,9 +44,9 @@ const ResetPassword = () => {
         top: "50%",
         left: "50%",
         transform: "translate(-50%, -50%)",
-        width: 400,
+        width: { xs: 350, md: 400 },
         boxShadow: 24,
-        p: 4,
+        p: {xs:2,md:4},
         borderRadius: 2,
         "& .MuiModal-backdrop": {
           bgcolor: "white",

@@ -1,7 +1,6 @@
 import { IProgress } from "../models/progressModel";
 
 export interface IProgressRepository {
-  // createProgress (userId: string, courseId: string ): Promise<IProgress | null>
   findProgress(userId: string, courseId: string): Promise<IProgress | null>;
   markLectureCompleted(
     userId: string,
@@ -14,9 +13,10 @@ export interface IProgressRepository {
     progressPercentage: number,
     completed: boolean
   ): Promise<IProgress | null>;
-  updateCertificateUrl(
+  updateCertificateId(
     userId: string,
     courseId: string,
-    certificateUrl: string
+    certificatId: string
   ): Promise<IProgress | null>;
+  findProgressByCertificateId(certificateId: string): Promise<IProgress | null>;
 }

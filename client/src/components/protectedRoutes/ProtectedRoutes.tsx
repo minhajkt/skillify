@@ -1,37 +1,33 @@
-import { useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { RootState } from "../../store/store";
+import {  Navigate } from "react-router-dom";
 
 interface ProtectedRouteProps {
-  children: React.ReactNode;
-  requiredRole?: string;
+    children: React.ReactNode;
+    requiredRole? : string
 }
 
 const ProtectedRoutes: React.FC<ProtectedRouteProps> = ({
-  children,
-  requiredRole,
+    children,
+    requiredRole
 }) => {
-  const user = useSelector((state: RootState) => state.auth.user);
-  const token = useSelector((state: RootState) => state.auth.token);
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!token) {
+    const user = useSelector((state: RootState) => state.auth.user) 
+    const token = useSelector((state: RootState) => state.auth.token)
 
-      navigate("/login", { replace: true });
-      
-      return
-    } else if (requiredRole && user?.role !== requiredRole) {
-      navigate("/login", { replace: true });
+    
+    if(!token) {
+        return <Navigate to="/login" replace />;
     }
-  }, [token, user, requiredRole, navigate]); 
 
-  if (!token || (requiredRole && user?.role !== requiredRole)) {
-    return null; 
-  }
+    if(requiredRole && user?.role !== requiredRole ) {
+        if (user?.role === "user") return <Navigate to="/home" replace />;
+        if (user?.role === "tutor") return <Navigate to="/tutors/home" replace />;
+        if (user?.role === "admin") return <Navigate to="/admin/dashboard" replace />;
+    }
 
-  return <>{children}</>;
-};
+    return <>{children} </>
+}
 
-export default ProtectedRoutes;
+export default ProtectedRoutes
+

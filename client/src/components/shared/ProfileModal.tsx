@@ -20,8 +20,8 @@ interface ProfileModalProps {
 
 const ProfileModal = ({ user, onClose }: ProfileModalProps) => {
   
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const token = useSelector((state: RootState) => state.auth.token);
-  console.log("userdataaaaaa is", token);
 
   const dispatch = useDispatch();
 
@@ -60,22 +60,12 @@ const ProfileModal = ({ user, onClose }: ProfileModalProps) => {
 
       dispatch(updateUser(response.data));
       setSuccessSnackbar(true);
-      console.log("Snackbar should open:", successSnackbar);
       setTimeout(() => {
         onClose();
       }, 3000);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       setError("Failed to update profile");
-      console.error("Error updating profile", err);
-      console.log("id of user", user._id);
-      console.log("res", {
-        url: `/users/update-user/${user?._id}`,
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-        formData,
-      });
     } finally {
       setIsLoading(false);
     }
@@ -86,18 +76,23 @@ const ProfileModal = ({ user, onClose }: ProfileModalProps) => {
       sx={{
         bgcolor: "background.paper",
         borderRadius: 2,
-        p: 4,
+        p: { xs: 0, md: 4 },
         width: "100%",
         maxWidth: 480,
-        mx: "auto",
+        mx: { xs: 0, md: "auto" },
         boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
       }}
     >
       <Typography
         variant="h5"
         fontWeight="600"
-        mb={3}
-        sx={{ color: "black", textAlign: "center" }}
+        // mb={3}
+        sx={{
+          color: "black",
+          textAlign: "center",
+          mb: { xs: 1, md: 3 },
+          mt: { xs: 1, md: 0 },
+        }}
       >
         Profile
       </Typography>
@@ -109,23 +104,22 @@ const ProfileModal = ({ user, onClose }: ProfileModalProps) => {
         onChange={(e) => setName(e.target.value)}
         fullWidth
         margin="normal"
-        sx={{ mb: 3 }}
+        sx={{ mb: { xs: 1, md: 3 } }}
       />
 
       <Box
         display="flex"
         alignItems="center"
         gap={3}
-        mb={4}
         p={2}
-        // bgcolor="grey.30"
         borderRadius={1}
+        sx={{ mb: { xs: 1, md: 4 } }}
       >
         <Avatar
           src={photo ? URL.createObjectURL(photo) : user?.profilePhoto}
           sx={{
-            width: 80,
-            height: 80,
+            width: { xs: 60, md: 80 },
+            height: { xs: 60, md: 80 },
             border: 2,
             borderColor: "primary.main",
           }}
@@ -144,7 +138,7 @@ const ProfileModal = ({ user, onClose }: ProfileModalProps) => {
               component="span"
               sx={{
                 textTransform: "none",
-                px: 3,
+                px: { xs: 1, md: 3 },
               }}
             >
               Change Photo
@@ -165,8 +159,12 @@ const ProfileModal = ({ user, onClose }: ProfileModalProps) => {
           onClick={handleSaveProfile}
           disabled={isLoading}
           sx={{
-            flex: 1,
-            py: 1.5,
+            flex: { md: 1 },
+            py: { md: 1.5 },
+            height: { xs: "2rem", md: "auto" },
+            width: { xs: "10rem", md: "auto" },
+            mx:{xs:1.5,md:0},
+            mb:{xs:2,md:0}
           }}
         >
           {isLoading ? <CircularProgress size={24} /> : "Save Changes"}
@@ -175,8 +173,10 @@ const ProfileModal = ({ user, onClose }: ProfileModalProps) => {
           variant="outlined"
           onClick={onClose}
           sx={{
-            flex: 1,
-            py: 1.5,
+            flex: { md: 1 },
+            py: { md: 1.5 },
+            height: { xs: "2rem", md: "auto" },
+            width: { xs: "10rem", md: "auto" },
           }}
         >
           Cancel
@@ -184,14 +184,13 @@ const ProfileModal = ({ user, onClose }: ProfileModalProps) => {
         <Snackbar
           open={successSnackbar}
           onClose={() => setSuccessSnackbar(false)}
-          autoHideDuration={3000}
+          autoHideDuration={2000}
           message="Profile updated successfully!"
           anchorOrigin={{ vertical: "top", horizontal: "center" }}
-          sx={{zIndex:3000}}
+          sx={{ zIndex: 3000 }}
         />
       </Box>
     </Box>
-
   );
 };
 

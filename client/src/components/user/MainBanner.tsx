@@ -4,14 +4,12 @@ import { RootState } from "../../store/store";
 
 const MainBanner = ({ sx }: { sx?: object }) => {
   const user = useSelector((state: RootState) => state.auth.user);
-  // console.log("user from redux", user);
   return (
     <Box
       sx={{
         ...sx,
         width: "100%",
         margin: "0 auto",
-        // bgcolor: "yellow",
         pt: 0,
         mt: 0,
       }}
@@ -54,7 +52,7 @@ const MainBanner = ({ sx }: { sx?: object }) => {
             bgcolor: "white",
             width: "90%",
             margin: "0 auto",
-            mt: { xs: 8, md: 9 },
+            mt: { xs: 5, md: 8 },
             pt: 2,
           }}
         ></Box>
@@ -68,7 +66,6 @@ const MainBanner = ({ sx }: { sx?: object }) => {
           justifyContent: "center",
           width: "100%",
           mt: 0,
-          // bgcolor: "palegoldenrod",
         }}
       >
         <Box
@@ -121,7 +118,7 @@ const MainBanner = ({ sx }: { sx?: object }) => {
           sx={{
             width: "100%",
             bgcolor: "#2667D1",
-            height: { xs: 50, md: 80 },
+            height: { xs: 40, md: 80 },
             mt: 0,
             display: "flex",
             justifyContent: "space-around",
@@ -135,11 +132,15 @@ const MainBanner = ({ sx }: { sx?: object }) => {
                 width: { xs: "25px", md: "40px" },
               }}
             >
-              <img
+              <Box
+                component="img"
                 src="/images/skill.png"
-                style={{ height: "100%", width: "100%" }}
                 alt="Skill Icon"
-              />
+                sx={{
+                  width: { xs: "80%", md: "100%" },
+                  height: { xs: "80%", md: "100%" },
+                }}
+              ></Box>
             </Box>
             <Typography
               sx={{
@@ -156,13 +157,18 @@ const MainBanner = ({ sx }: { sx?: object }) => {
               sx={{
                 height: { xs: "25px", md: "40px" },
                 width: { xs: "25px", md: "40px" },
+                pt: { xs: ".2rem" },
               }}
             >
-              <img
+              <Box
+                component="img"
                 src="/images/master.png"
-                style={{ height: "100%", width: "100%" }}
                 alt="Skill Icon"
-              />
+                sx={{
+                  width: { xs: "80%", md: "100%" },
+                  height: { xs: "80%", md: "100%" },
+                }}
+              ></Box>
             </Box>
             <Typography
               sx={{
@@ -180,13 +186,18 @@ const MainBanner = ({ sx }: { sx?: object }) => {
               sx={{
                 height: { xs: "25px", md: "40px" },
                 width: { xs: "25px", md: "40px" },
+                pt: { xs: ".1rem" },
               }}
             >
-              <img
+              <Box
+                component="img"
                 src="/images/grow.png"
-                style={{ height: "100%", width: "100%" }}
                 alt="Skill Icon"
-              />
+                sx={{
+                  width: { xs: "80%", md: "100%" },
+                  height: { xs: "80%", md: "100%" },
+                }}
+              ></Box>
             </Box>
             <Typography
               sx={{
@@ -206,11 +217,16 @@ const MainBanner = ({ sx }: { sx?: object }) => {
                 width: { xs: "25px", md: "40px" },
               }}
             >
-              <img
+              <Box
+                component="img"
                 src="/images/certification.png"
-                style={{ height: "100%", width: "100%" }}
                 alt="Skill Icon"
-              />
+                sx={{
+                  width: { xs: "80%", md: "100%" },
+                  height: { xs: "80%", md: "100%" },
+                  pt: { xs: ".2rem" },
+                }}
+              ></Box>
             </Box>
             <Typography
               sx={{

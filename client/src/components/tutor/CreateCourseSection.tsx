@@ -17,7 +17,6 @@ import { Upload as UploadIcon } from "@mui/icons-material";
 import React, { useEffect, useState } from "react";
 import { createCourse, fetchCategories } from "../../api/courseApi";
 import { useSelector } from "react-redux";
-// import { RootState } from "../../store/store";
 import { useNavigate } from "react-router-dom";
 import { IUser } from "../../types/types";
 import Navbar from "../shared/Navbar";
@@ -34,9 +33,6 @@ interface RootState {
   auth: AuthState;
 }
 
-
-
-
 const CreateCourseSection = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [status, setStatus] = useState<string>("");
@@ -44,21 +40,22 @@ const CreateCourseSection = () => {
   const tutor = useSelector((state: RootState) => state.auth.user);
   const tutorId = tutor?._id;
   const [searchQuery, setSearchQuery] = useState("");
-  const [payments, setPayments] = useState<[]>([])
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [payments, setPayments] = useState<[]>([]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
-      useEffect(() => {
-          const fecthTutorsPayment = async(tutorId: string) => {
-              const data = await tutorRecievable(tutorId)
-              setPayments(data)
-          }
-              if (tutorId) {
-                  fecthTutorsPayment(tutorId)
-              }
-      }, [])
+  useEffect(() => {
+    const fecthTutorsPayment = async (tutorId: string) => {
+      const data = await tutorRecievable(tutorId);
+      setPayments(data);
+    };
+    if (tutorId) {
+      fecthTutorsPayment(tutorId);
+    }
+  }, []);
 
   useEffect(() => {
     const getCategories = async () => {
@@ -97,14 +94,10 @@ const CreateCourseSection = () => {
     try {
       setStatus("loading");
       const response = await createCourse(formData);
-      // console.log("Course created successfully:", response);
-      // console.log("responsedata:", response.newCourse);
       const courseId = response?.newCourse?._id;
-      // console.log("Course id: ", courseId);
       navigate(`/tutors/add-lecture/${courseId}`);
     } catch (error) {
       setErrorMessage((error as Error).message);
-      console.log(error);
     } finally {
       setStatus("");
       setSubmitting(false);
@@ -112,10 +105,10 @@ const CreateCourseSection = () => {
   };
 
   return (
-    <Box sx={{ minWidth: "100vw", bgcolor: "#f1f5f9", py: 6 }}>
+    <Box sx={{ minWidth: "100vw", bgcolor: "#f1f5f9", py: {xs:3,md:6} }}>
       <Navbar searchQuery={searchQuery} onSearchChange={handleSearchChange} />
 
-      <Box sx={{ maxWidth: "900px", mx: "auto", mt: 6, px: { xs: 3, md: 0 } }}>
+      <Box sx={{ maxWidth: "900px", mx: "auto", mt: 6, px: { xs: 1, md: 0 } }}>
         <Card
           sx={{
             bgcolor: "white",
@@ -124,14 +117,15 @@ const CreateCourseSection = () => {
             overflow: "hidden",
           }}
         >
-          <CardContent sx={{ p: { xs: 4, md: 6 } }}>
+          <CardContent sx={{ p: { xs: 1, md: 6 } }}>
             <Typography
               variant="h4"
               sx={{
-                mb: 2,
+                mb: {xs:1,md:2},
                 fontWeight: "bold",
                 color: "#1e293b",
                 textAlign: "center",
+                fontSize:{xs:20,md:32}
               }}
             >
               Create a New Course
@@ -139,7 +133,9 @@ const CreateCourseSection = () => {
             <Typography
               variant="body1"
               color="text.secondary"
-              sx={{ mb: 4, textAlign: "center" }}
+              sx={{ mb: {xs:2,md:4}, textAlign: "center", 
+              fontSize:{xs:12,md:16}
+             }}
             >
               Share your knowledge and inspire learners by creating a compelling
               course.
@@ -315,10 +311,11 @@ const CreateCourseSection = () => {
                       type="submit"
                       disabled={isSubmitting || status === "loading"}
                       sx={{
-                        px: 5,
-                        py: 1.5,
+                        px: {xs:2,md:5},
+                        py: {xs:1,md:1.5},
                         borderRadius: 4,
                         bgcolor: "#2563eb",
+                        fontSize:{xs:12,md:14},
                         fontWeight: "bold",
                         "&:hover": {
                           bgcolor: "#1e40af",

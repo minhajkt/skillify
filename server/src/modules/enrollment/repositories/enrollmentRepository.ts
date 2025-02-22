@@ -1,13 +1,18 @@
 import mongoose from "mongoose";
 import Enrollment, { IEnrollment } from "../models/enrollmentModel";
 import { IEnrollmentRepository } from "./IEnrollmentRepository";
+import { BaseRepository } from "../../../common/baseRepository";
+import Course from '../../courses/models/courseModel'
 
+export class EnrollmentRepository extends BaseRepository<IEnrollment> implements IEnrollmentRepository {
+  constructor() {
+    super(Enrollment)
+  }
 
-export class EnrollmentRepository implements IEnrollmentRepository {
   async getAllEnrolledCoursesByStudent(
     id: string
   ): Promise<IEnrollment[] | null> {
-    // return await Enrollment.find({userId: id}).populate('courseId').populate("courseId.createdBy", "name").exec()
+
     return await Enrollment.find({ userId: id })
       .populate({
         path: "courseId",
@@ -20,7 +25,6 @@ export class EnrollmentRepository implements IEnrollmentRepository {
   }
 
   async getEnrolledStudents(tutorId: string): Promise<IEnrollment[] | null> {
-    console.log("Fetching students for tutor with ID:", tutorId);
 
     const enrollments = await Enrollment.aggregate([
       {
@@ -52,11 +56,7 @@ export class EnrollmentRepository implements IEnrollmentRepository {
       },
     ]);
 
-    // console.log("After lookup:", enrollments);
     return enrollments;
-    // console.log("Enrollments found:", enrollments);
-
-   
   }
 
   async countEnrollments(): Promise<number> {
@@ -95,7 +95,6 @@ export class EnrollmentRepository implements IEnrollmentRepository {
         },
       },
     ]);
-    // console.log(result);
 
     return result;
   }

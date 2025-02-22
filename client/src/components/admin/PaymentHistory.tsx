@@ -56,43 +56,83 @@ const PaymentHistory: React.FC = () => {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
+      <Typography
+        variant="h4"
+        sx={{
+          mb: { xs: 1, md: 3 },
+          fontSize: { xs: 18, md: 24 },
+          fontWeight: "bold",
+          ml: { xs: -2, md: 0 },
+        }}
+        gutterBottom
+      >
         Payments History
       </Typography>
-      <TableContainer component={Paper}>
+      <TableContainer
+        component={Paper}
+        sx={{ ml: { xs: -2, md: 0 }, width: { xs: "110%", md: "auto" } }}
+      >
         <Table>
           <TableHead>
             <TableRow>
               <TableCell>Name of Tutor</TableCell>
-              <TableCell>Course Name</TableCell>
-              <TableCell>New Enrollments</TableCell>
-              <TableCell>Price</TableCell>
+              <TableCell sx={{ display: { xs: "none", md: "table-cell" } }}>
+                Course Name
+              </TableCell>
+              <TableCell sx={{ display: { xs: "none", md: "table-cell" } }}>
+                New Enrollments
+              </TableCell>
+              <TableCell sx={{ display: { xs: "none", md: "table-cell" } }}>
+                Price
+              </TableCell>
               <TableCell>Paid Amount</TableCell>
               <TableCell>PaymentDate</TableCell>
-              <TableCell sx={{ textAlign: "center" }}>Status</TableCell>
+              <TableCell
+                sx={{
+                  textAlign: "center",
+                  display: { xs: "none", md: "table-cell" },
+                }}
+              >
+                Status
+              </TableCell>
               {/* <TableCell sx={{ textAlign: "center" }}>Actions</TableCell> */}
             </TableRow>
           </TableHead>
           <TableBody>
             {paymentHistory
+              .sort(
+                (a, b) =>
+                  new Date(b.paymentDate).getTime() -
+                  new Date(a.paymentDate).getTime()
+              )
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((payment, index) => (
                 <TableRow key={index}>
                   <TableCell>{payment.tutorId.name}</TableCell>
-                  <TableCell>{payment.courseId.title}</TableCell>
-                  <TableCell sx={{ textAlign: "center" }}>
+                  <TableCell sx={{ display: { xs: "none", md: "table-cell" } }}>
+                    {payment.courseId.title}
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      textAlign: "center",
+                      display: { xs: "none", md: "table-cell" },
+                    }}
+                  >
                     {payment.newEnrollments}
                   </TableCell>
-                  <TableCell>₹ {payment.courseId.price}</TableCell>
+                  <TableCell sx={{ display: { xs: "none", md: "table-cell" } }}>
+                    ₹ {payment.courseId.price}
+                  </TableCell>
                   <TableCell sx={{ textAlign: "center" }}>
                     ₹ {payment.amount}
                   </TableCell>
                   <TableCell sx={{ textAlign: "center" }}>
-                    {new Date(payment.paymentDate).toLocaleDateString('en-GB')}
+                    {new Date(payment.paymentDate).toLocaleDateString("en-GB")}
                   </TableCell>
                   <TableCell
                     sx={{
                       color: payment.status === "Completed" ? "green" : "red",
+                      display: { xs: "none", md: "table-cell" },
                     }}
                   >
                     {payment.status}
@@ -110,6 +150,18 @@ const PaymentHistory: React.FC = () => {
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleChangeRowsPerPage}
         rowsPerPageOptions={[5, 10, 20]}
+        sx={{
+          ".MuiTablePagination-root": {
+            fontSize: { xs: "0.75rem", md: ".8rem" },
+            padding: { xs: "4px", md: "16px" },
+          },
+          ".MuiTablePagination-selectLabel, .MuiTablePagination-input": {
+            fontSize: { xs: "0.75rem", md: ".85rem" },
+          },
+          ".MuiTablePagination-actions": {
+            transform: { xs: "scale(0.8)", md: "scale(1)" },
+          },
+        }}
       />
     </Box>
   );

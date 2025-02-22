@@ -1,14 +1,20 @@
+import { BaseRepository } from "../../../common/baseRepository";
 import Review, { IReview } from "../models/reivewModel";
 import { IReviewRepository } from "./IReviewRepository";
 
-export class ReviewRepository implements IReviewRepository {
+export class ReviewRepository extends BaseRepository<IReview> implements IReviewRepository {
+  constructor() {
+    super(Review)
+  }
   async addReview(reviewData: Partial<IReview>): Promise<IReview> {
-    const review = new Review(reviewData);
-    return await review.save();
+    // const review = new Review(reviewData);
+    // return await review.save();
+    return await this.create(reviewData)
   }
 
   async getReviews(courseId: string):Promise<IReview[]> {
     return await Review.find({courseId}).populate('userId', "name profilePhoto")
+    
   }
 
   async getUserReview(userId: string, courseId: string): Promise<IReview | null> {
@@ -23,7 +29,6 @@ async updateCourseReview(userId: string, courseId: string, reviewText: string, r
         }
         review.reviewText = reviewText
         review.rating = rating
-        // console.log("in back", review.reviewText, review.rating);
         
         await review.save()
         return review

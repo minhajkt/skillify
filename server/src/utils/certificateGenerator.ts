@@ -131,15 +131,17 @@ export const generateCertificate = async (
             folder: "certificates",
             resource_type: "raw",
             format: "pdf",
-            access_mode: "public"
+            access_mode: "authenticated",
+            type: "authenticated",
           });
 
           fs.unlinkSync(pdfPath);
-          resolve(uploadedFile.secure_url);
+          resolve(uploadedFile.public_id);
         } catch (uploadError) {
           reject(uploadError);
         }
       });
+      
 
       stream.on("error", (error) => reject(error));
     } catch (error) {

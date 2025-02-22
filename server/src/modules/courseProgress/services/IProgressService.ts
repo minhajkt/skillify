@@ -13,4 +13,5 @@ export interface IProgressService {
     userName: string,
     courseName: string
   ): Promise<string>;
+  downloadCertificate(certificateId: string, userId: string): Promise<string>;
 }

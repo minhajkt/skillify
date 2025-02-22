@@ -1,5 +1,4 @@
 
-
 import axios from "axios";
 import Cookies from "js-cookie";
 import { store } from "../store/store";
@@ -25,7 +24,6 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
   (response) => {
-    // console.log('responeeeeeeeeeee////', response);
     
     return response;
   },
@@ -33,17 +31,16 @@ axiosInstance.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       store.dispatch(logout())
       Cookies.remove("authToken");
-      // window.location.href = "/login";
       return
     }
       else if (
         error.response &&
         (error.response.status === 403)
       ) {
-        console.log("awaitign to refresh access token");
+        // console.log("awaitign to refresh access token");
 
         if (error.config._retry) {
-          console.error("Token refresh failed again. Logging out...");
+          // console.error("Token refresh failed again. Logging out...");
           store.dispatch(logout());
           Cookies.remove("authToken");
           window.location.href = "/login";
@@ -61,21 +58,24 @@ axiosInstance.interceptors.response.use(
             throw new Error("No new access token received"); 
           }
 
-          console.log("recieved accesstoken ", refreshResponse.data);
-
-          store.dispatch(
-            loginSuccess({
-              token: refreshResponse.data.token,
-              user: store.getState().auth.user,
-              isAuthenticated: true,
-            })
-          );
+          // console.log("recieved accesstoken ", refreshResponse.data);
+          const user = store.getState().auth.user;
+          if(user) {            
+            store.dispatch(
+              loginSuccess({
+                token: refreshResponse.data.token,
+                user: user,
+                isAuthenticated: true,
+              })
+            );
+          }
           error.config.headers[
             "Authorization"
           ] = `Bearer ${refreshResponse.data.token}`;
           return axiosInstance(error.config);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {
-          console.error("Refresh token invalid or expired", err);
+          // console.error("Refresh token invalid or expired", err);
           store.dispatch(logout());
           Cookies.remove("authToken");
           // window.location.href = "/login";

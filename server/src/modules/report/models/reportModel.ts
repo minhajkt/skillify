@@ -2,10 +2,11 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IReport extends Document {
-  userId: mongoose.Types.ObjectId;  
-  courseId: mongoose.Types.ObjectId;  
-  lectureId: mongoose.Types.ObjectId;  
-  reportDescription: string; 
+  userId: mongoose.Types.ObjectId;
+  courseId: mongoose.Types.ObjectId;
+  lectureId: mongoose.Types.ObjectId;
+  reportDescription: string;
+  isResolved: boolean;
 }
 
 const reportSchema: Schema = new Schema(

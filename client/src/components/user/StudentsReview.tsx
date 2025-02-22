@@ -10,7 +10,6 @@ const StudentsReview = () => {
   return (
     <Box
       sx={{
-        // bgcolor: "palegreen",
         width: "100%",
         paddingLeft: { xs: "0rem", sm: "4rem" },
         boxSizing: "border-box",

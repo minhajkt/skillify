@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Box,
   Typography,
@@ -33,6 +35,8 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import LazyLoad from "react-lazyload";
 import Notification from "./Notification";
 import VideoCall from "./VideoCall";
+import { IMessage } from "../../types/types";
+import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 
 interface EmojiClickData {
   native: string;
@@ -40,16 +44,7 @@ interface EmojiClickData {
 
 const ChatComponent = () => {
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<
-    Array<{
-      senderId: string;
-      recipientId: string;
-      message: string;
-      read: boolean;
-      readAt?: string | null;
-      timestamp?: string;
-    }>
-  >([]);
+  const [messages, setMessages] = useState<IMessage[]>([]);
   const { tutorId, studentId } = useParams<{
     tutorId?: string;
     studentId?: string;
@@ -60,12 +55,12 @@ const ChatComponent = () => {
   const [openModal, setOpenModal] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
-  const [messageToDelete, setMessageToDelete] = useState(null);
+  const [messageToDelete, setMessageToDelete] = useState<string | null>(null);
   const user = useSelector((state: RootState) => state.auth.user);
   const senderId = user?._id;
   const isTutor = user?.role === "tutor";
   const recipientId = isTutor ? studentId : tutorId;
-  const messagesEndRef = useRef(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [openNotification, setOpenNotification] = useState(false);
@@ -93,7 +88,7 @@ const ChatComponent = () => {
 
   useEffect(() => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "auto" });
+      messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
     }
   }, [messages]);
 
@@ -104,11 +99,9 @@ const ChatComponent = () => {
         let data;
         if (isTutor) {
           data = await fetchStudentById(recipientId);
-          // console.log('recipient is', data.role)
           setRecipientRole("user");
         } else {
           data = await fetchTutorById(recipientId);
-          // console.log('recipient is', data.role)
           setRecipientRole("tutor");
         }
         setRecipientName(data?.name || "Unknown User");
@@ -127,7 +120,7 @@ const ChatComponent = () => {
 
     const fetchMessages = async () => {
       try {
-        const response = await getMessages(senderId, recipientId);
+        const response:IMessage[] = await getMessages(senderId, recipientId);
         setMessages(response);
         if (response.some((msg) => msg.senderId === recipientId && !msg.read)) {
           socket.emit("message_read", { senderId, recipientId });
@@ -165,11 +158,6 @@ const ChatComponent = () => {
     socket.on(
       "message_read",
       ({ senderId: msgSenderId, recipientId: msgRecipientId, readAt }) => {
-        console.log("Message read event received", {
-          msgSenderId,
-          msgRecipientId,
-          readAt,
-        });
         setMessages((prevMessages) =>
           prevMessages.map((msg) => {
             if (
@@ -220,24 +208,23 @@ const ChatComponent = () => {
     }
   };
 
-  const createPeerConnection = async (stream) => {
+  const createPeerConnection = async (stream: MediaStream) => {
     const peer = new RTCPeerConnection({
       iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
     });
 
-    stream.getTracks().forEach((track) => {
+    stream.getTracks().forEach((track: MediaStreamTrack) => {
       peer.addTrack(track, stream);
     });
 
     peer.ontrack = (event) => {
-      console.log("Received remote track");
       setRemoteStream(event.streams[0]);
     };
 
     peer.onicecandidate = (event) => {
       if (event.candidate) {
         socket.emit("ice_candidate", {
-          senderId: user._id,
+          senderId: user?._id,
           recipientId,
           candidate: event.candidate,
         });
@@ -259,7 +246,7 @@ const ChatComponent = () => {
       await peer.setLocalDescription(offer);
 
       socket.emit("video_call_offer", {
-        senderId: user._id,
+        senderId: user?._id,
         recipientId,
         offer,
       });
@@ -279,15 +266,15 @@ const ChatComponent = () => {
       setPeerConnection(peer);
 
       await peer.setRemoteDescription(
-        new RTCSessionDescription(callOffer.offer)
+        new RTCSessionDescription(callOffer?.offer)
       );
 
       const answer = await peer.createAnswer();
       await peer.setLocalDescription(answer);
 
       socket.emit("video_call_answer", {
-        senderId: user._id,
-        recipientId: callOffer.senderId,
+        senderId: user?._id,
+        recipientId: callOffer?.senderId,
         answer,
       });
 
@@ -324,7 +311,7 @@ const ChatComponent = () => {
     socket.on(
       "video_call_offer",
       ({ senderId, recipientId: receiverId, offer }) => {
-        if (receiverId === user._id) {
+        if (receiverId === user?._id) {
           setIncomingCall(true);
           setCallOffer({ senderId, offer });
         }
@@ -334,7 +321,7 @@ const ChatComponent = () => {
     socket.on(
       "video_call_answer",
       async ({ senderId, recipientId: receiverId, answer }) => {
-        if (receiverId === user._id && peerConnection) {
+        if (receiverId === user?._id && peerConnection) {
           try {
             await peerConnection.setRemoteDescription(
               new RTCSessionDescription(answer)
@@ -349,7 +336,7 @@ const ChatComponent = () => {
     socket.on(
       "ice_candidate",
       async ({ senderId, recipientId: receiverId, candidate }) => {
-        if (receiverId === user._id && peerConnection) {
+        if (receiverId === user?._id && peerConnection) {
           try {
             await peerConnection.addIceCandidate(
               new RTCIceCandidate(candidate)
@@ -362,8 +349,7 @@ const ChatComponent = () => {
     );
 
     socket.on("call_ended", ({ senderId, recipientId: receiverId }) => {
-      if (receiverId === user._id) {
-        console.log("Call ended by the other user.");
+      if (receiverId === user?._id) {
         if (peerConnection) peerConnection.close();
 
         if (localStream) {
@@ -380,8 +366,7 @@ const ChatComponent = () => {
     });
 
     socket.on("call_rejected", ({ senderId, recipientId }) => {
-      if (recipientId === user._id) {
-        console.log("The other user rejected the call.");
+      if (recipientId === user?._id) {
         if (localStream) {
           localStream.getTracks().forEach((track) => track.stop());
         }
@@ -399,7 +384,7 @@ const ChatComponent = () => {
       socket.off("call_ended");
       socket.off("call_rejected");
     };
-  }, [socket, user._id, peerConnection]);
+  }, [socket, user?._id, peerConnection]);
 
   const endVideoCall = () => {
     if (peerConnection) {
@@ -409,7 +394,7 @@ const ChatComponent = () => {
       localStream.getTracks().forEach((track) => track.stop());
     }
 
-    socket.emit("call_ended", { senderId: user._id, recipientId });
+    socket.emit("call_ended", { senderId: user?._id, recipientId });
 
     setIsVideoCallActive(false);
     setLocalStream(null);
@@ -427,12 +412,11 @@ const ChatComponent = () => {
       localStream.getTracks().forEach((track) => track.stop());
     }
 
-    socket.emit("call_rejected", { senderId: user._id, recipientId });
+    socket.emit("call_rejected", { senderId: user?._id, recipientId });
 
     setIsVideoCallActive(false);
     setLocalStream(null);
     setRemoteStream(null);
-    // setSnackbar(true);
   };
 
   const handleNotificationClose = () => {
@@ -460,7 +444,7 @@ const ChatComponent = () => {
         recipientId,
         message: message.trim(),
         fileUrl: null,
-        fileType: null,
+        fileType: null as string | null,
         read: false,
         timestamp: new Date().toISOString(),
       };
@@ -494,14 +478,13 @@ const ChatComponent = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files ? e.target.files[0] : null;
     setFile(file);
-    console.log(file);
     if (file) {
       const previewUrl = URL.createObjectURL(file);
       setFilePreview(previewUrl);
     }
   };
 
-  const handleDeleteClick = (messageId) => {
+  const handleDeleteClick = (messageId: string) => {
     setMessageToDelete(messageId);
     setOpenModal(true);
   };
@@ -518,7 +501,7 @@ const ChatComponent = () => {
     setOpenModal(false);
     setMessageToDelete(null);
   };
-  const handleDeleteMessage = (messageId) => {
+  const handleDeleteMessage = (messageId:string) => {
     socket.emit("delete_message", { messageId, senderId });
   };
 
@@ -557,6 +540,20 @@ const ChatComponent = () => {
           alignItems: "center",
         }}
       >
+        <IconButton
+          sx={{ display: { xs: "block", md: "none" } }}
+          onClick={() => {
+            if(user?.role === 'user') {
+              navigate('/messages')
+            }else {
+              navigate('/tutors/contacts')
+            }
+          }
+            
+            }
+        >
+          <ArrowBackOutlinedIcon />
+        </IconButton>
         <Avatar>{recipientName[0]}</Avatar>
         <Typography sx={{ ml: 2 }}>{recipientName}</Typography>
         <Box sx={{ ml: "auto" }}>
@@ -578,6 +575,7 @@ const ChatComponent = () => {
         sx={{
           flex: 1,
           overflow: "auto",
+          // overflowX:'hidden',
           backgroundImage: "url('/images/bgbbg.jpg')",
         }}
       >
@@ -620,7 +618,7 @@ const ChatComponent = () => {
                   >
                     <Typography
                       variant="body2"
-                      sx={{ wordBreak: "break-word" }}
+                      sx={{ wordBreak: "break-word", mr: 1.5 }}
                     >
                       {msg.message === "This message was deleted" ? (
                         <Typography
@@ -669,9 +667,11 @@ const ChatComponent = () => {
                           overflow={true}
                           placeholder={
                             <Box
-                              style={{
-                                width: "300px",
-                                maxWidth: "600px",
+                              sx={{
+                                // width: {xs:'200px',md:"300px"},
+                                // maxWidth: {xs:'200px',md:"600px"},
+                                width: "auto",
+                                maxWidth: "auto",
                                 height: "auto",
                                 background: "#f0f0f0",
                                 borderRadius: "8px",
@@ -749,10 +749,12 @@ const ChatComponent = () => {
                         lineHeight: 1,
                       }}
                     >
-                      {new Date(msg.timestamp).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {msg.timestamp
+                        ? new Date(msg.timestamp).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : "N/A"}
                     </Typography>
 
                     {isSender && msg.message !== "This message was deleted" && (
@@ -788,7 +790,7 @@ const ChatComponent = () => {
 
       <Box
         sx={{
-          p: 2,
+          p: { xs: 0, md: 2 },
           pt: 0,
           borderTop: 1,
           borderColor: "divider",
@@ -803,13 +805,23 @@ const ChatComponent = () => {
               <img
                 src={filePreview}
                 alt="Preview"
-                style={{ width: 200, height: 200, borderRadius: 0 }}
+                style={{
+                  width: "100%",
+                  maxWidth: "200px",
+                  height: "auto",
+                  borderRadius: 0,
+                }}
               />
             ) : (
               <video
                 src={filePreview}
                 controls
-                style={{ width: 200, height: 200, borderRadius: 0 }}
+                style={{
+                  width: "100%",
+                  maxWidth: "200px",
+                  height: "auto",
+                  borderRadius: 0,
+                }}
               />
             )}
             <IconButton
@@ -900,7 +912,12 @@ const ChatComponent = () => {
               },
             }}
           >
-            {loading ? "" : "Send"}
+            <Box
+              component="span"
+              sx={{ display: { xs: "none", sm: "inline" } }}
+            >
+              Send
+            </Box>
           </Button>
         </Box>
       </Box>
@@ -910,11 +927,15 @@ const ChatComponent = () => {
         aria-labelledby="delete-message-dialog-title"
         aria-describedby="delete-message-dialog-description"
       >
-        <DialogTitle id="delete-message-dialog-title">
+        <DialogTitle id="delete-message-dialog-title" 
+        sx={{fontSize:{xs:16,md:20}}}
+        >
           Confirm Delete
         </DialogTitle>
         <DialogContent>
-          <DialogContentText id="delete-message-dialog-description">
+          <DialogContentText id="delete-message-dialog-description" 
+          sx={{fontSize:{xs:12,md:16},mb:-2}}
+          >
             Are you sure you want to delete this message? This action cannot be
             undone.
           </DialogContentText>
@@ -933,3 +954,4 @@ const ChatComponent = () => {
 };
 
 export default ChatComponent;
+

@@ -20,11 +20,11 @@ const Login = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [openSnackbar, setOpenSnackbar] = useState(false);
-  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated)
-  
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated
+  );
+
   const navigate = useNavigate();
-
-
 
   useEffect(() => {
     if (localStorage.getItem("logoutSuccess") === "true") {
@@ -33,7 +33,6 @@ const Login = () => {
     }
   }, []);
 
-  
   if (isAuthenticated) {
     return <Navigate to={"/home"} />;
   }
@@ -68,9 +67,9 @@ const Login = () => {
         const userData = await googleSignIn(credentialResponse.credential);
         navigate("/home");
       }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       setErrorMessage("Your account is temporarily suspended");
-      console.error("Google sign in error:", error);
     }
   };
 
@@ -178,7 +177,12 @@ const Login = () => {
                 <Typography
                   variant="body2"
                   textAlign="end"
-                  sx={{ marginBottom: 1, color: "#1e90ff", cursor: "pointer" }}
+                  sx={{
+                    marginBottom: 1,
+                    color: "#1e90ff",
+                    cursor: "pointer",
+                    fontSize: { xs: 10, md: 14 },
+                  }}
                   onClick={handleOpenModal}
                 >
                   Forgot password?

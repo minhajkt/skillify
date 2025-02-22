@@ -25,7 +25,6 @@ const Category = () => {
         icon: icons[cat]
       }))
       setCategories(formattedResponse)
-      // console.log('cat is ca', formattedResponse);
       
     }
     getCategories()
@@ -34,7 +33,6 @@ const Category = () => {
   return (
     <Box
       sx={{
-        // bgcolor: "palegreen",
         width: "100%",
         paddingLeft: { xs: "0rem", sm: "4rem" },
         boxSizing: "border-box",
@@ -49,15 +47,19 @@ const Category = () => {
           <Box sx={{ mt: 3 }}>
             <Typography
               variant="h5"
-              sx={{ fontSize: { xs: "1.2rem", md: "1.8rem" } }}
-              fontWeight={"bold"}
+              sx={{ fontSize: { xs: "1.1rem", md: "1.8rem" },
+            ml:{xs:1,md:0},
+            fontWeight:{xs:600,md:600}
+            }}
             >
               All the skills you need in one place
             </Typography>
           </Box>
           <Box>
             <Typography
-              sx={{ fontSize: { xs: ".8rem", md: "1rem", color: "#6A6F73" } }}
+              sx={{ fontSize: { xs: ".8rem", md: "1rem", color: "#6A6F73" },
+             ml:{xs:1,md:0}
+             }}
             >
               From critical skills to technical topics,{" "}
               <span style={{ color: "#999999", fontWeight: "bold" }}>
@@ -70,7 +72,9 @@ const Category = () => {
           <Box sx={{ mt: 3 }}>
             <Typography
               variant="h5"
-              sx={{ fontSize: { xs: "1.2rem", md: "1.8rem", mb: 3 } }}
+              sx={{ fontSize: { xs: "1.2rem", md: "1.8rem", mb: 3 },
+            ml:{xs:1,md:0}
+             }}
               fontWeight={"bold"}
             >
               Top Categories
@@ -85,7 +89,7 @@ const Category = () => {
                       flexDirection: "row",
                       alignItems: "center",
                       justifyContent: "center",
-                      ml: { xs: 4, sm: 0 },
+                      ml: { xs: 3, sm: 0 },
                       border: "1px solid #ddd",
                       borderRadius: "8px",
                       padding: { xs: 1, sm: 2 },
@@ -110,7 +114,7 @@ const Category = () => {
                     />
                     <Typography
                       variant="body1"
-                      sx={{ fontSize: { xs: 7, sm: 12, md: 17 } }}
+                      sx={{ fontSize: { xs: 10, sm: 12, md: 17 } }}
                       fontWeight="medium"
                     >
                       {category.name}

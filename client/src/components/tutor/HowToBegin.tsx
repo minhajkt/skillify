@@ -1,11 +1,42 @@
 import { Box, Grid, Typography } from "@mui/material";
 
 const HowToBegin = () => {
-        const content = [
-        {head:"Plan your curriculum",name: (<>You start with your passion and knowledge. Then choose a promising topic with the help of our Marketplace Insights tool. <br /><br /> The way that you teach — what you bring to it — is up to you.</>)},
-        {head:"Record Your Video",name: (<>Use basic tools like a smartphone or a DSLR camera. Add a good microphone and you’re ready to start.<br /><br /> If you don’t like being on camera, just capture your screen. Either way, we recommend two hours or more of video for a course.</>)},
-        {head:"Launch Your Course",name: (<>Gather your first ratings and reviews by promoting your course through social media and your professional networks.<br /><br /> Your course will be discoverable in our marketplace where you earn revenue from each paid enrollment.</>)}
-    ]
+  const content = [
+    {
+      head: "Plan your curriculum",
+      name: (
+        <>
+          You start with your passion and knowledge. Then choose a promising
+          topic with the help of our Marketplace Insights tool. <br />
+          <br /> The way that you teach — what you bring to it — is up to you.
+        </>
+      ),
+    },
+    {
+      head: "Record Your Video",
+      name: (
+        <>
+          Use basic tools like a smartphone or a DSLR camera. Add a good
+          microphone and you’re ready to start.
+          <br />
+          <br /> If you don’t like being on camera, just capture your screen.
+          Either way, we recommend two hours or more of video for a course.
+        </>
+      ),
+    },
+    {
+      head: "Launch Your Course",
+      name: (
+        <>
+          Gather your first ratings and reviews by promoting your course through
+          social media and your professional networks.
+          <br />
+          <br /> Your course will be discoverable in our marketplace where you
+          earn revenue from each paid enrollment.
+        </>
+      ),
+    },
+  ];
   return (
     <Box
       sx={{
@@ -26,7 +57,7 @@ const HowToBegin = () => {
       >
         <Typography
           variant="h5"
-          sx={{ fontWeight: "bold", mt: 2, textAlign: "left" }}
+          sx={{ fontWeight: {xs:'medium',md:"bold"}, mt: 2, textAlign: "left" }}
         >
           How to Begin
         </Typography>
@@ -39,7 +70,7 @@ const HowToBegin = () => {
                   flexDirection: { xs: "row", sm: "column" },
                   alignItems: { xs: "start", sm: "center" },
                   justifyContent: "center",
-                  ml: { xs: 4, sm: 0 },
+                  ml: { xs: 2, md: 0 },
                   borderRadius: "8px",
                   height: "auto",
                   width: { xs: "90%", sm: "80%" },
@@ -48,12 +79,12 @@ const HowToBegin = () => {
                     backgroundColor: "#e0e0e0",
                   },
                   "& .MuiBox-root": {
-                    padding: 0,
+                    padding: 0.2,
                     margin: 0,
+                    borderRadius:'10px'
                   },
                   cursor: "pointer",
                 }}
-                onClick={() => console.log("clicked")}
               >
                 <Box
                   sx={{
@@ -97,6 +128,6 @@ const HowToBegin = () => {
       </Box>
     </Box>
   );
-}
+};
 
-export default HowToBegin
+export default HowToBegin;

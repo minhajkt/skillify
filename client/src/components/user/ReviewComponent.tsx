@@ -6,6 +6,8 @@ import { ReviewComponentProps, IReview } from "../../types/types";
 
 const ReviewComponent:React.FC<ReviewComponentProps> = ({ courseId, setAverageRating, setTotalReviews }) => {
   const [reviews, setReviews] = useState<IReview[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [error, setError] = useState('')
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -14,15 +16,16 @@ const ReviewComponent:React.FC<ReviewComponentProps> = ({ courseId, setAverageRa
         setReviews(reviewData.reviews);
         setAverageRating(reviewData.averageRating);
         setTotalReviews(reviewData.totalReviews);
-        console.log("reviewdata is ", reviewData.reviews);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
-        console.error("Failed to fetch reviews:", error);
+        setError("Failed to fetch reviews");
       }
     };
     fetchReviews();
   }, [courseId]);
+  
   return (
-    <Box sx={{ mt: 6, mb: 4, px: { xs: 0, md: 14 } }}>
+    <Box sx={{ mt: 6, mb: 4, px: { xs: 1, md: 14 } }}>
       <Typography
         variant="h5"
         fontWeight="600"

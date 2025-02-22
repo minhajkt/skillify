@@ -5,7 +5,6 @@ import { RootState } from "../../store/store";
 
 const TutorBanner = ({ sx }: { sx?: object }) => {
   const user = useSelector((state: RootState) => state.auth.user);
-  // console.log("user from redux", user);
     const navigate = useNavigate()
 
   return (
@@ -14,7 +13,6 @@ const TutorBanner = ({ sx }: { sx?: object }) => {
         ...sx,
         width: "100%",
         margin: "0 auto",
-        // bgcolor: "yellow",
         pt: 0,
         mt: 0,
       }}
@@ -57,7 +55,7 @@ const TutorBanner = ({ sx }: { sx?: object }) => {
             bgcolor: "white",
             width: "90%",
             margin: "0 auto",
-            mt: { xs: 8, md: 9 },
+            mt: { xs: 5, md: 8 },
             pt: 2,
           }}
         ></Box>
@@ -70,7 +68,6 @@ const TutorBanner = ({ sx }: { sx?: object }) => {
           justifyContent: "center",
           width: "100%",
           mt: 0,
-          // bgcolor: "palegoldenrod",
         }}
       >
         <Box
@@ -117,14 +114,17 @@ const TutorBanner = ({ sx }: { sx?: object }) => {
               Become an instructor and change lives — including your own
             </Typography>
           </Box>
-          <Box sx={{position: "relative", top:"20%", left:"10%"}}>
+          
+          <Box sx={{position: "relative", top:"20%", left:{md:"10%"}}}>
             {!user? (
-            <Button variant="contained" sx={{mt:3, bgcolor:"black", fontWeight:'bold',display:{sm:'block'}}}
+            <Button variant="contained" sx={{mt:3,ml:{xs:4,md:0}, bgcolor:"black", fontWeight:'bold',display:{sm:'block'},fontSize:{xs:10,md:14}}}
             onClick={() =>navigate("/tutors/login")}>
                 Get Started
             </Button>
             ) : (
-            <Button variant="contained" sx={{mt:3, bgcolor:"black", fontWeight:'bold'}}
+            <Button variant="contained" sx={{mt:3,ml:{xs:4,md:0}, bgcolor:"black", fontWeight:'bold',
+              fontSize:{xs:10,md:14}
+             }}
             onClick={() =>navigate("/tutors/create-course")}>
                 Create Course
             </Button>

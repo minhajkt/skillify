@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
 import { IReportService } from "../services/IReportService";
 import { IReportController } from "./IReportController";
+import { AuthRequest } from "../../../types/custom";
+import { HttpStatus } from "../../../constants/httpStatus";
+import { MESSAGES } from "../../../constants/messages";
 
 class ReportController implements IReportController {
   private reportService: IReportService;
@@ -9,18 +12,21 @@ class ReportController implements IReportController {
     this.reportService = reportService;
   }
 
-  async reportLecture(req: Request, res: Response): Promise<void> {
+  async reportLecture(req: AuthRequest, res: Response): Promise<void> {
     const { courseId, lectureId, reportDescription } = req.body;
     if (!courseId || !lectureId) {
        res
-        .status(400)
-        .json({ message: "Course ID and Lecture ID are required." });
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ message: MESSAGES.NO_COURSE_LECTURE_ID });
         return
     }
-    console.log('route hit');
     
-    const userId = req.user.id;
-    console.log(userId);
+    const userId = req.user?.id;
+    
+    if (!userId) {
+      res.status(HttpStatus.BAD_REQUEST).json({ message: MESSAGES.USERID_NOT_FOUND });
+      return;
+    }
     
 
     try {
@@ -30,22 +36,19 @@ class ReportController implements IReportController {
         reportDescription,
         userId
       );
-      res.status(201).json({ message: "Report created successfully", report });
+      res.status(HttpStatus.CREATED).json({ message: MESSAGES.REPORT_CREATED, report });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Failed to create report" });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: MESSAGES.UNEXPECTED_ERROR });
     }
   }
 
   async getReports(req: Request, res: Response): Promise<void> {
     try {
-        // console.log('fetching reports from backend');
-        
       const reports = await this.reportService.getReports();
-      res.status(200).json(reports);
+      res.status(HttpStatus.OK).json(reports);
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Failed to retrieve reports" });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: MESSAGES.UNEXPECTED_ERROR });
+
     }
   }
 }

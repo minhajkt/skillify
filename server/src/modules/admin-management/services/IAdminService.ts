@@ -11,5 +11,5 @@ export interface IAdminService {
   getCourseRequests(): Promise<ICourse[]>;
   updateCourseApproval(id: string, status: string): Promise<ICourse | null>;
   getAllCourse(): Promise<ICourse[]>;
-  
+  updateCourseEditApproval(id: string,editStatus: string): Promise<ICourse | null>;
 }

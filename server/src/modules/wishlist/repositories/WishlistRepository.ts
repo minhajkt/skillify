@@ -1,8 +1,12 @@
+import { BaseRepository } from "../../../common/baseRepository";
 import Wishlist, { IWishlist } from "../models/wishlistModel";
 import { IWishlistRepository } from "./IWishlistRepository";
 
 
-export class WishlistRepository implements IWishlistRepository {
+export class WishlistRepository extends BaseRepository<IWishlist> implements IWishlistRepository {
+  constructor() {
+      super(Wishlist)
+    }
   async findWishlistByUserId(userId: string): Promise<IWishlist | null> {
     return Wishlist.findOne({ userId });
   }

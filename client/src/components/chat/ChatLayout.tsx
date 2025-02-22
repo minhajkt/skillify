@@ -5,12 +5,11 @@ import { useParams } from "react-router-dom";
 
 const ChatLayout = () => {
   const { tutorId } = useParams<{ tutorId: string }>();
-
   return (
     <Box sx={{ display: "flex", height: "100vh" }}>
       <Box
         sx={{
-          width: "30%", 
+          width: "30%",
           borderRight: "1px solid #ddd",
           overflowY: "auto",
           backgroundColor: "#f8f9fa",
@@ -21,7 +20,7 @@ const ChatLayout = () => {
 
       <Box
         sx={{
-          flex: 1, 
+          flex: 1,
           display: "flex",
           flexDirection: "column",
           backgroundColor: "#ffffff",

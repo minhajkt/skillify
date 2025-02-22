@@ -4,6 +4,9 @@ import { EnrollmentService } from "../services/enrollmentService";
 import Enrollment from '../models/enrollmentModel'
 import { IEnrollmentService } from "../services/IEnrollmentService";
 import { IEnrollmentController } from "./IEnrollmentController";
+import { Users } from "../../../types/interfaces";
+import { HttpStatus } from "../../../constants/httpStatus";
+import { MESSAGES } from "../../../constants/messages";
 
 
 
@@ -18,27 +21,23 @@ export class enrollmentController implements IEnrollmentController {
     res: Response
   ): Promise<void> {
     try {
-      // console.log("Entering getAllEnrolledCoursesByStudent controller");
-      const id = req.user?.id;
+      const id = (req.user as Users)?.id;
       if (!id) {
-        res.status(400).json({ message: "User ID is required" });
+        res.status(HttpStatus.BAD_REQUEST).json({ message: MESSAGES.USER_ID_REQUIRED });
         return;
       }
-      // console.log("getAllEnrolledCoursesByStudent,, user details", id );
 
       const enrolledCourses =
         await this.enrollmentService.getAllEnrolledCoursesByStudent(id);
 
       if (!enrolledCourses || enrolledCourses.length === 0) {
-        res.status(404).json("No courses enrolled");
+        res.status(HttpStatus.NOT_FOUND).json(MESSAGES.NOT_ENROLLED);
       }
 
-      res.status(200).json(enrolledCourses);
+      res.status(HttpStatus.OK).json(enrolledCourses);
     } catch (error) {
-      console.log("no course");
-
-      res.status(500).json({
-        message: "An unexpected error occured.",
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        message: MESSAGES.UNEXPECTED_ERROR,
         error: (error as Error).message,
       });
     }
@@ -46,10 +45,10 @@ export class enrollmentController implements IEnrollmentController {
 
   async getTutorsStudents(req: Request, res: Response): Promise<void> {
     try {
-      const tutorId = req.user?.id;
+      const tutorId = (req.user as Users)?.id;
 
       if (!tutorId) {
-        res.status(400).json({ message: "User ID is required" });
+        res.status(HttpStatus.BAD_REQUEST).json({ message: MESSAGES.USER_ID_REQUIRED });
         return;
       }
 
@@ -58,13 +57,13 @@ export class enrollmentController implements IEnrollmentController {
       );
 
       if (!enrolledStudents || enrolledStudents.length === 0) {
-        res.status(404).json("No students enrolled");
+        res.status(HttpStatus.NOT_FOUND).json(MESSAGES.NOT_ENROLLED);
       }
 
-      res.status(200).json(enrolledStudents);
+      res.status(HttpStatus.OK).json(enrolledStudents);
     } catch (error) {
-      res.status(500).json({
-        message: "An unexpected error occured.",
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        message: MESSAGES.UNEXPECTED_ERROR,
         error: (error as Error).message,
       });
     }
@@ -74,9 +73,9 @@ export class enrollmentController implements IEnrollmentController {
     try {
       const totalStudents =
         await this.enrollmentService.totalEnrolledStudents();
-      res.status(200).json({ total: totalStudents });
+      res.status(HttpStatus.OK).json({ total: totalStudents });
     } catch (error) {
-      res.status(500).json("Failed to fetch enrollment details");
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({message: MESSAGES.UNEXPECTED_ERROR});
     }
   }
 
@@ -84,13 +83,12 @@ export class enrollmentController implements IEnrollmentController {
     try {
       const totalRevenue = await this.enrollmentService.totalRevenue();
       if (!totalRevenue) {
-        res.status(404).json("Cannot find total revenue");
+        res.status(HttpStatus.NOT_FOUND).json({message:MESSAGES.REVENUE_NOT_FOUND});
         return;
       }
-      res.status(200).json(totalRevenue);
+      res.status(HttpStatus.OK).json(totalRevenue);
     } catch (error) {
-      console.log("error occured while finding total revenue", error);
-      res.status(500).json("An unexpected error occured");
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({message: MESSAGES.UNEXPECTED_ERROR});
     }
   }
 
@@ -98,15 +96,13 @@ export class enrollmentController implements IEnrollmentController {
     try {
       const courseStrength = await this.enrollmentService.courseStrength();
       if (!courseStrength) {
-        res.status(404).json("No course strength found");
+        res.status(HttpStatus.NOT_FOUND).json({message: MESSAGES.NO_COURSE_STRENGTH});
         return;
       }
-      // console.log(courseStrength);
 
-      res.status(200).json(courseStrength);
+      res.status(HttpStatus.OK).json(courseStrength);
     } catch (error) {
-      console.log("Failed to get course Strength", error);
-      res.status(500).json("An unexpected error occured");
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({message: MESSAGES.UNEXPECTED_ERROR});
     }
   }
 
@@ -118,12 +114,9 @@ export class enrollmentController implements IEnrollmentController {
         startDate as string,
         endDate as string
       );
-      res.status(200).json(reportData);
+      res.status(HttpStatus.OK).json(reportData);
     } catch (error) {
-      console.log("Error fetching revenue report", error);
-      res.status(500).json("An unexpected error occurred");
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({message: MESSAGES.UNEXPECTED_ERROR});
     }
-  }
-
-  
+  }  
 }

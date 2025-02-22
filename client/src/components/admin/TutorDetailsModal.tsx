@@ -27,7 +27,7 @@ const TutorDetailsModal: React.FC<TutorDetailModalProps> = ({
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          width: 400,
+          width: {xs:350,md:400},
           bgcolor: "#FAFAFA",
           border: "2px solid #000",
           borderRadius: 1,

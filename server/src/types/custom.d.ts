@@ -1,5 +1,12 @@
 import { Request } from "express";
 
+interface AuthRequest extends Request {
+  user?: {
+    id: string;
+    _id: string
+  };
+}
+
 // declare global {
 //   namespace Express {
 //     interface User {
