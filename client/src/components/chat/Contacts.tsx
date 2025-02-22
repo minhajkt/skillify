@@ -95,7 +95,7 @@ const Contacts = () => {
             <Typography variant="h6" sx={{ml:{xs:3, md:0}}}>Your Tutors</Typography>
           </Box>
           <Box sx={{ overflow: "auto", height: "calc(100vh - 70px)" }}>
-            {myTutors.map((tutor, index) => (
+            {myTutors.length > 0 ? ( myTutors.map((tutor, index) => (
               <ContactItem
                 key={index}
                 isSelected={tutorId === tutor._id}
@@ -120,7 +120,12 @@ const Contacts = () => {
                   </Box>
                 </Box>
               </ContactItem>
-            ))}
+            )) ): (
+            <Typography sx={{ textAlign: "center", mt: 2, fontSize:{xs:14,md:"auto"} }} color="text.secondary">
+              No contacts found <br />
+              Enroll to a course to connect with your tutor
+            </Typography>
+          ) }
           </Box>
         </ContactsList>
 

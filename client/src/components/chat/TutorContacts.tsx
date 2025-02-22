@@ -105,31 +105,45 @@ const TutorContacts = () => {
           </Typography>
         </Box>
         <Box sx={{ overflow: "auto", height: "calc(100vh - 70px)" }}>
-          {myStudents.map((student, index) => (
-            <ContactItem
-              key={index}
-              isSelected={studentId === student?._id}
-              onClick={() => student?._id && handleChatClick(student._id)}
-            >
-              <Box sx={{ display: "flex", alignItems: "center" }}>
-                <Avatar>{student?.name[0].toUpperCase()}</Avatar>
-                {student?._id && unreadCounts[student._id] > 0 && (
-                  <Box>
-                    <Badge
-                      badgeContent={unreadCounts[student._id]}
-                      color="primary"
-                    />
+          {myStudents.length > 0 ? (
+            myStudents.map((student, index) => (
+              <ContactItem
+                key={index}
+                isSelected={studentId === student?._id}
+                onClick={() => student?._id && handleChatClick(student._id)}
+              >
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <Avatar>{student?.name[0].toUpperCase()}</Avatar>
+                  {student?._id && unreadCounts[student._id] > 0 && (
+                    <Box>
+                      <Badge
+                        badgeContent={unreadCounts[student._id]}
+                        color="primary"
+                      />
+                    </Box>
+                  )}
+                  <Box sx={{ ml: 2 }}>
+                    <Typography variant="subtitle1">{student?.name}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {student.courseId?.title}
+                    </Typography>
                   </Box>
-                )}
-                <Box sx={{ ml: 2 }}>
-                  <Typography variant="subtitle1">{student?.name}</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {student.courseId?.title}
-                  </Typography>
                 </Box>
-              </Box>
-            </ContactItem>
-          ))}
+              </ContactItem>
+            ))
+          ) : (
+            <Typography
+              sx={{
+                textAlign: "center",
+                mt: 2,
+                fontSize: { xs: 14, md: "auto" },
+              }}
+              color="text.secondary"
+            >
+              No contacts found <br />
+              You will see your students ones they enroll
+            </Typography>
+          )}
         </Box>
       </ContactsList>
 

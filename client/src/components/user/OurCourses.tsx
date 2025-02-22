@@ -315,7 +315,9 @@ const OurCourses = ({ searchQuery }: NavbarProps) => {
         </Typography>
 
         <Grid container spacing={{ xs: 0, sm: 4, md: 0 }} sx={{ padding: 2 }}>
-          {sortedCourses.slice(0, visibleCourses).map((course, index) => (
+          {sortedCourses
+          // .sort((a,b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+          .slice(0, visibleCourses).map((course, index) => (
             <Grid item xs={12} sm={6} md={3} key={index}>
               <Box
                 sx={{

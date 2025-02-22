@@ -6,7 +6,7 @@ export const validateUserCreation = [
   body("name")
     .isLength({ min: 3 })
     .withMessage("Name should be of minimum 3 charecters for user")
-    // .isAlpha().withMessage('Name should not contain numbers')
+    .isAlpha().withMessage('Name should not contain numbers')
     .trim(),
 
   body("email")
@@ -15,19 +15,19 @@ export const validateUserCreation = [
     .normalizeEmail(),
 
   body("password")
-    .isLength({ min: 3 })
-    .withMessage("Password should contain atleast 3 charecters")
+    .isLength({ min: 6 })
+    .withMessage("Password should contain atleast 6 charecters")
     .matches(/[0-9]/)
     .withMessage("Password should contain atleast one number")
-    // .matches(/[a-zAZ]/).withMessage('Password must contain a letter')
+    .matches(/[a-zAZ]/).withMessage('Password must contain a letter')
     .trim(),
 
   body("confirmPassword")
-    .isLength({ min: 3 })
-    .withMessage("Password should contain atleast 3 charecters")
+    .isLength({ min: 6 })
+    .withMessage("Password should contain atleast 6 charecters")
     .matches(/[0-9]/)
     .withMessage("Password should contain atleast one number")
-    // .matches(/[a-zAZ]/).withMessage('Password must contain a letter')
+    .matches(/[a-zAZ]/).withMessage('Password must contain a letter')
     .trim(),
 
 
@@ -37,7 +37,7 @@ export const validateTutorCreation = [
   body("name")
     .isLength({ min: 3 })
     .withMessage("Name should be of minimum 3 charecters for tutor")
-    // .isAlpha().withMessage('Name should not contain numbers')
+    .isAlpha().withMessage('Name should not contain numbers')
     .trim(),
 
   body("email")
@@ -46,25 +46,24 @@ export const validateTutorCreation = [
     .normalizeEmail(),
 
   body("password")
-    .isLength({ min: 3 })
-    .withMessage("Password should contain atleast 3 charecters")
+    .isLength({ min: 6 })
+    .withMessage("Password should contain atleast 6 charecters")
     .matches(/[0-9]/)
     .withMessage("Password should contain atleast one number")
-    // .matches(/[a-zAZ]/).withMessage('Password must contain a letter')
+    .matches(/[a-zAZ]/).withMessage('Password must contain a letter')
     .trim(),
 
   body("confirmPassword")
-    .isLength({ min: 3 })
-    .withMessage("Password should contain atleast 3 charecters")
+    .isLength({ min: 6 })
+    .withMessage("Password should contain atleast 6 charecters")
     .matches(/[0-9]/)
     .withMessage("Password should contain atleast one number")
-    // .matches(/[a-zAZ]/).withMessage('Password must contain a letter')
+    .matches(/[a-zAZ]/).withMessage('Password must contain a letter')
     .trim(),
 
   body("bio")
   .isLength({ min: 3 })
   .withMessage("Please provide a short description")
-  // .matches(/[a-zAZ]/).withMessage('Password must contain a letter')
   .trim(),
 ];
 
@@ -76,8 +75,8 @@ export const validateUserLogin = [
     .normalizeEmail(),
 
   body("password")
-    .isLength({ min: 3 })
-    .withMessage("Password should contain atleast 3 charecters")
+    .isLength({ min: 6 })
+    .withMessage("Password should contain atleast 6 charecters")
     .matches(/[0-9]/)
     .withMessage("Password should contain atleast one number")
     // .matches(/[a-zAZ]/).withMessage('Password must contain a letter')
@@ -94,25 +93,25 @@ export const validateUserUpdation = [
   body("name")
     .isLength({ min: 3 })
     .withMessage("Name should be of minimum 3 charecters for updattion")
-    // .isAlpha().withMessage('Name should not contain numbers')
+    .isAlpha().withMessage('Name should not contain numbers')
     .trim(),
 
 ];
 
 export const validateForgotPassword = [
   body("newPassword")
-    .isLength({ min: 3 })
-    .withMessage("Password should contain atleast 3 charecters")
+    .isLength({ min: 6 })
+    .withMessage("Password should contain atleast 6 charecters")
     .matches(/[0-9]/)
     .withMessage("Password should contain atleast one number")
-    // .matches(/[a-zAZ]/).withMessage('Password must contain a letter')
+    .matches(/[a-zAZ]/).withMessage('Password must contain a letter')
     .trim(),
   body("confirmNewPassword")
-    .isLength({ min: 3 })
-    .withMessage("Password should contain atleast 3 charecters")
+    .isLength({ min: 6 })
+    .withMessage("Password should contain atleast 6 charecters")
     .matches(/[0-9]/)
     .withMessage("Password should contain atleast one number")
-    // .matches(/[a-zAZ]/).withMessage('Password must contain a letter')
+    .matches(/[a-zAZ]/).withMessage('Password must contain a letter')
     .trim(),
 ];
 

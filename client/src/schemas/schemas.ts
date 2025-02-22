@@ -6,7 +6,7 @@ export const LoginSchema = Yup.object().shape({
     .required("Email is required")
     .trim(),
   password: Yup.string()
-    .min(3, "Password must be at least 3 characters long")
+    .min(6, "Password must be at least 6 characters long")
     .required("Password is required")
     .trim(),
 });
@@ -16,13 +16,16 @@ export const TutorSignupSchema = Yup.object().shape({
   name: Yup.string()
     .required("Full Name is required")
     .matches(/^[A-Za-z\s]+$/, "Name should only contain alphabets")
+    .min(3, "Name should be at least 3 characters")
     .trim(),
   email: Yup.string()
     .email("Invalid email address")
     .required("Email is required")
     .trim(),
   password: Yup.string()
-    .min(3, "Password must be at least 3 characters")
+    .min(6, "Password must be at least 6 characters")
+    .matches(/[0-9]/, "Password should contain at least one number") 
+    .matches(/[a-zA-Z]/, "Password must contain at least one letter")
     .required("Password is required")
     .trim(),
   confirmPassword: Yup.string()
@@ -142,13 +145,16 @@ export const SignupSchema = Yup.object().shape({
   name: Yup.string()
     .required("Full Name is required")
     .matches(/^[A-Za-z\s]+$/, "Name should only contain alphabets")
+    .min(3, "Name should be at least 3 characters")
     .trim(),
   email: Yup.string()
     .email("Invalid email address")
     .required("Email is required")
     .trim(),
   password: Yup.string()
-    .min(3, "Password should be of minimum 3 charecters for user")
+    .min(6, "Password should be of minimum 6 charecters")
+    .matches(/[0-9]/, "Password should contain at least one number")
+    .matches(/[a-zA-Z]/, "Password must contain at least one letter")
     .required("Password is required")
     .trim(),
   confirmPassword: Yup.string()

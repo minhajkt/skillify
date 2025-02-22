@@ -7,7 +7,7 @@ import {
 import { upload } from "../../config/cloudinaryConfig";
 import { CourseRepository } from "./repositories/courseRepository";
 import { CourseService } from "./services/courseService";
-import { CourseController } from "./controllers/CourseController";
+import { CourseController } from "./controllers/courseController";
 import { authenticateJWT } from "../../middlewares/authenticateJWT";
 
 const courseRouter = express.Router();
