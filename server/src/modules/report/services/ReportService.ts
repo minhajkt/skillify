@@ -1,6 +1,7 @@
 import { IReportService } from "./IReportService";
-import { IReport } from "../models/reportModel";
+import Report, { IReport } from "../models/reportModel";
 import { IReportRepository } from "../repositories/IReportRepository";
+import mongoose from "mongoose";
 
 class ReportService implements IReportService {
   private reportRepository: IReportRepository;
@@ -15,13 +16,15 @@ class ReportService implements IReportService {
     reportDescription: string,
     userId: string
   ): Promise<IReport> {
-    const reportData: IReport = {
-      courseId,
-      lectureId,
-      userId,
-      reportDescription,
-      isResolved: false,
-    };
+    
+      const reportData = new Report({
+    courseId: new mongoose.Types.ObjectId(courseId),
+    lectureId: new mongoose.Types.ObjectId(lectureId),
+    userId: new mongoose.Types.ObjectId(userId),
+    reportDescription,
+    isResolved: false,
+  });
+    
     return this.reportRepository.createReport(reportData);
   }
 

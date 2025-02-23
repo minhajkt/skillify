@@ -73,7 +73,7 @@ export class AdminRepository
         price: course.draftVersion.price,
         editStatus: "approved",
         isApproved: "approved",
-        draftVersion: null,
+        draftVersion: undefined,
       };
 
       await Course.updateOne({ _id: id }, { $set: updates });

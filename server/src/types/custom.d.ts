@@ -7,6 +7,14 @@ interface AuthRequest extends Request {
   };
 }
 
+declare global {
+  namespace Express {
+    interface Request {
+      user?: IUser;
+    }
+  }
+}
+
 // declare global {
 //   namespace Express {
 //     interface User {

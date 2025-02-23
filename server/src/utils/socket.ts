@@ -4,6 +4,11 @@ import Message from "../modules/messages/messageModel";
 import MessageRoom from "../modules/messages/messageRoomModel";
 import mongoose from "mongoose";
 
+export interface IMessageRoom extends Document {
+  users: string[]; 
+}
+
+
 export const initializeSocket = (server: http.Server) => {
   const io = new SocketIOServer(server, {
     cors: {
@@ -15,7 +20,7 @@ export const initializeSocket = (server: http.Server) => {
   io.on("connection", (socket) => {
     // console.log(`User connected: ${socket.id}`);
 
-    const getOrCreateRoom = async (senderId: string, recipientId: string) => {
+    const getOrCreateRoom = async (senderId: string, recipientId: string):Promise<string> => {
       let room = await MessageRoom.findOne({
         users: { $all: [senderId, recipientId] },
       }).select("_id");
@@ -23,7 +28,7 @@ export const initializeSocket = (server: http.Server) => {
         room = new MessageRoom({ users: [senderId, recipientId] });
         await room.save();
       }
-      return room._id;
+      return (room._id as mongoose.Types.ObjectId).toString();;
     };
 
     socket.on("joinRoom", async ({ senderId, recipientId }) => {

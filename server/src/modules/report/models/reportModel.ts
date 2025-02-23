@@ -9,6 +9,7 @@ export interface IReport extends Document {
   isResolved: boolean;
 }
 
+
 const reportSchema: Schema = new Schema(
   {
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },  
