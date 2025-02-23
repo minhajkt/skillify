@@ -238,11 +238,11 @@ const AdminCourse = () => {
           </TableHead>
           <TableBody>
             {filteredCourses
-              .sort(
-                (a, b) =>
-                  new Date(b.createdAt).getTime() -
-                  new Date(a.createdAt).getTime()
-              )
+              // .sort(
+              //   (a, b) =>
+              //     new Date(b.createdAt).getTime() -
+              //     new Date(a.createdAt).getTime()
+              // )
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((course, index) => (
                 <TableRow

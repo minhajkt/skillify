@@ -1,4 +1,6 @@
-export const fillMissingDates = (data, timeRange, startDate, endDate) => {
+import { RevenueEntry } from "../types/types";
+
+export const fillMissingDates = (data:RevenueEntry[], timeRange:"daily" | "monthly" | "quarterly" | "yearly" | "custom", startDate:Date, endDate:Date) => {
   const allDates = new Map();
   const currentDate = new Date(startDate);
   let formattedDate = "";

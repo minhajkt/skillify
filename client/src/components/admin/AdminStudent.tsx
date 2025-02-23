@@ -220,11 +220,12 @@ const handleStatusToggle = async (studentIndex: number) => {
           </TableHead>
           <TableBody>
             {filteredStudents
-              .sort(
-                (a, b) =>
-                  new Date(b.createdAt).getTime() -
-                  new Date(a.createdAt).getTime()
-              )
+              // .sort(
+              //   (a, b) =>
+              //     new Date(b.createdAt).getTime() -
+              //     new Date(a.createdAt).getTime()
+              // )
+              
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((student, index) => (
                 <TableRow key={index}>

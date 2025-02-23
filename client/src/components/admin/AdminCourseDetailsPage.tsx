@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
@@ -84,59 +85,40 @@ const [open, setOpen] = useState(false);
     }
   };
 
-  const handleVideoLoad = async (lectureId: string) => {
-    try {
-      if (!course?.draftVersion?.lectures) {
-        console.error("Draft version lectures not available");
-        return;
-      }
-      // console.log("available", course?.draftVersion?.lectures);
-      const lecture = course.draftVersion.lectures.find(
-        (lec) => lec.order === lecture.order
-      );
-      // console.log("Found lecture:", lecture);
-
-      if (!lecture || !lecture.videoUrl) {
-        console.error("Video not found for lecture:", lectureId);
-        return;
-      }
-
-      setLectures((prevLectures) => {
-        // console.log("Previous state before update:", prevLectures);
-
-        return {
-          ...prevLectures,
-          [lecture._id]: {
-            ...lecture, 
-            videoLoaded: true,
-          },
-        };
-      });
-    } catch (error) {
-      console.error("Error loading video:", error);
-    }
-  };
-
-
   // const handleVideoLoad = async (lectureId: string) => {
   //   try {
-  //     const { data: lecture } = await axiosInstance.get(
-  //       `/lectures/${lectureId}`
+  //     if (!course?.draftVersion?.lectures) {
+  //       console.error("Draft version lectures not available");
+  //       return;
+  //     }
+  //     // console.log("available", course?.draftVersion?.lectures);
+  //     const lecture = course.draftVersion.lectures.find(
+  //       (lec) => lec.order === lecture.order
   //     );
-  //     // console.log("Loaded lecture data:", lecture);
+  //     // console.log("Found lecture:", lecture);
 
-  //     setLectures((prevLectures) => ({
-  //       ...prevLectures,
-  //       [lecture._id]: {
-  //         ...prevLectures[lecture._id],
-  //         videoUrl: lecture.videoUrl,
-  //         videoLoaded: true,
-  //       },
-  //     }));
+  //     if (!lecture || !lecture.videoUrl) {
+  //       console.error("Video not found for lecture:", lectureId);
+  //       return;
+  //     }
+
+  //     setLectures((prevLectures) => {
+  //       // console.log("Previous state before update:", prevLectures);
+
+  //       return {
+  //         ...prevLectures,
+  //         [lecture._id]: {
+  //           ...lecture, 
+  //           videoLoaded: true,
+  //         },
+  //       };
+  //     });
   //   } catch (error) {
   //     console.error("Error loading video:", error);
   //   }
   // };
+
+
 
 
 const handleApprove = async (courseId: string) => {
@@ -167,7 +149,7 @@ const handleApproveEdit = async (courseId: string) => {
     });
     setCourse((prev) =>
       prev && prev._id === courseId
-        ? { ...prev, ...prev.draftVersion, isApproved:"approved",editStatus: "approved", draftVersion: null }
+        ? { ...prev, ...prev.draftVersion, isApproved:"approved",editStatus: "approved", draftVersion: undefined }
         : prev
     );
   } catch (error) {
@@ -235,7 +217,7 @@ const handleBlockToggle = async (courseId: string, newStatus: string) => {
     });
     setCourse((prev) =>
       prev && prev._id === courseId
-        ? { ...prev, isApproved:"approved", editStatus: "rejected", draftVersion: null }
+        ? { ...prev, isApproved:"approved", editStatus: "rejected", draftVersion: undefined }
         : prev
     );
   } catch (error) {

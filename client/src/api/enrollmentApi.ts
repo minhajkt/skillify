@@ -50,8 +50,13 @@ export const getCourseStrength = async () => {
     }
 }
 
-export const getRevenueReport = async (timeRange, startDate, endDate) => {
+export const getRevenueReport = async (
+  timeRange: "daily" | "monthly" | "quarterly" | "yearly" | "custom",
+  startDate: string,
+  endDate: string
+) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const params: any = { timeRange };
     if (timeRange === "custom") {
       params.startDate = startDate;
@@ -59,9 +64,9 @@ export const getRevenueReport = async (timeRange, startDate, endDate) => {
     }
 
     const response = await axiosInstance.get("/enrollment/revenue-report", {
-      params
+      params,
     });
-    return response.data.map((item) => ({
+    return response.data.map((item: { _id: string; totalRevenue: number }) => ({
       date: item._id,
       totalRevenue: item.totalRevenue,
     }));

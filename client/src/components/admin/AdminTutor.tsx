@@ -73,8 +73,10 @@ const AdminTutor = () => {
     const isAsc = sortConfig.key === key && sortConfig.direction === "asc";
     setSortConfig({ key, direction: isAsc ? "desc" : "asc" });
     const sortedData = [...filteredTutors].sort((a, b) => {
-      if (a[key] < b[key]) return isAsc ? -1 : 1;
-      if (a[key] > b[key]) return isAsc ? 1 : -1;
+      const aValue = a[key] ?? ""; 
+      const bValue = b[key] ?? "";
+      if (aValue < bValue) return isAsc ? -1 : 1;
+      if (aValue > bValue) return isAsc ? 1 : -1;
       return 0;
     });
     setFilteredTutors(sortedData);
@@ -209,11 +211,11 @@ const AdminTutor = () => {
           </TableHead>
           <TableBody>
             {filteredTutors
-              .sort(
-                (a, b) =>
-                  new Date(b.createdAt).getTime() -
-                  new Date(a.createdAt).getTime()
-              )
+              // .sort(
+              //   (a, b) =>
+              //     new Date(b.createdAt).getTime() -
+              //     new Date(a.createdAt).getTime()
+              // )
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((tutor, index) => (
                 <TableRow key={index}>

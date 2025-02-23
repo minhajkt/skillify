@@ -43,7 +43,9 @@ const AdminDashBoard = () => {
   const [courseStrength, setCourseSterngth] = useState<
     { name: string; value: string }[]
   >([]);
-  const [timeRange, setTimeRange] = useState("daily");
+  const [timeRange, setTimeRange] = useState<
+    "daily" | "monthly" | "quarterly" | "yearly" | "custom"
+  >("daily");
   const [customDates, setCustomDates] = useState({
     startDate: "",
     endDate: "",
@@ -116,8 +118,8 @@ const AdminDashBoard = () => {
       const formattedData = fillMissingDates(
         data,
         timeRange,
-        customDates.startDate,
-        customDates.endDate
+        new Date(customDates.startDate),
+        new Date(customDates.endDate)
       );
       setSalesData(formattedData);
     } catch (error) {
@@ -203,7 +205,16 @@ const AdminDashBoard = () => {
           >
             <Select
               value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value)}
+              onChange={(e) =>
+                setTimeRange(
+                  e.target.value as
+                    | "daily"
+                    | "monthly"
+                    | "quarterly"
+                    | "yearly"
+                    | "custom"
+                )
+              }
               size="small"
               sx={{ fontSize: { xs: 12, md: 16 } }}
             >
@@ -232,7 +243,7 @@ const AdminDashBoard = () => {
                   gap: 1,
                   alignItems: { xs: "stretch", sm: "center" },
                   width: "100%",
-                  mt:{xs:-4, md:0}
+                  mt: { xs: -4, md: 0 },
                 }}
               >
                 <TextField
@@ -289,10 +300,13 @@ const AdminDashBoard = () => {
               </BarChart>
             </ResponsiveContainer>
           </Box>
-        
         </Card>
         <Card sx={{ flex: 1, p: 2, bgcolor: "#FAFAFA", mt: 3 }}>
-          <Typography variant="h6" fontWeight={"bold"} sx={{ mb: {xs:0,md:2}, fontSize: { xs: 16, md: 20 } }}>
+          <Typography
+            variant="h6"
+            fontWeight={"bold"}
+            sx={{ mb: { xs: 0, md: 2 }, fontSize: { xs: 16, md: 20 } }}
+          >
             Course Strength
           </Typography>
           <List>

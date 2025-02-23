@@ -134,8 +134,8 @@ const AddLecture = () => {
               {
                 title: "",
                 description: "",
-                duration: "",
-                order: "1",
+                duration: 0,
+                order: 1,
                 videoFile: null,
               },
             ],

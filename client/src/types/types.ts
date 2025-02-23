@@ -30,10 +30,13 @@ export interface ICourse {
   lectures?: ILectures[];
   thumbnail: File | null
   rating?: number
+  editStatus?: string
   draftVersion? : {
     title?: string
     category?:string
+    description: string
     price?:number
+    lectures: ILectures[]
   }
 }
 
@@ -132,8 +135,8 @@ export interface ICreateCourse {
 export interface Lecture {
   title: string;
   description: string;
-  duration: string;
-  order: string;
+  duration: number;
+  order: number;
   videoFile: File | null;
   videoUrl?:string
 }
@@ -233,4 +236,9 @@ export interface PaymentPending {
   newEnrollments: number;
   amount: number;
   updatedAt: string
+}
+
+export interface RevenueEntry {
+  date: string; 
+  totalRevenue: number; 
 }
