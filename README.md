@@ -10,8 +10,8 @@ The platform supports multiple user roles, including students and tutors, with f
 - **OTP-based Email Verification** for registration
 - **Course Management for Tutors**
 - **Student Enrollment** in courses
-- - **Wishlist** favourite courses
-- - **Messaging** between student and tutor
+- **Wishlist** favourite courses
+- **Messaging** between student and tutor
 - **Video call** between student and tutor
 - **Admin Panel** managing users, tutors and courses
 - **Profile Management** for both students and tutors
@@ -59,3 +59,4 @@ npm run dev
 ```bash
 npm run dev
 ```
+----------
