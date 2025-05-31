@@ -60,7 +60,8 @@ const ResetPassword = () => {
         sx={{ mb: 2 }}
         fullWidth
         label="Enter your new Password"
-        value={newPassword}
+        type="password"
+	value={newPassword}
         onChange={(e) => {
           setNewPassword(e.target.value);
           setErrorMessage("");
@@ -69,6 +70,7 @@ const ResetPassword = () => {
       <TextField
         fullWidth
         label="Re enter your new Password"
+	type= "password"
         value={confirmNewPassword}
         onChange={(e) => {
           setConfirmNewPassword(e.target.value);

@@ -32,6 +32,7 @@ const AdminCourseDetailsPage = () => {
   const [error, setError] = useState("");
   const [blockLoad, setBlockLoad] = useState(false)
   const [unblockLoad, setUnblockLoad] = useState(false);
+  const [isEditing, setIsEditing] = useState(false)
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -140,6 +141,7 @@ const handleApprove = async (courseId: string) => {
 };
 
 const handleApproveEdit = async (courseId: string) => {
+  setIsEditing(true)
   try {
     const updatedCourse = await updateCourseEditApproval(courseId, "approved", "approved");
     await fetchCourseDetails()
@@ -154,7 +156,9 @@ const handleApproveEdit = async (courseId: string) => {
     );
   } catch (error) {
     console.error("Failed to approve course edit request.", error);
-  }
+  } finally {
+     setIsEditing(false)
+}
 };
 
 const handleBlockToggle = async (courseId: string, newStatus: string) => {
@@ -451,16 +455,18 @@ const handleBlockToggle = async (courseId: string, newStatus: string) => {
                   color="success"
                   sx={{ marginRight: 2 }}
                   onClick={() => handleApproveEdit(course._id)}
+		  disabled={isEditing}
                 >
-                  Approve Edit
+                  {isEditing ? <CircularProgress size={20} /> : "Approve Edit"}
                 </Button>
 
                 <Button
                   variant="contained"
                   color="error"
                   onClick={() => handleRejectEdit(course._id)}
+		  disabled={isEditing}
                 >
-                  Reject Edit
+                  {isEditing ? <CircularProgress size={20} /> : "Reject Edit"}
                 </Button>
               </>
             )}

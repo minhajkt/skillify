@@ -36,12 +36,20 @@ connectDB()
 
 // app.use(morgan('combined', { stream: accessLogStream }));
 
+if (!process.env.CORS_ORIGIN) {
+  throw new Error("CORS_ORIGIN is not defined in the environment variables.");
+}
+
 app.use(
   cors({
     origin: process.env.CORS_ORIGIN,
     credentials: true,
   })
 );
+
+
+
+
 // app.use(express.raw({ type: "application/json" }));
 app.use("/webhook", express.raw({ type: "application/json" }), webhookRouter);
 
@@ -51,7 +59,7 @@ const server = http.createServer(app)
 
 initializeSocket(server)
 
-const port = process.env.PORT || 5000;
+const port = Number(process.env.PORT) || 5000;
 app.use(cookieParser());
 
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -59,7 +67,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
 }
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion:"2024-12-18.acacia"
+  apiVersion:"2025-01-27.acacia"
 });
 
 app.use('/api', userRoutes)
@@ -79,7 +87,7 @@ app.get('/', (req, res) => {
     res.send("hello world")
 })
 
-server.listen(port , () => {
+server.listen(port ,'0.0.0.0', () => {
     console.log(`Listening to port ${port}`);
 })
 

@@ -20,7 +20,7 @@ import { MESSAGES } from "../../../constants/messages";
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-12-18.acacia",
+  apiVersion: "2025-01-27.acacia",
 });
 
 interface AuthRequest extends Request {
@@ -110,7 +110,7 @@ export class UserController implements IUserController {
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
       
-
+	console.log('logged in')
       res.status(HttpStatus.OK).json({ message: MESSAGES.LOGIN_SUCCESS_MESSAGE, token, user });
 
       return;

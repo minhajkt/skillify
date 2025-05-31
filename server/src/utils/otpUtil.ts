@@ -21,7 +21,7 @@ export const sendOtpToEmail = async (email: string): Promise<string> => {
   };
 
   await transporter.sendMail(mailOptions);
-  // console.log('otp', otp)
+   console.log('otp', otp)
   return otp;
 };
 

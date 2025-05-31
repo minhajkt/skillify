@@ -6,7 +6,7 @@ export const validateUserCreation = [
   body("name")
     .isLength({ min: 3 })
     .withMessage("Name should be of minimum 3 charecters for user")
-    .isAlpha().withMessage('Name should not contain numbers')
+    .isAlpha("en-US", { ignore: " " }).withMessage('Name should not contain numbers')
     .trim(),
 
   body("email")
@@ -37,7 +37,7 @@ export const validateTutorCreation = [
   body("name")
     .isLength({ min: 3 })
     .withMessage("Name should be of minimum 3 charecters for tutor")
-    .isAlpha().withMessage('Name should not contain numbers')
+    .isAlpha("en-US", { ignore: " " }).withMessage('Name should not contain numbers')
     .trim(),
 
   body("email")
@@ -93,7 +93,7 @@ export const validateUserUpdation = [
   body("name")
     .isLength({ min: 3 })
     .withMessage("Name should be of minimum 3 charecters for updattion")
-    .isAlpha().withMessage('Name should not contain numbers')
+    .isAlpha("en-US", { ignore: " " }).withMessage('Name should not contain numbers')
     .trim(),
 
 ];

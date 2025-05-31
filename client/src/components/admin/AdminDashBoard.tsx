@@ -118,8 +118,8 @@ const AdminDashBoard = () => {
       const formattedData = fillMissingDates(
         data,
         timeRange,
-        new Date(customDates.startDate),
-        new Date(customDates.endDate)
+        customDates.startDate as unknown as Date,
+        customDates.endDate as unknown as Date
       );
       setSalesData(formattedData);
     } catch (error) {
@@ -331,7 +331,7 @@ const AdminDashBoard = () => {
                         >
                           <Box
                             sx={{
-                              width: `${(Number(course.value) / 10) * 100}%`,
+                              width: `${(Number(course.value) / 100) * 100}%`,
                               height: "100%",
                               bgcolor: "#107dac",
                               borderRadius: 2,

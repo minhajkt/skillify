@@ -191,7 +191,7 @@ const UserCourseDetailsPage = () => {
         mx={{ xs: -2, md: "auto" }}
       >
         <Grid item xs={12} md={8}>
-          <Card sx={{ mb: 4 }}>
+          {/* <Card sx={{ mb: 4 }}>
             <CardContent>
               <Typography
                 variant="h5"
@@ -210,7 +210,7 @@ const UserCourseDetailsPage = () => {
                 {course.description}
               </Typography>
             </CardContent>
-          </Card>
+          </Card> */}
 
           <Card>
             <CardContent>
