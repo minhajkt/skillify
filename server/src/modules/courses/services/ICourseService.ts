@@ -1,9 +1,11 @@
 import mongoose from "mongoose";
 import { ICourse } from "../models/courseModel";
+import { CourseQueryOptions } from "../../../types/interfaces";
 
 export interface ICourseService {
     createCourse(courseData: Partial<ICourse>, file?: Express.Multer.File): Promise<ICourse | null>
-    getAllCourses() : Promise<ICourse[]>;
+    // getAllCourses() : Promise<ICourse[]>;
+    getFilteredCourses(filters: CourseQueryOptions): Promise<{ courses: ICourse[]; total: number }>;
     getCategories(): Promise<string[]>;
     getUserCourse(courseId: string): Promise<ICourse | null>
     addLectureToCourse(courseId: mongoose.Types.ObjectId,lectureId: mongoose.Types.ObjectId): Promise<void> 

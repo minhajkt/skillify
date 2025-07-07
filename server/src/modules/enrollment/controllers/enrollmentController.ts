@@ -9,9 +9,9 @@ import { HttpStatus } from "../../../constants/httpStatus";
 import { MESSAGES } from "../../../constants/messages";
 
 
-
 export class enrollmentController implements IEnrollmentController {
   private enrollmentService: IEnrollmentService;
+
   constructor(enrollmentService: IEnrollmentService) {
     this.enrollmentService = enrollmentService;
   }
@@ -23,7 +23,9 @@ export class enrollmentController implements IEnrollmentController {
     try {
       const id = (req.user as Users)?.id;
       if (!id) {
-        res.status(HttpStatus.BAD_REQUEST).json({ message: MESSAGES.USER_ID_REQUIRED });
+        res
+          .status(HttpStatus.BAD_REQUEST)
+          .json({ message: MESSAGES.USER_ID_REQUIRED });
         return;
       }
 
@@ -32,6 +34,7 @@ export class enrollmentController implements IEnrollmentController {
 
       if (!enrolledCourses || enrolledCourses.length === 0) {
         res.status(HttpStatus.NOT_FOUND).json(MESSAGES.NOT_ENROLLED);
+        return;
       }
 
       res.status(HttpStatus.OK).json(enrolledCourses);
@@ -48,7 +51,9 @@ export class enrollmentController implements IEnrollmentController {
       const tutorId = (req.user as Users)?.id;
 
       if (!tutorId) {
-        res.status(HttpStatus.BAD_REQUEST).json({ message: MESSAGES.USER_ID_REQUIRED });
+        res
+          .status(HttpStatus.BAD_REQUEST)
+          .json({ message: MESSAGES.USER_ID_REQUIRED });
         return;
       }
 
@@ -58,6 +63,7 @@ export class enrollmentController implements IEnrollmentController {
 
       if (!enrolledStudents || enrolledStudents.length === 0) {
         res.status(HttpStatus.NOT_FOUND).json(MESSAGES.NOT_ENROLLED);
+        return;
       }
 
       res.status(HttpStatus.OK).json(enrolledStudents);
@@ -75,48 +81,65 @@ export class enrollmentController implements IEnrollmentController {
         await this.enrollmentService.totalEnrolledStudents();
       res.status(HttpStatus.OK).json({ total: totalStudents });
     } catch (error) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({message: MESSAGES.UNEXPECTED_ERROR});
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: MESSAGES.UNEXPECTED_ERROR });
     }
   }
 
   async totalRevenue(req: Request, res: Response): Promise<void> {
     try {
       const totalRevenue = await this.enrollmentService.totalRevenue();
+
       if (!totalRevenue) {
-        res.status(HttpStatus.NOT_FOUND).json({message:MESSAGES.REVENUE_NOT_FOUND});
+        res
+          .status(HttpStatus.NOT_FOUND)
+          .json({ message: MESSAGES.REVENUE_NOT_FOUND });
         return;
       }
+
       res.status(HttpStatus.OK).json(totalRevenue);
     } catch (error) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({message: MESSAGES.UNEXPECTED_ERROR});
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: MESSAGES.UNEXPECTED_ERROR });
     }
   }
 
   async courseStrength(req: Request, res: Response): Promise<void> {
     try {
       const courseStrength = await this.enrollmentService.courseStrength();
+
       if (!courseStrength) {
-        res.status(HttpStatus.NOT_FOUND).json({message: MESSAGES.NO_COURSE_STRENGTH});
+        res
+          .status(HttpStatus.NOT_FOUND)
+          .json({ message: MESSAGES.NO_COURSE_STRENGTH });
         return;
       }
 
       res.status(HttpStatus.OK).json(courseStrength);
     } catch (error) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({message: MESSAGES.UNEXPECTED_ERROR});
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: MESSAGES.UNEXPECTED_ERROR });
     }
   }
 
   async revenueReport(req: Request, res: Response): Promise<void> {
     try {
       const { timeRange, startDate, endDate } = req.query;
+
       const reportData = await this.enrollmentService.getRevenueReport(
         timeRange as string,
         startDate as string,
         endDate as string
       );
+
       res.status(HttpStatus.OK).json(reportData);
     } catch (error) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({message: MESSAGES.UNEXPECTED_ERROR});
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: MESSAGES.UNEXPECTED_ERROR });
     }
-  }  
+  }
 }

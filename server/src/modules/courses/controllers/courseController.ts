@@ -28,7 +28,9 @@ export class CourseController implements ICourseController {
         .status(HttpStatus.CREATED)
         .json({ newCourse, message: MESSAGES.NEW_COURSE_CREATED });
     } catch (error) {
-      res.status(HttpStatus.BAD_REQUEST).json({ error: (error as Error).message });
+      res
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ error: (error as Error).message });
     }
   }
 
@@ -52,15 +54,47 @@ export class CourseController implements ICourseController {
         course: updatedCourse,
       });
     } catch (error) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: (error as Error).message });
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: (error as Error).message });
     }
   }
 
-  async getAllCourses(req: Request, res: Response): Promise<void> {
-    try {
-      const courses = await this.courseService.getAllCourses();
+  // async getAllCourses(req: Request, res: Response): Promise<void> {
+  //   try {
+  //     const courses = await this.courseService.getAllCourses();
 
-      res.status(HttpStatus.OK).json(courses);
+  //     res.status(HttpStatus.OK).json(courses);
+  //   } catch (error) {
+  //     res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+  //       message: MESSAGES.UNEXPECTED_ERROR,
+  //       error: (error as Error).message,
+  //     });
+  //   }
+  // }
+  
+  async getFilteredCourses(req: Request, res: Response): Promise<void> {
+    try {
+      const {
+        search = "",
+        category = "",
+        sortBy = "price",
+        sortOrder = "asc",
+        page = "1",
+        limit = "8",
+      } = req.query;
+
+      const filters = {
+        search: search as string,
+        category: category as string,
+        sortBy: sortBy as string,
+        sortOrder: sortOrder as "asc" | "desc",
+        page: parseInt(page as string, 10),
+        limit: parseInt(limit as string, 10),
+      };
+
+      const result = await this.courseService.getFilteredCourses(filters);
+      res.status(HttpStatus.OK).json(result);
     } catch (error) {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         message: MESSAGES.UNEXPECTED_ERROR,
@@ -88,7 +122,9 @@ export class CourseController implements ICourseController {
       const { courseId } = req.params;
 
       if (!mongoose.Types.ObjectId.isValid(courseId)) {
-        res.status(HttpStatus.BAD_REQUEST).json({ message: MESSAGES.INVALID_COURSE_ID });
+        res
+          .status(HttpStatus.BAD_REQUEST)
+          .json({ message: MESSAGES.INVALID_COURSE_ID });
       }
 
       const userCourse = await this.courseService.getUserCourse(courseId);
@@ -102,31 +138,36 @@ export class CourseController implements ICourseController {
     }
   }
 
-  async blockCourse(req:Request, res:Response):Promise<void> {
+  async blockCourse(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
     const { isApproved } = req.body;
 
     try {
-
       const updatedCourse = await this.courseService.toggleBlockStatus(
         id,
         isApproved
       );
       res.status(HttpStatus.OK).json(updatedCourse);
     } catch (error) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: (error as Error).message });
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: (error as Error).message });
     }
   }
 
   async countCourses(req: Request, res: Response): Promise<void> {
     try {
-      const courseCount = await this.courseService.countCourses()
-      if(!courseCount) {
-        res.status(HttpStatus.NOT_FOUND).json({message: MESSAGES.COURSE_NOT_FOUND})
+      const courseCount = await this.courseService.countCourses();
+      if (!courseCount) {
+        res
+          .status(HttpStatus.NOT_FOUND)
+          .json({ message: MESSAGES.COURSE_NOT_FOUND });
       }
-        res.status(HttpStatus.OK).json(courseCount)
+      res.status(HttpStatus.OK).json(courseCount);
     } catch (error) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({message: (error as Error).message})
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: (error as Error).message });
     }
   }
 }

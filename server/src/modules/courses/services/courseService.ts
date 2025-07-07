@@ -3,6 +3,7 @@ import { ICourse } from "../models/courseModel";
 import { ICourseRepository } from "../repositories/ICourseRepository";
 import { cloudinary } from "../../../config/cloudinaryConfig";
 import { ICourseService } from "./ICourseService";
+import { CourseQueryOptions } from "../../../types/interfaces";
 
 export class CourseService implements ICourseService {
   private courseRepo: ICourseRepository;
@@ -54,8 +55,14 @@ export class CourseService implements ICourseService {
     }
   }
 
-  async getAllCourses(): Promise<ICourse[]> {
-    return await this.courseRepo.getAllCourses();
+  // async getAllCourses(): Promise<ICourse[]> {
+  //   return await this.courseRepo.getAllCourses();
+  // }
+
+  async getFilteredCourses(
+    filters: CourseQueryOptions
+  ): Promise<{ courses: ICourse[]; total: number }> {
+    return await this.courseRepo.getFilteredCourses(filters);
   }
 
   async getCategories(): Promise<string[]> {
@@ -81,11 +88,11 @@ export class CourseService implements ICourseService {
     await this.courseRepo.addLecture(courseId, lectureId);
   }
 
-  async toggleBlockStatus(courseId:string, status:string):Promise<ICourse> {
+  async toggleBlockStatus(courseId: string, status: string): Promise<ICourse> {
     const validStatuses = ["pending", "approved", "rejected", "blocked"];
-      if (!validStatuses.includes(status)) {
-        throw new Error(`Invalid status: ${status}`);
-      }
+    if (!validStatuses.includes(status)) {
+      throw new Error(`Invalid status: ${status}`);
+    }
 
     const course = await this.courseRepo.updateBlockStatus(courseId, status);
 
@@ -96,11 +103,11 @@ export class CourseService implements ICourseService {
     return course;
   }
 
-  async countCourses() : Promise<number> {
-    const countCourse = await this.courseRepo.countCourses()
-if (typeof countCourse !== "number") {
-  throw new Error("Invalid count returned from repository");
-}
-    return countCourse
+  async countCourses(): Promise<number> {
+    const countCourse = await this.courseRepo.countCourses();
+    if (typeof countCourse !== "number") {
+      throw new Error("Invalid count returned from repository");
+    }
+    return countCourse;
   }
 }
