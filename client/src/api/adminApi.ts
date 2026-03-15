@@ -1,14 +1,29 @@
 import { handleAxiosError } from "../utils/errorHandler";
 import { axiosInstance } from "./axiosInstance";
 
-export const fetchStudents = async () => {
+// export const fetchStudents = async () => {
+//   try {
+//     const response = await axiosInstance.get("/admin/students");
+//     return response.data;
+//   } catch (error) {
+//     handleAxiosError(error);
+//   }
+// };
+
+export const fetchStudents = async ({search,sort,order,page,limit,status,
+}: {search?: string;sort: string;order: "asc" | "desc";page: number;limit: number;status?: string;
+}) => {
   try {
-    const response = await axiosInstance.get("/admin/students");
+    const response = await axiosInstance.get("/admin/students", {
+      params: { search, sort, order, page, limit, status },
+    });
     return response.data;
   } catch (error) {
     handleAxiosError(error);
+    throw error;
   }
 };
+
 
 export const updateStudentStatus = async (id: string, isActive: boolean) => {
   try {
@@ -21,15 +36,31 @@ export const updateStudentStatus = async (id: string, isActive: boolean) => {
   }
 };
 
-export const fetchTutors = async () => {
-  try {
-    const response = await axiosInstance.get("/admin/tutors");
+// export const fetchTutors = async () => {
+//   try {
+//     const response = await axiosInstance.get("/admin/tutors");
 
-    return response.data;
-  } catch (error) {
-    handleAxiosError(error);
-  }
+//     return response.data;
+//   } catch (error) {
+//     handleAxiosError(error);
+//   }
+// };
+
+export const fetchTutors = async (params?: {
+  search?: string;
+  sort?: string;
+  order?: "asc" | "desc";
+  page?: number;
+  limit?: number;
+  status?: string;
+}) => {
+  const response = await axiosInstance.get("/admin/tutors", {
+    params,
+  });
+
+  return response.data;
 };
+
 
 export const fetchTutorById = async (tutorId: string) => {
   try {
@@ -74,9 +105,11 @@ export const updateTutorsApproval = async (id: string, isApproved: string) => {
   }
 };
 
-export const fetchTutorRequests = async () => {
+export const fetchTutorRequests = async ({ search }: { search?: string }) => {
   try {
-    const response = await axiosInstance.get("/admin/tutor-requests");
+    const response = await axiosInstance.get("/admin/tutor-requests", {
+      params: { search },
+    });
 
     return response.data.tutorRequest;
   } catch (error) {
@@ -84,10 +117,11 @@ export const fetchTutorRequests = async () => {
   }
 };
 
-export const fetchCourseRequests = async () => {
+export const fetchCourseRequests = async ({ search }: { search?: string }) => {
   try {
-    const response = await axiosInstance.get("/admin/course-requests");
-
+    const response = await axiosInstance.get("/admin/course-requests", {
+      params: { search },
+    });
     return response.data.courseRequest;
   } catch (error) {
     handleAxiosError(error);
@@ -136,11 +170,37 @@ export const updateCourseBlock = async (id: string, isApproved: string) => {
   }
 };
 
-export const fetchAllCourses = async () => {
+// export const fetchAllCourses = async () => {
+//   try {
+//     const response = await axiosInstance.get("/admin/courses");
+//     return response.data;
+//   } catch (error) {
+//     handleAxiosError(error);
+//   }
+// };
+
+export const fetchAllCourses = async ({
+  search = "",
+  category = "",
+  sort = "createdAt",
+  order = "desc",
+  page = 1,
+  limit = 5,
+}: {
+  search?: string;
+  category?: string;
+  sort?: string;
+  order?: "asc" | "desc";
+  page?: number;
+  limit?: number;
+}) => {
   try {
-    const response = await axiosInstance.get("/admin/courses");
-    return response.data;
+    const response = await axiosInstance.get("/admin/courses", {
+      params: { search, category, sort, order, page, limit },
+    });
+    return response.data; 
   } catch (error) {
     handleAxiosError(error);
   }
 };
+

@@ -9,8 +9,9 @@ import {
   Typography,
   SelectChangeEvent,
   Snackbar,
+  Skeleton,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { fetchTutorById } from "../../api/adminApi";
 import { useNavigate } from "react-router-dom";
 import { fetchCategories, getOurCourses } from "../../api/courseApi";
@@ -22,29 +23,51 @@ import {
   handleRemoveFromWishlist,
 } from "../../api/wishlistApi";
 import { NavbarProps, ICourse, ICategory } from "../../types/types";
+import { useDebounce } from "../../hooks/useDebounce";
 
 const OurCourses = ({ searchQuery }: NavbarProps) => {
   const [courses, setCourses] = useState<ICourse[]>([]);
   const [categoryFilter, setCategoryFilter] = useState("");
-  const [sortOrder, setSortOrder] = useState("asc");
-  const [sortBy, setSortBy] = useState("price");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [sortBy, setSortBy] = useState<"price" | "title">("price");
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [snackbar, setSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('')
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true); 
+  const limit = 4;
+  const debouncedSearch = useDebounce(searchQuery, 500);
   const navigate = useNavigate();
-  useEffect(() => {
-    const getCourses = async () => {
-      try {
-        const response = await getOurCourses();
 
-        const tutorIds = response.map((course: ICourse) => course.createdBy);
+  const getCourses = useCallback(
+    async (currentPage: number) => {
+      try {
+        if (currentPage === 1) {
+          setLoading(true);
+        } else {
+          setLoadingMore(true);
+        }
+        const response = await getOurCourses({
+          search: searchQuery || "",
+          category: categoryFilter,
+          sortBy,
+          sortOrder,
+          page: currentPage,
+          limit,
+        });
+
+        const tutorIds = response.courses.map(
+          (course: ICourse) => course.createdBy
+        );
 
         const tutors = await Promise.all(
           tutorIds.map((tutorId: string) => fetchTutorById(tutorId))
         );
 
-        const coursesWithTutors = response.map(
+        const coursesWithTutors = response.courses.map(
           (course: ICourse, index: number) => ({
             ...course,
             name: course.title,
@@ -52,43 +75,31 @@ const OurCourses = ({ searchQuery }: NavbarProps) => {
           })
         );
 
-        setCourses(coursesWithTutors);
+        if (currentPage === 1) {
+          setCourses(coursesWithTutors);
+        } else {
+          setCourses((prev) => [...prev, ...coursesWithTutors]);
+        }
+
+        if (response.courses.length < limit) {
+          setHasMore(false);
+        }
       } catch (error) {
         console.error("error occured", error);
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
       }
-    };
-    getCourses();
-  }, []);
-
-  const filteredBySearch =
-    courses && courses.length > 0
-      ? courses.filter((course) =>
-          course.title
-            ?.toLowerCase()
-            .includes((searchQuery || "").toLowerCase())
-        )
-      : [];
-
-  const filteredByCategory = categoryFilter
-    ? filteredBySearch.filter((course) => course.category === categoryFilter)
-    : filteredBySearch;
-
-  const sortedCourses = filteredByCategory.sort((a, b) => {
-    if (sortBy === "price") {
-      if (sortOrder === "asc") {
-        return a.price - b.price;
-      } else {
-        return b.price - a.price;
-      }
-    } else if (sortBy === "title") {
-      if (sortOrder === "asc") {
-        return a.title.localeCompare(b.title);
-      } else {
-        return b.title.localeCompare(a.title);
-      }
-    }
-    return 0;
-  });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [debouncedSearch, categoryFilter, sortBy, sortOrder, limit]
+  );
+  useEffect(() => {
+    setCourses([]);
+    setPage(1);
+    setHasMore(true);
+    getCourses(1);
+  }, [getCourses]);
 
   useEffect(() => {
     const getCategories = async () => {
@@ -108,16 +119,20 @@ const OurCourses = ({ searchQuery }: NavbarProps) => {
   }, []);
 
   const handleSortChange = (
-    event: SelectChangeEvent<`${string}_${string}`>
+    event: SelectChangeEvent
   ) => {
-    const [field, order] = (event.target.value as string).split("_");
+    const [field, order] = event.target.value.split("_") as [
+      "price" | "title",
+      "asc" | "desc"
+    ];
     setSortBy(field);
     setSortOrder(order);
   };
 
-  const [visibleCourses, setVisibleCourses] = useState(4);
-  const handleShowMoreCourses = () => {
-    setVisibleCourses((prev) => prev + 4);
+  const handleShowMore = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    getCourses(nextPage);
   };
 
   useEffect(() => {
@@ -303,168 +318,219 @@ const OurCourses = ({ searchQuery }: NavbarProps) => {
           alignItems: "center",
         }}
       >
-        <Typography
-          variant="h5"
-          sx={{
-            fontSize: { xs: "1.2rem", md: "1.8rem" },
-            mb: { xs: 0, md: 2 },
-          }}
-          fontWeight={"bold"}
-        >
-          Our Courses
-        </Typography>
-
-        <Grid container spacing={{ xs: 0, sm: 4, md: 0 }} sx={{ padding: 2 }}>
-          {sortedCourses
-          // .sort((a,b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-          .slice(0, visibleCourses).map((course, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: { xs: "row", sm: "column" },
-                  alignItems: { xs: "start", sm: "center" },
-                  justifyContent: "center",
-                  // ml: { xs: 1.5, sm: 0 },
-                  mb: 2,
-                  borderRadius: "8px",
-                  height: "auto",
-                  width: { xs: "100%", sm: "80%" },
-                  backgroundColor: "#F7F9FA",
-                  "&:hover": {
-                    backgroundColor: "#e0e0e0",
-                  },
-                  "& .MuiBox-root": {
-                    padding: 0,
-                    margin: 0,
-                  },
-                  cursor: "pointer",
-                }}
-                onClick={() => navigate(`/users/course-details/${course._id}`)}
-              >
+        {loading ? (
+          <Grid container spacing={{ xs: 0, sm: 4, md: 0 }} sx={{ padding: 2 }}>
+            {[...Array(6)].map((_, index) => (
+              <Grid item xs={12} sm={6} md={3} key={index}>
                 <Box
                   sx={{
-                    width: { xs: "50%", sm: "100%" },
-                    height: { xs: "5rem", sm: "8rem" },
-                    p: 0,
-                    m: 0,
+                    display: "flex",
+                    flexDirection: { xs: "row", sm: "column" },
+                    alignItems: { xs: "start", sm: "center" },
+                    justifyContent: "center",
+                    mb: 2,
+                    borderRadius: "8px",
+                    height: "auto",
+                    width: { xs: "100%", sm: "80%" },
+                    backgroundColor: "#F7F9FA",
                   }}
                 >
-                  <Box
-                    component="img"
-                    src={
-                      typeof course.thumbnail === "string"
-                        ? course.thumbnail
-                        : undefined
-                    }
-                    alt={course.name}
+                  <Skeleton
+                    variant="rectangular"
                     sx={{
-                      width: { xs: "100%", sm: "100%" },
+                      width: { xs: "50%", sm: "100%" },
                       height: { xs: "5rem", sm: "8rem" },
-                      marginBottom: 1,
-                      mr: 0,
-                      objectFit: { sm: "cover" },
                       borderRadius: "8px",
+                      m: 1,
                     }}
                   />
+                  <Box sx={{ width: "100%", p: 1 }}>
+                    <Skeleton width="80%" height={10} sx={{ mb: 1 }} />
+                    <Skeleton width="60%" height={10} sx={{ mb: 1 }} />
+                    <Skeleton width="50%" height={10} sx={{ mb: 1 }} />
+                    <Skeleton width="40%" height={10} />
+                  </Box>
                 </Box>
-                <Box
-                  sx={{
-                    height: { xs: "5rem", sm: "10rem" },
-                    width: "100%",
-                    borderRadius: "8px",
-                  }}
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      fontSize: { xs: 10, sm: 12, md: "1rem" },
-                      fontWeight: { xs: 600, md: 700 },
-                      padding: { xs: 0, sm: 2 },
-                      px: { xs: 1, sm: 2 },
-                      pt: { xs: 1, sm: 2 },
-                    }}
-                  >
-                    {course?.title || "name"}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: "#6A6F73",
-                      paddingLeft: { xs: 1, sm: 2 },
-                      fontSize: { xs: 10, sm: 12, md: "1rem" },
-                    }}
-                  >
-                    {course.tutor || "Tutor1"}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: "darkgray",
-                      paddingLeft: { xs: 1, sm: 2 },
-                      fontSize: { xs: 10, sm: 12, md: "1rem" },
-                      // fontWeight: "medium",
-                    }}
-                  >
-                    {course.category}
-                  </Typography>
+              </Grid>
+            ))}
+          </Grid>
+        ) : (
+          <>
+            <Typography
+              variant="h5"
+              sx={{
+                fontSize: { xs: "1.2rem", md: "1.8rem" },
+                mb: { xs: 0, md: 2 },
+              }}
+              fontWeight={"bold"}
+            >
+              Our Courses
+            </Typography>
+
+            <Grid
+              container
+              spacing={{ xs: 0, sm: 4, md: 0 }}
+              sx={{ padding: 2 }}
+            >
+              {courses.map((course, index) => (
+                <Grid item xs={12} sm={6} md={3} key={index}>
                   <Box
                     sx={{
                       display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
+                      flexDirection: { xs: "row", sm: "column" },
+                      alignItems: { xs: "start", sm: "center" },
+                      justifyContent: "center",
+                      // ml: { xs: 1.5, sm: 0 },
+                      mb: 2,
+                      borderRadius: "8px",
+                      height: "auto",
+                      width: { xs: "100%", sm: "80%" },
+                      backgroundColor: "#F7F9FA",
+                      "&:hover": {
+                        backgroundColor: "#e0e0e0",
+                      },
+                      "& .MuiBox-root": {
+                        padding: 0,
+                        margin: 0,
+                      },
+                      cursor: "pointer",
                     }}
+                    onClick={() =>
+                      navigate(`/users/course-details/${course._id}`)
+                    }
                   >
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: "#2D2F31",
-                        paddingLeft: { xs: 1, sm: 2 },
-                        fontSize: { xs: 10, sm: 12, md: "1rem" },
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {`${"₹ "}` + course.price || "5000"}
-                    </Typography>
                     <Box
                       sx={{
-                        color: wishlist.includes(course._id)
-                          ? "#ff4081"
-                          : "initial",
-                        cursor: "pointer",
-                        "&:hover": { color: "#ff1744" },
-                      }}
-                      onClick={(e) => {
-                        if (wishlist.includes(course._id)) {
-                          handleRemoveFromWishlistHandler(course._id, e);
-                        } else {
-                          handleAddToWishlistHandler(course._id, e);
-                        }
+                        width: { xs: "50%", sm: "100%" },
+                        height: { xs: "5rem", sm: "8rem" },
+                        p: 0,
+                        m: 0,
                       }}
                     >
-                      {wishlist.includes(course._id) ? (
-                        <FavoriteIcon
-                          sx={{ pr: 1, fontSize: { xs: "1rem", md: "1.5rem" } }}
-                        />
-                      ) : (
-                        <FavoriteBorderIcon
-                          sx={{ pr: 1, fontSize: { xs: "1rem", md: "1.5rem" } }}
-                        />
-                      )}
+                      <Box
+                        component="img"
+                        src={
+                          typeof course.thumbnail === "string"
+                            ? course.thumbnail
+                            : undefined
+                        }
+                        alt={course.name}
+                        sx={{
+                          width: { xs: "100%", sm: "100%" },
+                          height: { xs: "5rem", sm: "8rem" },
+                          marginBottom: 1,
+                          mr: 0,
+                          objectFit: { sm: "cover" },
+                          borderRadius: "8px",
+                        }}
+                      />
+                    </Box>
+                    <Box
+                      sx={{
+                        height: { xs: "5rem", sm: "10rem" },
+                        width: "100%",
+                        borderRadius: "8px",
+                      }}
+                    >
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          fontSize: { xs: 10, sm: 12, md: "1rem" },
+                          fontWeight: { xs: 600, md: 700 },
+                          padding: { xs: 0, sm: 2 },
+                          px: { xs: 1, sm: 2 },
+                          pt: { xs: 1, sm: 2 },
+                        }}
+                      >
+                        {course?.title || "name"}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "#6A6F73",
+                          paddingLeft: { xs: 1, sm: 2 },
+                          fontSize: { xs: 10, sm: 12, md: "1rem" },
+                        }}
+                      >
+                        {course.tutor || "Tutor1"}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "darkgray",
+                          paddingLeft: { xs: 1, sm: 2 },
+                          fontSize: { xs: 10, sm: 12, md: "1rem" },
+                          // fontWeight: "medium",
+                        }}
+                      >
+                        {course.category}
+                      </Typography>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: "#2D2F31",
+                            paddingLeft: { xs: 1, sm: 2 },
+                            fontSize: { xs: 10, sm: 12, md: "1rem" },
+                            fontWeight: "bold",
+                          }}
+                        >
+                          {`${"₹ "}` + course.price || "5000"}
+                        </Typography>
+                        <Box
+                          sx={{
+                            color: wishlist.includes(course._id)
+                              ? "#ff4081"
+                              : "initial",
+                            cursor: "pointer",
+                            "&:hover": { color: "#ff1744" },
+                          }}
+                          onClick={(e) => {
+                            if (wishlist.includes(course._id)) {
+                              handleRemoveFromWishlistHandler(course._id, e);
+                            } else {
+                              handleAddToWishlistHandler(course._id, e);
+                            }
+                          }}
+                        >
+                          {wishlist.includes(course._id) ? (
+                            <FavoriteIcon
+                              sx={{
+                                pr: 1,
+                                fontSize: { xs: "1rem", md: "1.5rem" },
+                              }}
+                            />
+                          ) : (
+                            <FavoriteBorderIcon
+                              sx={{
+                                pr: 1,
+                                fontSize: { xs: "1rem", md: "1.5rem" },
+                              }}
+                            />
+                          )}
+                        </Box>
+                      </Box>
                     </Box>
                   </Box>
-                </Box>
-              </Box>
+                </Grid>
+              ))}
             </Grid>
-          ))}
-        </Grid>
+          </>
+        )}
       </Box>
 
-      {visibleCourses < courses.length && (
+      {hasMore && (
         <Box sx={{ marginTop: { xs: -2, md: 0 }, paddingLeft: 2 }}>
           <Button
             variant="outlined"
-            onClick={handleShowMoreCourses}
+            onClick={handleShowMore}
+            disabled={loadingMore}
             sx={{
               color: "black",
               fontWeight: "bold",
@@ -475,7 +541,7 @@ const OurCourses = ({ searchQuery }: NavbarProps) => {
               mb: { xs: 1, md: 0 },
             }}
           >
-            Show More
+            {loadingMore ? "Loading..." : "Show More"}
           </Button>
         </Box>
       )}

@@ -26,11 +26,13 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { fetchStudents, updateStudentStatus } from "../../api/adminApi";
 import { AxiosError } from "axios";
 import {IStudent} from '../../types/types'
+import { useDebounce } from "../../hooks/useDebounce";
 
 
 const AdminStudent = () => {
   const [students, setStudents] = useState<IStudent[]>([]);
-  const [filteredStudents, setFilteredStudents] = useState<IStudent[]>([]); 
+  const [totalStudents, setTotalStudents] = useState(0);
+  // const [filteredStudents, setFilteredStudents] = useState<IStudent[]>([]); 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [sortConfig, setSortConfig] = useState<{
@@ -46,39 +48,52 @@ const AdminStudent = () => {
   const [statusFilter, setStatusFilter] = useState("");
     const [snackbar, setSnackbar] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
+    const debouncedSearchQuery = useDebounce(searchQuery, 1000);
 
   useEffect(() => {
     const getStudents = async () => {
       setLoading(true);
       try {
-        const fetchedStudents = await fetchStudents(); 
-        setStudents(fetchedStudents);  
-        setFilteredStudents(fetchedStudents); 
-        
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { users, total } = await fetchStudents({
+          search: debouncedSearchQuery,
+          sort: sortConfig.key,
+          order: sortConfig.direction,
+          page: page + 1,
+          limit: rowsPerPage,
+          status: statusFilter,
+        });
+        setStudents(users);
+        setTotalStudents(total);
+        // setFilteredStudents(fetchedStudents);
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         setError("Failed to fetch students. Please try again.");
-        
       } finally {
         setLoading(false);
       }
     };
 
     getStudents();
-  }, []);
+  }, [debouncedSearchQuery, sortConfig, page, rowsPerPage, statusFilter]);
 
   if (loading) return <Typography>Loading ...</Typography>;
   if (error) return <Typography color="error">{error}</Typography>;
 
-  const handleSort = (key: keyof (typeof students)[0]) => {
+  // const handleSort = (key: keyof (typeof students)[0]) => {
+  //   const isAsc = sortConfig.key === key && sortConfig.direction === "asc";
+  //   setSortConfig({ key, direction: isAsc ? "desc" : "asc" });
+  //   const sortedData = [...filteredStudents].sort((a, b) => {
+  //     if (a[key] < b[key]) return isAsc ? -1 : 1;
+  //     if (a[key] > b[key]) return isAsc ? 1 : -1;
+  //     return 0;
+  //   });
+  //   setFilteredStudents(sortedData);
+  // };
+
+  const handleSort = (key: keyof IStudent) => {
     const isAsc = sortConfig.key === key && sortConfig.direction === "asc";
     setSortConfig({ key, direction: isAsc ? "desc" : "asc" });
-    const sortedData = [...filteredStudents].sort((a, b) => {
-      if (a[key] < b[key]) return isAsc ? -1 : 1;
-      if (a[key] > b[key]) return isAsc ? 1 : -1;
-      return 0;
-    });
-    setFilteredStudents(sortedData);
   };
 
   const handleChangePage = (_event: unknown, newPage: number) => {
@@ -92,10 +107,15 @@ const AdminStudent = () => {
     setPage(0);
   };
 
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const query = event.target.value.toLowerCase();
-    setSearchQuery(query);
-    filterStudents(query, statusFilter);
+  // const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   const query = event.target.value.toLowerCase();
+  //   setSearchQuery(query);
+  //   filterStudents(query, statusFilter);
+  // };
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setPage(0);
   };
 
   const handleStatusFilterChange = (
@@ -103,33 +123,45 @@ const AdminStudent = () => {
   ) => {
     const status = event.target.value;
     setStatusFilter(status);
-    filterStudents(searchQuery, status);
+    // filterStudents(searchQuery, status);
+    setPage(0);
   };
 
-  const filterStudents = (query: string, status: string) => {
-    setFilteredStudents(
-      students
-        .filter(
-          (student) =>
-            student.name.toLowerCase().includes(query) ||
-            student.email.toLowerCase().includes(query)
-        )
-        .filter((student) => {
-          return status ? student.isActive === (status === "active") : true;
-        })
-    );
-    setPage(0); 
-  };
+  // const filterStudents = (query: string, status: string) => {
+  //   setFilteredStudents(
+  //     students
+  //       .filter(
+  //         (student) =>
+  //           student.name.toLowerCase().includes(query) ||
+  //           student.email.toLowerCase().includes(query)
+  //       )
+  //       .filter((student) => {
+  //         return status ? student.isActive === (status === "active") : true;
+  //       })
+  //   );
+  //   setPage(0); 
+  // };
 
 const handleStatusToggle = async (studentIndex: number) => {
-  const updatedStudents = [...filteredStudents];
+  const updatedStudents = [...students];
   const student = updatedStudents[studentIndex];
   const originalStatus = student.isActive; 
 
   try {
     await updateStudentStatus(student._id, !originalStatus);
     student.isActive = !originalStatus;
-    setFilteredStudents(updatedStudents);
+    // setFilteredStudents(updatedStudents);
+    setStudents(updatedStudents);
+    const { users, total } = await fetchStudents({
+      search: debouncedSearchQuery,
+      sort: sortConfig.key,
+      order: sortConfig.direction,
+      page: page + 1,
+      limit: rowsPerPage,
+      status: statusFilter,
+    });
+    setStudents(users);
+    setTotalStudents(total);
     setSnackbarMessage(originalStatus ? "Student blocked!" : "Student unblocked!");
     setSnackbar(true);
     
@@ -219,15 +251,15 @@ const handleStatusToggle = async (studentIndex: number) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredStudents
+            {/* {filteredStudents
               // .sort(
               //   (a, b) =>
               //     new Date(b.createdAt).getTime() -
               //     new Date(a.createdAt).getTime()
-              // )
-              
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((student, index) => (
+              // ) */}
+
+              {/* .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) */}
+              {students.map((student, index) => (
                 <TableRow key={index}>
                   <TableCell>{student.name}</TableCell>
                   <TableCell>
@@ -237,7 +269,7 @@ const handleStatusToggle = async (studentIndex: number) => {
                       <Typography color="red">Blocked</Typography>
                     )}
                   </TableCell>
-                  <TableCell sx={{ display: { xs: "none", md: "table-cell" } }} >
+                  <TableCell sx={{ display: { xs: "none", md: "table-cell" } }}>
                     {student.email}
                   </TableCell>
                   <TableCell>
@@ -263,7 +295,7 @@ const handleStatusToggle = async (studentIndex: number) => {
 
       <TablePagination
         component="div"
-        count={filteredStudents.length}
+        count={totalStudents}
         page={page}
         onPageChange={handleChangePage}
         rowsPerPage={rowsPerPage}

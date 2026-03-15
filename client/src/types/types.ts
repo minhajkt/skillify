@@ -62,6 +62,7 @@ export interface ILectures  {
   videoUrl?: string;
   order: number;
   duration: number
+  videoId: string
 
 };
 
@@ -241,4 +242,13 @@ export interface PaymentPending {
 export interface RevenueEntry {
   date: string; 
   totalRevenue: number; 
+}
+
+export interface CourseQueryOptions {
+  search?: string;
+  category?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+  page?: number;
+  limit?: number;
 }

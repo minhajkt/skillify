@@ -1,3 +1,4 @@
+import { CourseQueryOptions } from "../types/types";
 import { handleAxiosError } from "../utils/errorHandler";
 import { axiosInstance } from "./axiosInstance";
 
@@ -37,9 +38,21 @@ export const updateCourseDetails = async (
   }
 };
 
-export const getOurCourses = async () => {
+// export const getOurCourses = async () => {
+//   try {
+//     const response = await axiosInstance.get("/course/our-courses");
+//     return response.data;
+//   } catch (error) {
+//     throw handleAxiosError(error);
+//   }
+// };
+
+
+export const getOurCourses = async (filters: CourseQueryOptions = {}) => {
   try {
-    const response = await axiosInstance.get("/course/our-courses");
+    const response = await axiosInstance.get("/course/our-courses", {
+      params: filters,
+    });
     return response.data;
   } catch (error) {
     throw handleAxiosError(error);

@@ -28,12 +28,15 @@ import { fetchAllCourses, fetchTutorById } from "../../api/adminApi";
 import { fetchCategories, getComplaints } from "../../api/courseApi";
 import { useNavigate } from "react-router-dom";
 import {ICourse } from '../../types/types'
+import { useDebounce } from "../../hooks/useDebounce";
 
 type SortKey = "name" | "category" | "tutor" | "createdAt"; 
 
 const AdminCourse = () => {
   const [coursesData, setCoursesData] = useState<any[]>([]);
-  const [filteredCourses, setFilteredCourses] = useState<any[]>([]);
+  const [totalCourses, setTotalCourses] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   const [error, setError] = useState("");
   const [sortConfig, setSortConfig] = useState<{
@@ -47,7 +50,6 @@ const AdminCourse = () => {
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [categories, setCategories] = useState<string[]>([]);
   
@@ -68,65 +70,53 @@ const AdminCourse = () => {
   }, []);
 
   useEffect(() => {
-    const showCourses = async () => {
+    const loadCourses = async () => {
       try {
-        const courses = await fetchAllCourses();
+        const { courses, total } = await fetchAllCourses({
+          search: debouncedSearchQuery,
+          category: categoryFilter,
+          sort: sortConfig.key,
+          order: sortConfig.direction,
+          page: page + 1, 
+          limit: rowsPerPage,
+        });
 
-        const categories = await fetchCategories();
-        setCategories(categories);
-
-        const tutorIds = courses.map((course: ICourse) => course.createdBy);
+        const tutorIds = courses.map((c: ICourse) => c.createdBy);
         const tutors = await Promise.all(
-          tutorIds.map((tutorId:string) => fetchTutorById(tutorId))
+          tutorIds.map((id: string) => fetchTutorById(id))
         );
 
-        const coursesWithTutors = courses.map((course:ICourse, index:number) => ({
-          ...course,
-          name: course.title,
-          tutor: tutors[index]?.name || "Unknown",
-        }));
+        const coursesWithTutors = courses.map(
+          (course: ICourse, index: number) => ({
+            ...course,
+            name: course.title,
+            tutor: tutors[index]?.name || "Unknown",
+          })
+        );
 
         setCoursesData(coursesWithTutors);
-        setFilteredCourses(coursesWithTutors);
-      } catch (error) {
-        setError(`Failed to fetch the courses`);
-        console.log(error);
+        setTotalCourses(total);
+
+        const uniqueCategories: string[] = Array.from(
+          new Set(
+            courses.map((course: ICourse) => course.category).filter(Boolean)
+          )
+        );
+        setCategories(uniqueCategories);
+      } catch (err) {
+        setError("Failed to load courses");
+        console.error(err);
       }
     };
-    showCourses();
-  }, []);
+
+    loadCourses();
+  }, [debouncedSearchQuery, categoryFilter, sortConfig, page, rowsPerPage]);
+  
 
   const handleOpenModal = (course: ICourse) => {
     navigate(`/admin/course-details/${course._id}`);
   };
 
-  useEffect(() => {
-    let updatedCourses = [...coursesData];
-
-    if (searchQuery) {
-      updatedCourses = updatedCourses.filter(
-        (course) =>
-          course.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          course.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          course.tutor?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    if (categoryFilter) {
-      updatedCourses = updatedCourses.filter(
-        (course) => course.category === categoryFilter
-      );
-    }
-
-    updatedCourses.sort((a, b) => {
-      const isAsc = sortConfig.direction === "asc";
-      if (a[sortConfig.key] < b[sortConfig.key]) return isAsc ? -1 : 1;
-      if (a[sortConfig.key] > b[sortConfig.key]) return isAsc ? 1 : -1;
-      return 0;
-    });
-
-    setFilteredCourses(updatedCourses);
-  }, [coursesData, searchQuery, categoryFilter, sortConfig]);
 
   const handleSort = (key: SortKey) => {
     const isAsc = sortConfig.key === key && sortConfig.direction === "asc";
@@ -135,10 +125,12 @@ const AdminCourse = () => {
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
+    setPage(0);
   };
 
   const handleCategoryFilterChange = (event: SelectChangeEvent<string>) => {
     setCategoryFilter(event.target.value);
+    setPage(0);
   };
 
   const handleChangePage = (_event: unknown, newPage: number) => {
@@ -237,14 +229,8 @@ const AdminCourse = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredCourses
-              // .sort(
-              //   (a, b) =>
-              //     new Date(b.createdAt).getTime() -
-              //     new Date(a.createdAt).getTime()
-              // )
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((course, index) => (
+            
+              {coursesData.map((course, index) => (
                 <TableRow
                   key={index}
                   onClick={
@@ -287,7 +273,7 @@ const AdminCourse = () => {
 
       <TablePagination
         component="div"
-        count={filteredCourses.length}
+        count={totalCourses}
         page={page}
         onPageChange={handleChangePage}
         rowsPerPage={rowsPerPage}

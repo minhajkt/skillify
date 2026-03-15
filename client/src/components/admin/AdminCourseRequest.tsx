@@ -11,12 +11,14 @@ import {
   TablePagination,
   Button,
   useMediaQuery,
+  TextField,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { fetchCourseRequests, fetchTutors } from "../../api/adminApi";
 // import { axiosInstance } from "../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import {ICourse, ILectures, ITutor} from '../../types/types'
+import { useDebounce } from "../../hooks/useDebounce";
 
 
 
@@ -29,6 +31,8 @@ const AdminCourseRequest = () => {
   const [error, setError] = useState<string>("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const navigate = useNavigate(); 
   const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
 
@@ -37,19 +41,19 @@ const AdminCourseRequest = () => {
     const getCourseRequests = async () => {
       setLoading(true);
       try {
-        const fetchedCourse = await fetchCourseRequests();
-        // console.log('fffffffffffffffffffffffffffffff', fetchedCourse);
-        
+        const fetchedCourse = await fetchCourseRequests({ search: debouncedSearchQuery });
+
         setCourses(fetchedCourse);
 
         const fetchedTutors = await fetchTutors();
         const tutorsById: { [key: string]: ITutor } = {};
 
-        fetchedTutors.forEach((tutor: ITutor) => {
+        fetchedTutors.users.forEach((tutor: ITutor) => {
           tutorsById[tutor._id] = tutor;
         });
 
         setTutors(tutorsById);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         setError("Failed to fetch tutor requests.");
       } finally {
@@ -58,7 +62,7 @@ const AdminCourseRequest = () => {
     };
 
     getCourseRequests();
-  }, []);
+  }, [debouncedSearchQuery]);
 
 
   const handleOpenModal = (course: ICourse) => {
@@ -93,6 +97,15 @@ const AdminCourseRequest = () => {
       >
         Course Requests
       </Typography>
+
+      <TextField
+        fullWidth
+        placeholder="Search by course name"
+        variant="outlined"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        sx={{ mb: 2 }}
+      />
 
       <TableContainer
         component={Paper}

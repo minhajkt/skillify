@@ -14,6 +14,7 @@ import {
   Button,
   Snackbar,
   useMediaQuery,
+  TextField,
 
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -22,6 +23,7 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import { fetchTutorRequests, updateTutorsApproval } from "../../api/adminApi";
 import TutorDetailsModal from "./TutorDetailsModal";
 import { ITutor } from "../../types/types";
+import { useDebounce } from "../../hooks/useDebounce";
 
 
 
@@ -32,6 +34,8 @@ const AdminTutorRequest = () => {
   const [error, setError] = useState<string>("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [modalOpen, setModalOpen] = useState(false)
     const [snackbar, setSnackbar] = useState({
       open: false,
@@ -45,18 +49,19 @@ const AdminTutorRequest = () => {
     const getTutorRequests = async () => {
       setLoading(true);
       try {
-        const fetchedTutors = await fetchTutorRequests();
+        const fetchedTutors = await fetchTutorRequests({
+          search: debouncedSearchQuery,
+        });
         setTutors(fetchedTutors);
       } catch (error) {
         setError("Failed to fetch tutor requests.");
-        
       } finally {
         setLoading(false);
       }
     };
 
     getTutorRequests();
-  }, []);
+  }, [debouncedSearchQuery]);
 
     const handleOpenModal = (tutor: ITutor) => {
       setSelectedTutor(tutor);
@@ -130,6 +135,15 @@ const handleReject = async (tutorId: string) => {
       >
         Tutor Requests
       </Typography>
+
+      <TextField
+          fullWidth
+          placeholder="Search by course name"
+          variant="outlined"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          sx={{ mb: 2 }}
+        />
 
       <TableContainer component={Paper} sx={{ bgcolor: "#FAFAFA", ml:{xs:-2,md:0},width:{xs:'110%', md:'auto'} }}>
         <Table>

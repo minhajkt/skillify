@@ -25,13 +25,15 @@ import BlockIcon from "@mui/icons-material/Block";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { fetchTutors, updateTutorsStatus } from "../../api/adminApi";
 import {ITutor} from '../../types/types'
+import { useDebounce } from "../../hooks/useDebounce";
 
 
 const AdminTutor = () => {
   const [tutors, setTutors] = useState<ITutor[]>([]);
-  const [filteredTutors, setFilteredTutors] = useState<ITutor[]>([]); 
+  // const [filteredTutors, setFilteredTutors] = useState<ITutor[]>([]); 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
+  const [totalCount, setTotalCount] = useState(0);
   const [sortConfig, setSortConfig] = useState<{
     key: string;
     direction: "asc" | "desc";
@@ -45,42 +47,41 @@ const AdminTutor = () => {
   const [statusFilter, setStatusFilter] = useState("");
   const [snackbar, setSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 1000);
 
     useEffect(() => {
       const getTutors = async () => {
         setLoading(true);
         try {
-          const fetchedTutors = await fetchTutors(); 
-          setTutors(fetchedTutors);  
-          setFilteredTutors(fetchedTutors); 
-          
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { users, total } = await fetchTutors({
+            search: debouncedSearchQuery,
+            status: statusFilter,
+            sort: sortConfig.key,
+            order: sortConfig.direction,
+            page: page + 1,
+            limit: rowsPerPage,
+          });
+          setTutors(users);
+          setTotalCount(total);
+
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
           setError("Failed to fetch tutors. Please try again.");
-          
         } finally {
           setLoading(false);
         }
       };
-  
+
       getTutors();
-    }, []);
+    }, [debouncedSearchQuery, statusFilter, sortConfig, page, rowsPerPage]);
 
       if (loading) return <Typography>Loading ...</Typography>;
       if (error) return <Typography color="error">{error}</Typography>;
 
-  const handleSort = (key: keyof (typeof tutors)[0]) => {
-    const isAsc = sortConfig.key === key && sortConfig.direction === "asc";
-    setSortConfig({ key, direction: isAsc ? "desc" : "asc" });
-    const sortedData = [...filteredTutors].sort((a, b) => {
-      const aValue = a[key] ?? ""; 
-      const bValue = b[key] ?? "";
-      if (aValue < bValue) return isAsc ? -1 : 1;
-      if (aValue > bValue) return isAsc ? 1 : -1;
-      return 0;
-    });
-    setFilteredTutors(sortedData);
-  };
+      const handleSort = (key: keyof ITutor) => {
+        const isAsc = sortConfig.key === key && sortConfig.direction === "asc";
+        setSortConfig({ key, direction: isAsc ? "desc" : "asc" });
+      };
 
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
@@ -96,34 +97,34 @@ const AdminTutor = () => {
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value.toLowerCase();
     setSearchQuery(query);
-    filterTutors(query, statusFilter);
+    setPage(0);
   };
 
   const handleStatusFilterChange = (event: SelectChangeEvent<string>) => {
     const status = event.target.value;
     setStatusFilter(status);
-    filterTutors(searchQuery, status);
+    setPage(0);
   };
 
-  const filterTutors = (query: string, status: string) => {
-    setFilteredTutors(
-      tutors
-        .filter(
-          (tutor) =>
-            tutor.name.toLowerCase().includes(query) ||
-            tutor.email.toLowerCase().includes(query)
-        )
-        .filter((tutor) => (status ? tutor.status === status : true))
-    );
-    setPage(0); 
-  };
+  // const filterTutors = (query: string, status: string) => {
+  //   setFilteredTutors(
+  //     tutors
+  //       .filter(
+  //         (tutor) =>
+  //           tutor.name.toLowerCase().includes(query) ||
+  //           tutor.email.toLowerCase().includes(query)
+  //       )
+  //       .filter((tutor) => (status ? tutor.status === status : true))
+  //   );
+  //   setPage(0); 
+  // };
 
   const handleStatusToggle = async(tutorIndex: number) => {
-    const updatedTutors = [...filteredTutors];
+    const updatedTutors = [...tutors];
     const tutor = updatedTutors[tutorIndex];
     const newStatus = !tutor.isActive
     tutor.isActive = newStatus
-    setFilteredTutors(updatedTutors);
+    setTutors(updatedTutors);
     
     try {
         await updateTutorsStatus(tutor._id, newStatus)
@@ -133,7 +134,7 @@ const AdminTutor = () => {
     } catch (error) {
         console.error('Failed to update student', error);
         tutor.isActive = !newStatus; 
-        setFilteredTutors(updatedTutors);
+        // setFilteredTutors(updatedTutors);
     }    
   };
   return (
@@ -210,36 +211,36 @@ const AdminTutor = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredTutors
+            {/* {filteredTutors
               // .sort(
               //   (a, b) =>
               //     new Date(b.createdAt).getTime() -
               //     new Date(a.createdAt).getTime()
-              // )
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((tutor, index) => (
-                <TableRow key={index}>
-                  <TableCell>{tutor.name}</TableCell>
-                  <TableCell>
-                    {tutor.isActive ? (
-                      <Typography color="green">Active</Typography>
-                    ) : (
-                      <Typography color="red">Blocked</Typography>
-                    )}
-                  </TableCell>
-                  <TableCell sx={{ display: { xs: "none", md: "table-cell" } }}>
-                    {tutor.email}
-                  </TableCell>
-                  <TableCell>
-                    <IconButton
-                      color={tutor.isActive ? "error" : "success"}
-                      onClick={() => handleStatusToggle(index)}
-                    >
-                      {tutor.isActive ? <BlockIcon /> : <CheckCircleIcon />}
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
+              // ) */}
+            {/* .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) */}
+            {tutors.map((tutor, index) => (
+              <TableRow key={index}>
+                <TableCell>{tutor.name}</TableCell>
+                <TableCell>
+                  {tutor.isActive ? (
+                    <Typography color="green">Active</Typography>
+                  ) : (
+                    <Typography color="red">Blocked</Typography>
+                  )}
+                </TableCell>
+                <TableCell sx={{ display: { xs: "none", md: "table-cell" } }}>
+                  {tutor.email}
+                </TableCell>
+                <TableCell>
+                  <IconButton
+                    color={tutor.isActive ? "error" : "success"}
+                    onClick={() => handleStatusToggle(index)}
+                  >
+                    {tutor.isActive ? <BlockIcon /> : <CheckCircleIcon />}
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
@@ -252,7 +253,7 @@ const AdminTutor = () => {
       />
       <TablePagination
         component="div"
-        count={filteredTutors.length}
+        count={totalCount}
         page={page}
         onPageChange={handleChangePage}
         rowsPerPage={rowsPerPage}
