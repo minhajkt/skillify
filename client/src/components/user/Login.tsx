@@ -69,6 +69,7 @@ const Login = () => {
       }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
+      console.error("Google login error:", error);
       setErrorMessage("Your account is temporarily suspended");
     }
   };

@@ -184,7 +184,8 @@ export const loginAdmin = async (email: string, password: string) => {
 };
 
 export const googleSignIn = async (idToken: string) => {
-  const response = await fetch("https://skillify.sbs/api/auth/google", {
+  // const response = await fetch("https://skillify.sbs/api/auth/google", {
+  const response = await fetch(`${import.meta.env.VITE_BASE_URL}/auth/google`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ idToken }),
